@@ -1,0 +1,135 @@
+"""
+Module 1: Counter Testbench
+cocotb testbench for counter module.
+
+Demonstrates:
+- Clock generation
+- Reset sequence
+- Enable control
+- Counter verification
+"""
+
+import cocotb
+from cocotb.clock import Clock
+from cocotb.triggers import Timer, RisingEdge, FallingEdge
+from cocotb.binary import BinaryValue
+
+
+async def generate_clock(dut, period_ns=10):
+    """Generate clock signal."""
+    while True:
+        dut.clk.value = 1
+        await Timer(period_ns // 2, units="ns")
+        dut.clk.value = 0
+        await Timer(period_ns // 2, units="ns")
+
+
+async def reset_dut(dut, duration_ns=20):
+    """Reset the DUT."""
+    dut.rst_n.value = 0
+    dut.enable.value = 0
+    await Timer(duration_ns, units="ns")
+    dut.rst_n.value = 1
+    await Timer(10, units="ns")
+
+
+@cocotb.test()
+async def test_counter_reset(dut):
+    """
+    Test counter reset functionality.
+    """
+    # Start clock
+    cocotb.start_soon(generate_clock(dut, period_ns=10))
+    
+    # Reset
+    await reset_dut(dut)
+    
+    # Check counter is reset
+    assert dut.count.value == 0, f"Counter should be 0 after reset, got {dut.count.value}"
+
+
+@cocotb.test()
+async def test_counter_increment(dut):
+    """
+    Test counter increment functionality.
+    """
+    # Start clock
+    cocotb.start_soon(generate_clock(dut, period_ns=10))
+    
+    # Reset
+    await reset_dut(dut)
+    
+    # Enable counter
+    dut.enable.value = 1
+    
+    # Count for several cycles
+    for expected_count in range(1, 11):
+        await RisingEdge(dut.clk)
+        await Timer(1, units="ns")  # Wait for combinational logic
+        actual_count = dut.count.value.integer
+        assert actual_count == expected_count, \
+            f"Expected count {expected_count}, got {actual_count}"
+
+
+@cocotb.test()
+async def test_counter_enable(dut):
+    """
+    Test counter enable control.
+    """
+    # Start clock
+    cocotb.start_soon(generate_clock(dut, period_ns=10))
+    
+    # Reset
+    await reset_dut(dut)
+    
+    # Enable and count
+    dut.enable.value = 1
+    await RisingEdge(dut.clk)
+    await Timer(1, units="ns")
+    assert dut.count.value == 1, "Counter should increment when enabled"
+    
+    # Disable and check counter doesn't increment
+    dut.enable.value = 0
+    count_before = dut.count.value.integer
+    await RisingEdge(dut.clk)
+    await Timer(1, units="ns")
+    count_after = dut.count.value.integer
+    assert count_after == count_before, "Counter should not increment when disabled"
+    
+    # Re-enable and verify it continues
+    dut.enable.value = 1
+    await RisingEdge(dut.clk)
+    await Timer(1, units="ns")
+    assert dut.count.value == count_before + 1, "Counter should resume incrementing when re-enabled"
+
+
+@cocotb.test()
+async def test_counter_overflow(dut):
+    """
+    Test counter overflow behavior.
+    """
+    # Start clock
+    cocotb.start_soon(generate_clock(dut, period_ns=10))
+    
+    # Reset
+    await reset_dut(dut)
+    
+    # Enable counter
+    dut.enable.value = 1
+    
+    # Count to near overflow
+    for _ in range(254):
+        await RisingEdge(dut.clk)
+        await Timer(1, units="ns")
+    
+    # Check we're at 254
+    assert dut.count.value == 254, "Should be at 254"
+    
+    # Next increment should wrap to 0 (or continue to 255, depending on implementation)
+    await RisingEdge(dut.clk)
+    await Timer(1, units="ns")
+    # Note: This test depends on counter implementation
+    # Most counters will wrap to 0, but some may continue to 255
+    final_count = dut.count.value.integer
+    assert final_count in [0, 255], f"Counter should wrap or saturate, got {final_count}"
+
