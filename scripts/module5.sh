@@ -28,7 +28,7 @@ RUN_CALLBACKS=false
 RUN_REGISTER_MODEL=false
 RUN_PYUVM_TESTS=true
 USE_VENV=true
-SIMULATOR="verilator"
+SIMULATOR="icarus"
 
 # Function to print colored output
 print_status() {

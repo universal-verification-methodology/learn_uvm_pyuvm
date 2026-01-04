@@ -7,39 +7,7 @@ from pyuvm import *
 import cocotb
 from cocotb.triggers import Timer
 
-# Try to import uvm_seq_item_pull_port explicitly if not available from pyuvm import *
-try:
-    # Check if already available
-    _ = uvm_seq_item_pull_port
-except NameError:
-    # Try importing from TLM modules
-    try:
-        from pyuvm.s15_uvm_tlm_1 import uvm_seq_item_pull_port
-    except (ImportError, AttributeError):
-        try:
-            from pyuvm.s15_uvm_tlm import uvm_seq_item_pull_port
-        except (ImportError, AttributeError):
-            try:
-                from pyuvm.s16_uvm_tlm_1 import uvm_seq_item_pull_port
-            except (ImportError, AttributeError):
-                try:
-                    from pyuvm.s16_uvm_tlm import uvm_seq_item_pull_port
-                except (ImportError, AttributeError):
-                    # Try to get from pyuvm module
-                    import pyuvm
-                    if hasattr(pyuvm, 'uvm_seq_item_pull_port'):
-                        uvm_seq_item_pull_port = getattr(pyuvm, 'uvm_seq_item_pull_port')
-                    else:
-                        # Last resort: try to get from globals (might be available from pyuvm import *)
-                        try:
-                            uvm_seq_item_pull_port = globals()['uvm_seq_item_pull_port']
-                        except KeyError:
-                            # If all else fails, raise an error with helpful message
-                            raise ImportError(
-                                "Could not import uvm_seq_item_pull_port from pyuvm. "
-                                "Tried: pyuvm.s15_uvm_tlm_1, pyuvm.s15_uvm_tlm, "
-                                "pyuvm.s16_uvm_tlm_1, pyuvm.s16_uvm_tlm, pyuvm module, and globals()"
-                            )
+# Note: pyuvm uses uvm_seq_item_port, not uvm_seq_item_pull_port
 
 
 class VirtualTransaction(uvm_sequence_item):
@@ -174,8 +142,7 @@ class VirtualDriver(uvm_driver):
     
     def build_phase(self):
         self.logger.info(f"[{self.get_name()}] Building driver")
-        # uvm_seq_item_pull_port should be available from pyuvm import *
-        self.seq_item_port = uvm_seq_item_pull_port("seq_item_port", self)
+        # seq_item_port is already created by uvm_driver.__init__()
     
     def connect_phase(self):
         """Connect phase - connection is done by parent agent."""

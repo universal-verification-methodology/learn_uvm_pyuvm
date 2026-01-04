@@ -1,0 +1,3 @@
+[submodule "tools/verilator"]
+	path = tools/verilator
+	url = git@github.com:verilator/verilator.git

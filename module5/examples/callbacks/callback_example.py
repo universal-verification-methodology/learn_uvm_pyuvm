@@ -7,45 +7,8 @@ from pyuvm import *
 import cocotb
 from cocotb.triggers import Timer
 
-# Try to import uvm_callback explicitly if available
-try:
-    import pyuvm
-    if hasattr(pyuvm, 'uvm_callback'):
-        uvm_callback = pyuvm.uvm_callback
-    else:
-        # If uvm_callback is not available, use uvm_object as base class
-        # This is a workaround for pyuvm versions that don't export uvm_callback
-        uvm_callback = uvm_object
-except (ImportError, AttributeError):
-    # Fallback to uvm_object if anything goes wrong
-    uvm_callback = uvm_object
-
-# Explicit imports for TLM classes that may not be in __all__
-try:
-    # Try to get it from globals first (in case from pyuvm import * worked)
-    uvm_seq_item_pull_port  # type: ignore
-except NameError:
-    # Not in globals, try to import it explicitly
-    _found = False
-    # Try TLM module paths
-    for module_name in ['s15_uvm_tlm_1', 's15_uvm_tlm', 's16_uvm_tlm_1', 's16_uvm_tlm']:
-        try:
-            tlm_module = __import__(f'pyuvm.{module_name}', fromlist=['uvm_seq_item_pull_port'])
-            if hasattr(tlm_module, 'uvm_seq_item_pull_port'):
-                uvm_seq_item_pull_port = getattr(tlm_module, 'uvm_seq_item_pull_port')  # type: ignore
-                _found = True
-                break
-        except (ImportError, AttributeError):
-            continue
-    # If still not found, try pyuvm module directly
-    if not _found:
-        import pyuvm
-        if hasattr(pyuvm, 'uvm_seq_item_pull_port'):
-            uvm_seq_item_pull_port = getattr(pyuvm, 'uvm_seq_item_pull_port')  # type: ignore
-            _found = True
-    if not _found:
-        # This should not happen if pyuvm is properly installed
-        raise ImportError("Could not import uvm_seq_item_pull_port from pyuvm")
+# Note: pyuvm uses uvm_seq_item_port instead of uvm_seq_item_pull_port
+# Note: pyuvm may not have uvm_callback class, using uvm_object as base class
 
 
 class DriverTransaction(uvm_sequence_item):
@@ -59,7 +22,7 @@ class DriverTransaction(uvm_sequence_item):
         return f"data=0x{self.data:02X}"
 
 
-class DriverCallback(uvm_callback):
+class DriverCallback(uvm_object):
     """
     Callback class for driver.
     
@@ -86,33 +49,23 @@ class DriverWithCallbacks(uvm_driver):
     
     def build_phase(self):
         self.logger.info(f"[{self.get_name()}] Building driver with callbacks")
-        self.seq_item_port = uvm_seq_item_pull_port("seq_item_port", self)
+        # seq_item_port is already created by uvm_driver.__init__()
     
     async def run_phase(self):
-        """Run phase with callback execution."""
+        """Run phase - pyuvm doesn't support callbacks so just drive transactions."""
         self.logger.info(f"[{self.get_name()}] Starting driver")
-        
+
         while True:
             item = await self.seq_item_port.get_next_item()
-            
-            # Execute pre-drive callbacks
-            self.logger.info(f"[{self.get_name()}] Executing pre-drive callbacks")
-            for callback in self.get_callbacks(DriverCallback):
-                item = callback.pre_drive(self, item)
-            
-            # Drive transaction
+
+            # Drive transaction (callback functionality not available in pyuvm)
             self.logger.info(f"[{self.get_name()}] Driving: {item}")
-            await Timer(10, units="ns")
-            
-            # Execute post-drive callbacks
-            self.logger.info(f"[{self.get_name()}] Executing post-drive callbacks")
-            for callback in self.get_callbacks(DriverCallback):
-                callback.post_drive(self, item)
-            
+            await Timer(10, unit="ns")
+
             await self.seq_item_port.item_done()
 
 
-class MonitorCallback(uvm_callback):
+class MonitorCallback(uvm_object):
     """Callback for monitor."""
     
     def pre_sample(self, monitor, txn):
@@ -133,26 +86,18 @@ class MonitorWithCallbacks(uvm_monitor):
         self.ap = uvm_analysis_port("ap", self)
     
     async def run_phase(self):
-        """Run phase with callback execution."""
+        """Run phase - pyuvm doesn't support callbacks so just sample transactions."""
         self.logger.info(f"[{self.get_name()}] Starting monitor")
-        
+
         while True:
             # Sample DUT (simulated)
-            await Timer(10, units="ns")
-            
+            await Timer(10, unit="ns")
+
             txn = DriverTransaction()
             txn.data = 0xAA
-            
-            # Execute pre-sample callbacks
-            for callback in self.get_callbacks(MonitorCallback):
-                txn = callback.pre_sample(self, txn)
-            
-            # Sample transaction
+
+            # Sample transaction (callback functionality not available in pyuvm)
             self.logger.info(f"[{self.get_name()}] Sampled: {txn}")
-            
-            # Execute post-sample callbacks
-            for callback in self.get_callbacks(MonitorCallback):
-                callback.post_sample(self, txn)
             
             self.ap.write(txn)
 
@@ -171,18 +116,9 @@ class CallbackAgent(uvm_agent):
         self.driver.seq_item_port.connect(self.seqr.seq_item_export)
     
     def end_of_elaboration_phase(self):
-        """End of elaboration - register callbacks."""
-        self.logger.info("Registering callbacks")
-        
-        # Register driver callbacks
-        driver_callback = DriverCallback.create("driver_callback")
-        self.driver.add_callback(driver_callback)
-        self.logger.info("Registered driver callback")
-        
-        # Register monitor callbacks
-        monitor_callback = MonitorCallback.create("monitor_callback")
-        self.monitor.add_callback(monitor_callback)
-        self.logger.info("Registered monitor callback")
+        """End of elaboration - demonstrate callback classes."""
+        self.logger.info("Callback classes are defined but pyuvm doesn't support callback registration")
+        self.logger.info("DriverCallback and MonitorCallback classes demonstrate callback structure")
 
 
 class CallbackEnv(uvm_env):

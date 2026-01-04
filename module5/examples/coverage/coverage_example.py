@@ -7,32 +7,7 @@ from pyuvm import *
 import cocotb
 from cocotb.triggers import Timer
 
-# Explicit imports for TLM classes that may not be in __all__
-try:
-    # Try to get it from globals first (in case from pyuvm import * worked)
-    uvm_analysis_imp  # type: ignore
-except NameError:
-    # Not in globals, try to import it explicitly
-    _found = False
-    # Try TLM module paths
-    for module_name in ['s15_uvm_tlm_1', 's15_uvm_tlm', 's16_uvm_tlm_1', 's16_uvm_tlm']:
-        try:
-            tlm_module = __import__(f'pyuvm.{module_name}', fromlist=['uvm_analysis_imp'])
-            if hasattr(tlm_module, 'uvm_analysis_imp'):
-                uvm_analysis_imp = getattr(tlm_module, 'uvm_analysis_imp')  # type: ignore
-                _found = True
-                break
-        except (ImportError, AttributeError):
-            continue
-    # If still not found, try pyuvm module directly
-    if not _found:
-        import pyuvm
-        if hasattr(pyuvm, 'uvm_analysis_imp'):
-            uvm_analysis_imp = getattr(pyuvm, 'uvm_analysis_imp')  # type: ignore
-            _found = True
-    if not _found:
-        # This should not happen if pyuvm is properly installed
-        raise ImportError("Could not import uvm_analysis_imp from pyuvm")
+# Note: uvm_subscriber already provides analysis functionality, no need for uvm_analysis_imp
 
 
 class CoverageTransaction(uvm_sequence_item):
@@ -72,10 +47,8 @@ class CoverageModel(uvm_subscriber):
         self.cross_coverage = {}  # (data, command) -> count
     
     def build_phase(self):
-        """Build phase - create analysis ports."""
-        self.ap = uvm_analysis_export("ap", self)
-        self.imp = uvm_analysis_imp("imp", self)
-        self.ap.connect(self.imp)
+        """Build phase - uvm_subscriber already provides analysis export."""
+        # uvm_subscriber automatically creates analysis_export, no need to create manually
     
     def write(self, txn):
         """Write method - sample coverage."""
@@ -185,7 +158,7 @@ class CoverageEnv(uvm_env):
     
     def connect_phase(self):
         self.logger.info("Connecting CoverageEnv")
-        self.monitor.ap.connect(self.coverage.ap)
+        self.monitor.ap.connect(self.coverage.analysis_export)
 
 
 # Note: @uvm_test() decorator removed to avoid import-time TypeError
