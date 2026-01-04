@@ -443,7 +443,7 @@ This work is licensed under a [Creative Commons Attribution 4.0 International Li
 When using this material, please include:
 
 ```
-Based on "Learn UVM with pyuvm" by [Your Name/Organization]
+Based on "Learn UVM with pyuvm" by Yongfu Li
 Licensed under CC BY 4.0
 https://creativecommons.org/licenses/by/4.0/
 ```
@@ -498,4 +498,5 @@ For questions, issues, or contributions:
 **Happy Learning! 🚀**
 
 Start your UVM journey today with Module 0: [Installation and Setup](docs/MODULE0.md)
+
 
