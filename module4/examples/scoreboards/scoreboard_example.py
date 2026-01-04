@@ -1,0 +1,176 @@
+"""
+Module 4 Example 4.5: Scoreboard Implementation
+Demonstrates scoreboard implementation with analysis port connections.
+"""
+
+from pyuvm import *
+
+
+class ScoreboardTransaction(uvm_sequence_item):
+    """Transaction for scoreboard."""
+    
+    def __init__(self, name="ScoreboardTransaction"):
+        super().__init__(name)
+        self.data = 0
+        self.expected = 0
+        self.actual = 0
+    
+    def __str__(self):
+        return f"data=0x{self.data:02X}, expected=0x{self.expected:02X}, actual=0x{self.actual:02X}"
+
+
+class SimpleScoreboard(uvm_scoreboard):
+    """
+    Simple scoreboard demonstrating basic scoreboard implementation.
+    
+    Shows:
+    - Scoreboard class structure
+    - Analysis port connections
+    - Transaction storage
+    - Comparison logic
+    """
+    
+    def build_phase(self):
+        """Build phase - create analysis export."""
+        self.logger.info(f"[{self.get_name()}] Building scoreboard")
+        self.ap = uvm_analysis_export("ap", self)
+        self.imp = uvm_analysis_imp("imp", self)
+        self.ap.connect(self.imp)
+        self.expected = []
+        self.actual = []
+        self.mismatches = []
+    
+    def write(self, txn):
+        """Write method - receive transactions from analysis port."""
+        self.logger.info(f"[{self.get_name()}] Received transaction: {txn}")
+        self.actual.append(txn)
+        
+        # Compare with expected
+        if len(self.expected) > 0:
+            expected_txn = self.expected.pop(0)
+            if txn.actual != expected_txn.expected:
+                self.mismatches.append((expected_txn, txn))
+                self.logger.error(f"[{self.get_name()}] Mismatch: expected=0x{expected_txn.expected:02X}, "
+                                f"actual=0x{txn.actual:02X}")
+            else:
+                self.logger.info(f"[{self.get_name()}] Match: expected=0x{expected_txn.expected:02X}, "
+                               f"actual=0x{txn.actual:02X}")
+    
+    def add_expected(self, txn):
+        """Add expected transaction."""
+        self.expected.append(txn)
+        self.logger.info(f"[{self.get_name()}] Added expected: {txn}")
+    
+    def check_phase(self):
+        """Check phase - verify results."""
+        self.logger.info("=" * 60)
+        self.logger.info(f"[{self.get_name()}] Scoreboard Check")
+        self.logger.info(f"  Total expected: {len(self.expected)}")
+        self.logger.info(f"  Total actual: {len(self.actual)}")
+        self.logger.info(f"  Mismatches: {len(self.mismatches)}")
+        
+        if len(self.mismatches) == 0:
+            self.logger.info(f"  ✓ All transactions matched")
+        else:
+            self.logger.error(f"  ✗ Found {len(self.mismatches)} mismatches")
+            for exp, act in self.mismatches:
+                self.logger.error(f"    Expected: {exp}, Actual: {act}")
+
+
+class ReferenceModelScoreboard(uvm_scoreboard):
+    """
+    Scoreboard with reference model.
+    
+    Shows:
+    - Reference model implementation
+    - Expected value calculation
+    - Comparison with reference
+    """
+    
+    def build_phase(self):
+        self.logger.info(f"[{self.get_name()}] Building reference model scoreboard")
+        self.ap = uvm_analysis_export("ap", self)
+        self.imp = uvm_analysis_imp("imp", self)
+        self.ap.connect(self.imp)
+        self.actual = []
+    
+    def write(self, txn):
+        """Write method - compare with reference model."""
+        self.logger.info(f"[{self.get_name()}] Received transaction: {txn}")
+        self.actual.append(txn)
+        
+        # Calculate expected using reference model
+        expected = self.reference_model(txn.data)
+        
+        if txn.actual != expected:
+            self.logger.error(f"[{self.get_name()}] Mismatch: data=0x{txn.data:02X}, "
+                            f"expected=0x{expected:02X}, actual=0x{txn.actual:02X}")
+        else:
+            self.logger.info(f"[{self.get_name()}] Match: data=0x{txn.data:02X}, "
+                           f"expected=0x{expected:02X}, actual=0x{txn.actual:02X}")
+    
+    def reference_model(self, data):
+        """Reference model - calculate expected output."""
+        # Simple reference model: double the input
+        return (data * 2) & 0xFF
+    
+    def check_phase(self):
+        """Check phase."""
+        self.logger.info(f"[{self.get_name()}] Reference model scoreboard check completed")
+
+
+class ScoreboardEnv(uvm_env):
+    """Environment with scoreboard."""
+    
+    def build_phase(self):
+        self.logger.info("Building ScoreboardEnv")
+        self.scoreboard = SimpleScoreboard.create("scoreboard", self)
+    
+    def connect_phase(self):
+        self.logger.info("Connecting ScoreboardEnv")
+
+
+@uvm_test()
+class ScoreboardTest(uvm_test):
+    """Test demonstrating scoreboard usage."""
+    
+    async def build_phase(self):
+        self.logger.info("=" * 60)
+        self.logger.info("Scoreboard Example Test")
+        self.logger.info("=" * 60)
+        self.env = ScoreboardEnv.create("env", self)
+    
+    async def run_phase(self):
+        self.raise_objection()
+        self.logger.info("Running scoreboard test")
+        
+        # Add expected transactions
+        for i in range(5):
+            txn = ScoreboardTransaction()
+            txn.data = i * 0x10
+            txn.expected = i * 0x10
+            self.env.scoreboard.add_expected(txn)
+        
+        # Send actual transactions (some matching, some not)
+        for i in range(5):
+            txn = ScoreboardTransaction()
+            txn.data = i * 0x10
+            if i == 2:  # Introduce mismatch
+                txn.actual = 0xFF
+            else:
+                txn.actual = i * 0x10
+            self.env.scoreboard.write(txn)
+        
+        await Timer(10, units="ns")
+        self.drop_objection()
+    
+    def report_phase(self):
+        self.logger.info("=" * 60)
+        self.logger.info("Scoreboard test completed")
+        self.logger.info("=" * 60)
+
+
+if __name__ == "__main__":
+    print("This is a pyuvm scoreboard example.")
+    print("To run with cocotb, use the Makefile in the test directory.")
+
