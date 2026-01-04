@@ -4,8 +4,33 @@ Demonstrates integrating multiple utilities in a testbench.
 """
 
 from pyuvm import *
+# Explicitly import uvm_analysis_imp - it may not be exported by from pyuvm import *
+# Try multiple possible import paths
+_uvm_analysis_imp = None
+try:
+    # First try: check if it's in the namespace after from pyuvm import *
+    _uvm_analysis_imp = globals()['uvm_analysis_imp']
+except KeyError:
+    # Second try: import from pyuvm module directly
+    import pyuvm
+    if hasattr(pyuvm, 'uvm_analysis_imp'):
+        _uvm_analysis_imp = pyuvm.uvm_analysis_imp
+    else:
+        # Third try: try TLM module paths
+        for module_name in ['s15_uvm_tlm_1', 's15_uvm_tlm', 's16_uvm_tlm_1', 's16_uvm_tlm']:
+            try:
+                tlm_module = __import__(f'pyuvm.{module_name}', fromlist=['uvm_analysis_imp'])
+                if hasattr(tlm_module, 'uvm_analysis_imp'):
+                    _uvm_analysis_imp = tlm_module.uvm_analysis_imp
+                    break
+            except (ImportError, AttributeError):
+                continue
+
+if _uvm_analysis_imp is not None:
+    globals()['uvm_analysis_imp'] = _uvm_analysis_imp
 import sys
 import random
+import cocotb
 from collections import deque
 
 
@@ -168,7 +193,7 @@ class IntegrationSequence(uvm_sequence):
             if pool:
                 pool.put(txn)
             
-            await Timer(10, units="ns")
+            await Timer(10, unit="ns")
 
 
 class IntegrationAgent(uvm_agent):
@@ -206,7 +231,8 @@ class IntegrationEnv(uvm_env):
         
         # Create pool if enabled
         if self.use_pool:
-            self.pool = TransactionPool.create("pool", self, pool_size=5)
+            self.pool = TransactionPool.create("pool", self)
+            self.pool.pool_size = 5
     
     def get_clp_arg(self, arg_name, default_value):
         """Get command-line argument."""
@@ -224,11 +250,12 @@ class IntegrationEnv(uvm_env):
         self.logger.info("Connecting Integration Environment")
 
 
-@uvm_test()
+# Note: @uvm_test() decorator removed to avoid import-time TypeError
+# Using cocotb test wrapper instead for compatibility with cocotb test discovery
 class IntegrationTest(uvm_test):
     """Test demonstrating utility integration."""
     
-    async def build_phase(self):
+    def build_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("Utility Integration Example Test")
         self.logger.info("=" * 60)
@@ -250,7 +277,7 @@ class IntegrationTest(uvm_test):
             txn.address = random.randint(0x1000, 0x2000)
             self.env.scoreboard.write_expected(txn)
         
-        await Timer(200, units="ns")
+        await Timer(200, unit="ns")
         self.drop_objection()
     
     def report_phase(self):
@@ -263,6 +290,18 @@ class IntegrationTest(uvm_test):
         self.logger.info("  - Comparator")
         self.logger.info("  - Recorder")
         self.logger.info("  - Random utilities")
+
+
+# Cocotb test function to run the pyuvm test
+@cocotb.test()
+async def test_integration(dut):
+    """Cocotb test wrapper for pyuvm test."""
+    # Register the test class with uvm_root so run_test can find it
+    if not hasattr(uvm_root(), 'm_uvm_test_classes'):
+        uvm_root().m_uvm_test_classes = {}
+    uvm_root().m_uvm_test_classes["IntegrationTest"] = IntegrationTest
+    # Use uvm_root to run the test properly (executes all phases in hierarchy)
+    await uvm_root().run_test("IntegrationTest")
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ Demonstrates random number generation and constrained randomization.
 
 from pyuvm import *
 import random
+import cocotb
 
 
 class RandomTransaction(uvm_sequence_item):
@@ -51,14 +52,14 @@ class RandomSequence(uvm_sequence):
         """Generate random transactions."""
         if self.seed is not None:
             random.seed(self.seed)
-            self.logger.info(f"[{self.get_name()}] Using seed: {self.seed}")
+            # Note: Sequences don't have logger, so we skip logging here
         
         for i in range(10):
             txn = RandomTransaction()
             txn.randomize()
             await self.start_item(txn)
             await self.finish_item(txn)
-            await Timer(10, units="ns")
+            await Timer(10, unit="ns")
 
 
 class ConstrainedRandomSequence(uvm_sequence):
@@ -72,7 +73,7 @@ class ConstrainedRandomSequence(uvm_sequence):
         """Generate constrained random transactions."""
         if self.seed is not None:
             random.seed(self.seed)
-            self.logger.info(f"[{self.get_name()}] Using seed: {self.seed}")
+            # Note: Sequences don't have logger, so we skip logging here
         
         for i in range(10):
             txn = RandomTransaction()
@@ -91,7 +92,7 @@ class ConstrainedRandomSequence(uvm_sequence):
             
             await self.start_item(txn)
             await self.finish_item(txn)
-            await Timer(10, units="ns")
+            await Timer(10, unit="ns")
 
 
 class RandomUtilsExample(uvm_component):
@@ -173,11 +174,12 @@ class RandomEnv(uvm_env):
         self.logger.info("Connecting Random Environment")
 
 
-@uvm_test()
+# Note: @uvm_test() decorator removed to avoid import-time TypeError
+# Using cocotb test wrapper instead for compatibility with cocotb test discovery
 class RandomUtilsTest(uvm_test):
     """Test demonstrating random utilities."""
     
-    async def build_phase(self):
+    def build_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("Random Utilities Test")
         self.logger.info("=" * 60)
@@ -188,16 +190,31 @@ class RandomUtilsTest(uvm_test):
         self.logger.info("Running random utilities test")
         
         # Test random sequence
-        seq = RandomSequence.create("seq", seed=42)
+        seq = RandomSequence.create("seq")
+        # Set seed if the sequence supports it
+        if hasattr(seq, 'seed'):
+            seq.seed = 42
         await seq.start(self.env.agent.seqr)
         
-        await Timer(50, units="ns")
+        await Timer(50, unit="ns")
         self.drop_objection()
     
     def report_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("Random utilities test completed")
         self.logger.info("=" * 60)
+
+
+# Cocotb test function to run the pyuvm test
+@cocotb.test()
+async def test_random_utils(dut):
+    """Cocotb test wrapper for pyuvm test."""
+    # Register the test class with uvm_root so run_test can find it
+    if not hasattr(uvm_root(), 'm_uvm_test_classes'):
+        uvm_root().m_uvm_test_classes = {}
+    uvm_root().m_uvm_test_classes["RandomUtilsTest"] = RandomUtilsTest
+    # Use uvm_root to run the test properly (executes all phases in hierarchy)
+    await uvm_root().run_test("RandomUtilsTest")
 
 
 if __name__ == "__main__":
