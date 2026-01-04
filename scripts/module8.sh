@@ -171,9 +171,15 @@ run_python_example() {
         return 1
     fi
     
+    # Set library path for cocotb VPI libraries
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(cocotb-config --lib-dir)"
+
     # Run with cocotb using make
     cd "$MODULE8_DIR/examples/$example_dir"
-    
+
+    # Clean previous build to avoid path issues
+    make clean > /dev/null 2>&1 || true
+
     print_status $BLUE "Running pyuvm test for $example_name..."
     if make SIM="$SIMULATOR" 2>&1 | tee "/tmp/pyuvm_${example_dir}.log"; then
         print_status $GREEN "✓ $example_name completed successfully"
@@ -189,13 +195,19 @@ run_python_example() {
 # Function to run pyuvm tests
 run_pyuvm_tests() {
     print_header "Running pyuvm Tests"
-    
+
     if [[ "$USE_VENV" == true ]] && [[ -d "$VENV_DIR" ]] && [[ -f "$VENV_DIR/bin/activate" ]]; then
         source "$VENV_DIR/bin/activate"
     fi
-    
+
+    # Set library path for cocotb VPI libraries
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(cocotb-config --lib-dir)"
+
     cd "$MODULE8_DIR/tests/pyuvm_tests"
-    
+
+    # Clean previous build to avoid path issues
+    make clean > /dev/null 2>&1 || true
+
     print_status $BLUE "Running utilities test..."
     if make SIM="$SIMULATOR" TEST=test_utilities 2>&1 | tee /tmp/pyuvm_test.log; then
         print_status $GREEN "✓ pyuvm test passed"
