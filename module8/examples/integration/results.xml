@@ -1,8 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1767533647" />
-    <testcase name="test_integration" classname="integration_example" file="/data1/luwangzilu/yongfu/learn_uvm_pyuvm/module8/examples/integration/integration_example.py" lineno="296" time="0.009702920913696289" sim_time_ns="0.0" ratio_time="0.0">
-      <failure error_type="NameError" error_msg="name 'uvm_analysis_imp' is not defined" />
-    </testcase>
+    <property name="random_seed" value="1767537261" />
+    <testcase name="test_integration" classname="integration_example" file="/data1/luwangzilu/yongfu/learn_uvm_pyuvm/module8/examples/integration/integration_example.py" lineno="331" time="0.00701594352722168" sim_time_ns="300.0" ratio_time="42759.75124885309" />
   </testsuite>
 </testsuites>

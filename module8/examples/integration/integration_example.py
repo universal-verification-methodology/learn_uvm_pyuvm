@@ -4,34 +4,55 @@ Demonstrates integrating multiple utilities in a testbench.
 """
 
 from pyuvm import *
-# Explicitly import uvm_analysis_imp - it may not be exported by from pyuvm import *
-# Try multiple possible import paths
-_uvm_analysis_imp = None
-try:
-    # First try: check if it's in the namespace after from pyuvm import *
-    _uvm_analysis_imp = globals()['uvm_analysis_imp']
-except KeyError:
-    # Second try: import from pyuvm module directly
-    import pyuvm
-    if hasattr(pyuvm, 'uvm_analysis_imp'):
-        _uvm_analysis_imp = pyuvm.uvm_analysis_imp
-    else:
-        # Third try: try TLM module paths
-        for module_name in ['s15_uvm_tlm_1', 's15_uvm_tlm', 's16_uvm_tlm_1', 's16_uvm_tlm']:
-            try:
-                tlm_module = __import__(f'pyuvm.{module_name}', fromlist=['uvm_analysis_imp'])
-                if hasattr(tlm_module, 'uvm_analysis_imp'):
-                    _uvm_analysis_imp = tlm_module.uvm_analysis_imp
-                    break
-            except (ImportError, AttributeError):
-                continue
+# Use uvm_analysis_export as fallback (pyuvm doesn't have uvm_analysis_imp)
+uvm_analysis_imp = uvm_analysis_export
 
-if _uvm_analysis_imp is not None:
-    globals()['uvm_analysis_imp'] = _uvm_analysis_imp
+# Subscriber classes for expected and actual transactions
+class ExpectedSubscriber(uvm_subscriber):
+    """Subscriber for expected transactions."""
+
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+        self.parent = parent
+
+    def write(self, txn):
+        """Receive expected transaction."""
+        if hasattr(self.parent, 'receive_expected'):
+            self.parent.receive_expected(txn)
+
+
+class ActualSubscriber(uvm_subscriber):
+    """Subscriber for actual transactions."""
+
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+        self.parent = parent
+
+    def write(self, txn):
+        """Receive actual transaction."""
+        if hasattr(self.parent, 'receive_actual'):
+            self.parent.receive_actual(txn)
+
+
 import sys
 import random
 import cocotb
+from cocotb.triggers import Timer
 from collections import deque
+
+
+class IntegrationDriver(uvm_driver):
+    """Driver for integration example."""
+
+    def __init__(self, name="IntegrationDriver", parent=None):
+        super().__init__(name, parent)
+
+    async def run_phase(self):
+        while True:
+            txn = await self.seq_item_port.get_next_item()
+            # Just consume the transaction - no actual DUT interaction needed for this example
+            self.logger.info(f"Driving: {txn}")
+            self.seq_item_port.item_done()
 
 
 class IntegrationTransaction(uvm_sequence_item):
@@ -84,16 +105,30 @@ class IntegrationComparator(uvm_component):
     
     def __init__(self, name="IntegrationComparator", parent=None):
         super().__init__(name, parent)
-        self.expected_ap = uvm_analysis_export("expected_ap", self)
-        self.actual_ap = uvm_analysis_export("actual_ap", self)
-        self.expected_imp = uvm_analysis_imp("expected_imp", self)
-        self.actual_imp = uvm_analysis_imp("actual_imp", self)
-        self.expected_ap.connect(self.expected_imp)
-        self.actual_ap.connect(self.actual_imp)
+        self.expected_subscriber = ExpectedSubscriber("expected_subscriber", self)
+        self.actual_subscriber = ActualSubscriber("actual_subscriber", self)
         self.expected_queue = deque()
         self.matches = 0
         self.mismatches = 0
-    
+
+    def receive_expected(self, txn):
+        """Receive expected transaction."""
+        self.expected_queue.append(txn)
+        self.compare()
+
+    def receive_actual(self, txn):
+        """Receive actual transaction."""
+        if len(self.expected_queue) > 0:
+            expected = self.expected_queue.popleft()
+            if expected.data == txn.data and expected.address == txn.address:
+                self.matches += 1
+            else:
+                self.mismatches += 1
+
+    def compare(self):
+        """Compare transactions."""
+        pass
+
     def write_expected(self, txn):
         """Receive expected transaction."""
         self.expected_queue.append(txn)
@@ -114,14 +149,11 @@ class IntegrationComparator(uvm_component):
         pass
 
 
-class IntegrationRecorder(uvm_component):
+class IntegrationRecorder(uvm_subscriber):
     """Recorder for transaction recording."""
-    
+
     def __init__(self, name="IntegrationRecorder", parent=None):
         super().__init__(name, parent)
-        self.ap = uvm_analysis_export("ap", self)
-        self.imp = uvm_analysis_imp("imp", self)
-        self.ap.connect(self.imp)
         self.recorded = []
     
     def write(self, txn):
@@ -142,9 +174,9 @@ class IntegrationScoreboard(uvm_scoreboard):
         self.ap = uvm_analysis_port("ap", self)
     
     def connect_phase(self):
-        self.expected_ap.connect(self.comparator.expected_ap)
-        self.actual_ap.connect(self.comparator.actual_ap)
-        self.ap.connect(self.recorder.ap)
+        self.expected_ap.connect(self.comparator.expected_subscriber.analysis_export)
+        self.actual_ap.connect(self.comparator.actual_subscriber.analysis_export)
+        self.ap.connect(self.recorder.analysis_export)
     
     def write_expected(self, txn):
         """Write expected transaction."""
@@ -162,8 +194,9 @@ class IntegrationSequence(uvm_sequence):
     
     async def body(self):
         """Generate transactions using pool and random."""
-        # Get pool from environment
-        env = self.get_env()
+        # Get pool from sequencer
+        agent = self.sequencer.get_parent()
+        env = agent.get_parent()
         pool = env.pool if hasattr(env, 'pool') else None
         
         # Get number of transactions from CLP
@@ -202,9 +235,11 @@ class IntegrationAgent(uvm_agent):
     def build_phase(self):
         self.logger.info("Building Integration Agent")
         self.seqr = uvm_sequencer("sequencer", self)
-    
+        self.driver = IntegrationDriver("driver", self)
+
     def connect_phase(self):
         self.logger.info("Connecting Integration Agent")
+        self.driver.seq_item_port.connect(self.seqr.seq_item_export)
 
 
 class IntegrationEnv(uvm_env):

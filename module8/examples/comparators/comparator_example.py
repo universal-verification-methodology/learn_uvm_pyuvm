@@ -32,6 +32,7 @@ class ActualSubscriber(uvm_subscriber):
 
 
 import cocotb
+from cocotb.triggers import Timer
 
 
 class ComparatorTransaction(uvm_sequence_item):

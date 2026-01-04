@@ -109,7 +109,7 @@ class CLPDriver(uvm_driver):
             self.logger.info(f"[{self.get_name()}] Received transaction: {txn}")
             # Simulate processing
             await Timer(1, unit="ns")
-            await self.seq_item_port.item_done()
+            self.seq_item_port.item_done()
 
 
 class CLPAgent(uvm_agent):

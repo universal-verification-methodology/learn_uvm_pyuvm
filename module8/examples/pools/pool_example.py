@@ -5,6 +5,21 @@ Demonstrates object pooling for performance optimization.
 
 from pyuvm import *
 import cocotb
+from cocotb.triggers import Timer
+
+
+class PoolDriver(uvm_driver):
+    """Driver for pool example."""
+
+    def __init__(self, name="PoolDriver", parent=None):
+        super().__init__(name, parent)
+
+    async def run_phase(self):
+        while True:
+            txn = await self.seq_item_port.get_next_item()
+            # Just consume the transaction - no actual DUT interaction needed for this example
+            self.logger.info(f"Driving: {txn}")
+            self.seq_item_port.item_done()
 
 
 class PoolTransaction(uvm_sequence_item):
@@ -99,9 +114,11 @@ class PoolAgent(uvm_agent):
         self.pool = TransactionPool.create("pool", self)
         self.pool.pool_size = 5
         self.seqr = uvm_sequencer("sequencer", self)
-    
+        self.driver = PoolDriver("driver", self)
+
     def connect_phase(self):
         self.logger.info("Connecting Pool Agent")
+        self.driver.seq_item_port.connect(self.seqr.seq_item_export)
 
 
 class PoolSequence(uvm_sequence):
@@ -109,8 +126,8 @@ class PoolSequence(uvm_sequence):
     
     async def body(self):
         """Generate transactions using pool."""
-        # Get pool from parent
-        agent = self.get_parent()
+        # Get pool from sequencer
+        agent = self.sequencer.get_parent()
         pool = agent.pool if hasattr(agent, 'pool') else None
         
         for i in range(20):

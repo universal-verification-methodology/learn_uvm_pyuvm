@@ -47,7 +47,7 @@ class UtilitiesDriver(uvm_driver):
             item = await self.seq_item_port.get_next_item()
             self.logger.info(f"Driving: {item}")
             await Timer(10, unit="ns")
-            await self.seq_item_port.item_done()
+            self.seq_item_port.item_done()
 
 
 class UtilitiesMonitor(uvm_monitor):
@@ -65,13 +65,11 @@ class UtilitiesMonitor(uvm_monitor):
             self.ap.write(txn)
 
 
-class UtilitiesScoreboard(uvm_scoreboard):
+class UtilitiesScoreboard(uvm_subscriber):
     """Scoreboard for utilities test."""
-    
-    def build_phase(self):
-        self.ap = uvm_analysis_export("ap", self)
-        self.imp = uvm_analysis_imp("imp", self)
-        self.ap.connect(self.imp)
+
+    def __init__(self, name="UtilitiesScoreboard", parent=None):
+        super().__init__(name, parent)
         self.received = []
     
     def write(self, txn):
@@ -106,7 +104,7 @@ class UtilitiesEnv(uvm_env):
     
     def connect_phase(self):
         self.logger.info("Connecting UtilitiesEnv")
-        self.agent.monitor.ap.connect(self.scoreboard.ap)
+        self.agent.monitor.ap.connect(self.scoreboard.analysis_export)
 
 
 # Note: @uvm_test() decorator removed to avoid import-time TypeError

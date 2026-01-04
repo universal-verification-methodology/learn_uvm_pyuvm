@@ -4,31 +4,10 @@ Demonstrates queue data structures for transaction management.
 """
 
 from pyuvm import *
-# Explicitly import uvm_analysis_imp - it may not be exported by from pyuvm import *
-# Try multiple possible import paths
-_uvm_analysis_imp = None
-try:
-    # First try: check if it's in the namespace after from pyuvm import *
-    _uvm_analysis_imp = globals()['uvm_analysis_imp']
-except KeyError:
-    # Second try: import from pyuvm module directly
-    import pyuvm
-    if hasattr(pyuvm, 'uvm_analysis_imp'):
-        _uvm_analysis_imp = pyuvm.uvm_analysis_imp
-    else:
-        # Third try: try TLM module paths
-        for module_name in ['s15_uvm_tlm_1', 's15_uvm_tlm', 's16_uvm_tlm_1', 's16_uvm_tlm']:
-            try:
-                tlm_module = __import__(f'pyuvm.{module_name}', fromlist=['uvm_analysis_imp'])
-                if hasattr(tlm_module, 'uvm_analysis_imp'):
-                    _uvm_analysis_imp = tlm_module.uvm_analysis_imp
-                    break
-            except (ImportError, AttributeError):
-                continue
-
-if _uvm_analysis_imp is not None:
-    globals()['uvm_analysis_imp'] = _uvm_analysis_imp
+# Use uvm_analysis_export as fallback (pyuvm doesn't have uvm_analysis_imp)
+uvm_analysis_imp = uvm_analysis_export
 import cocotb
+from cocotb.triggers import Timer
 from collections import deque
 
 
@@ -169,16 +148,13 @@ class PriorityQueue(uvm_component):
         self.logger.info(f"  Items removed: {self.removed_count}")
 
 
-class QueueScoreboard(uvm_scoreboard):
+class QueueScoreboard(uvm_subscriber):
     """Scoreboard using queue for transaction buffering."""
     
     def build_phase(self):
         self.logger.info("Building Queue Scoreboard")
         self.queue = TransactionQueue.create("queue", self)
         self.queue.max_size = 100
-        self.ap = uvm_analysis_port("ap", self)
-        self.imp = uvm_analysis_imp("imp", self)
-        self.ap.connect(self.imp)
     
     def write(self, txn):
         """Receive transaction and add to queue."""
@@ -207,7 +183,7 @@ class QueueEnv(uvm_env):
     
     def connect_phase(self):
         self.logger.info("Connecting Queue Environment")
-        self.ap.connect(self.scoreboard.ap)
+        self.ap.connect(self.scoreboard.analysis_export)
 
 
 # Note: @uvm_test() decorator removed to avoid import-time TypeError

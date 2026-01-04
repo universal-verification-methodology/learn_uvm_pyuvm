@@ -6,6 +6,21 @@ Demonstrates random number generation and constrained randomization.
 from pyuvm import *
 import random
 import cocotb
+from cocotb.triggers import Timer
+
+
+class RandomDriver(uvm_driver):
+    """Driver for random utilities example."""
+
+    def __init__(self, name="RandomDriver", parent=None):
+        super().__init__(name, parent)
+
+    async def run_phase(self):
+        while True:
+            txn = await self.seq_item_port.get_next_item()
+            # Just consume the transaction - no actual DUT interaction needed for this example
+            self.logger.info(f"Driving: {txn}")
+            self.seq_item_port.item_done()
 
 
 class RandomTransaction(uvm_sequence_item):
@@ -157,9 +172,11 @@ class RandomAgent(uvm_agent):
     def build_phase(self):
         self.logger.info("Building Random Agent")
         self.seqr = uvm_sequencer("sequencer", self)
-    
+        self.driver = RandomDriver("driver", self)
+
     def connect_phase(self):
         self.logger.info("Connecting Random Agent")
+        self.driver.seq_item_port.connect(self.seqr.seq_item_export)
 
 
 class RandomEnv(uvm_env):
