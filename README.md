@@ -223,7 +223,7 @@ Each module has a dedicated guide with examples, exercises, and detailed explana
 ## 🎓 Modules
 
 ### Module 0: Installation and Setup
-**Duration**: 1 week | **Complexity**: Beginner
+**Complexity**: Beginner
 
 Set up your verification environment with all required tools:
 - Verilator (simulator)
@@ -233,7 +233,7 @@ Set up your verification environment with all required tools:
 **Quick Start**: `./scripts/module0.sh`
 
 ### Module 1: Python and Verification Basics
-**Duration**: 2 weeks | **Complexity**: Beginner
+**Complexity**: Beginner
 
 Learn Python concepts essential for verification:
 - Python OOP (classes, inheritance)
@@ -245,7 +245,7 @@ Learn Python concepts essential for verification:
 **Quick Start**: `./scripts/module1.sh`
 
 ### Module 2: cocotb Fundamentals
-**Duration**: 2 weeks | **Complexity**: Intermediate
+**Complexity**: Intermediate
 
 Master cocotb for hardware verification:
 - Signal access and manipulation
@@ -257,7 +257,7 @@ Master cocotb for hardware verification:
 **Quick Start**: `./scripts/module2.sh`
 
 ### Module 3: UVM Basics
-**Duration**: 2 weeks | **Complexity**: Intermediate
+**Complexity**: Intermediate
 
 Introduction to UVM methodology:
 - UVM class hierarchy
@@ -270,7 +270,7 @@ Introduction to UVM methodology:
 **Quick Start**: `./scripts/module3.sh`
 
 ### Module 4: UVM Components
-**Duration**: 3 weeks | **Complexity**: Intermediate-Advanced
+**Complexity**: Intermediate-Advanced
 
 Build complete UVM testbenches:
 - Drivers, monitors, sequencers
@@ -282,7 +282,7 @@ Build complete UVM testbenches:
 **Quick Start**: `./scripts/module4.sh`
 
 ### Module 5: Advanced UVM Concepts
-**Duration**: 3 weeks | **Complexity**: Advanced
+**Complexity**: Advanced
 
 Advanced UVM features:
 - Virtual sequences and sequencers
@@ -294,7 +294,7 @@ Advanced UVM features:
 **Quick Start**: `./scripts/module5.sh`
 
 ### Module 6: Complex Testbenches
-**Duration**: 3 weeks | **Complexity**: Advanced
+**Complexity**: Advanced
 
 Build production-quality testbenches:
 - Multi-agent environments
@@ -306,7 +306,7 @@ Build production-quality testbenches:
 **Quick Start**: `./scripts/module6.sh`
 
 ### Module 7: Real-World Applications
-**Duration**: 3 weeks | **Complexity**: Advanced
+**Complexity**: Advanced
 
 Apply UVM to real-world scenarios:
 - DMA verification
@@ -318,7 +318,7 @@ Apply UVM to real-world scenarios:
 **Quick Start**: `./scripts/module7.sh`
 
 ### Module 8: UVM Miscellaneous Utilities
-**Duration**: 2 weeks | **Complexity**: Intermediate-Advanced
+**Complexity**: Intermediate-Advanced
 
 Master UVM utility classes:
 - Command Line Processor
@@ -483,22 +483,6 @@ For questions, issues, or contributions:
 2. Review the [GLOSSARY.md](docs/GLOSSARY.md) for terminology
 3. Check [COVERAGE_CHECKLIST.md](docs/COVERAGE_CHECKLIST.md) for module coverage
 4. Open an issue for bugs or feature requests
-
-## 🎯 Learning Path
-
-Recommended learning path:
-
-1. **Week 1**: Module 0 (Installation)
-2. **Weeks 2-3**: Module 1 (Python Basics)
-3. **Weeks 4-5**: Module 2 (cocotb)
-4. **Weeks 6-7**: Module 3 (UVM Basics)
-5. **Weeks 8-10**: Module 4 (UVM Components)
-6. **Weeks 11-13**: Module 5 (Advanced UVM)
-7. **Weeks 14-16**: Module 6 (Complex Testbenches)
-8. **Weeks 17-19**: Module 7 (Real-World Applications)
-9. **Weeks 20-21**: Module 8 (Utilities)
-
-**Total Duration**: ~21 weeks (5 months) for complete mastery
 
 ## 📊 Project Statistics
 
