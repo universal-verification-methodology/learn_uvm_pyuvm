@@ -7,15 +7,8 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, RisingEdge
 from pyuvm import *
-# Explicit imports for TLM classes that may not be in __all__
-try:
-    from pyuvm.s15_uvm_tlm_1 import uvm_seq_item_pull_port
-except (ImportError, AttributeError):
-    # Try alternative import path
-    try:
-        from pyuvm.s15_uvm_tlm import uvm_seq_item_pull_port
-    except (ImportError, AttributeError):
-        pass  # May already be available from pyuvm import *
+# Use uvm_seq_item_port (pyuvm doesn't have uvm_seq_item_pull_port)
+uvm_seq_item_pull_port = uvm_seq_item_port
 
 
 class UtilitiesTransaction(uvm_sequence_item):
@@ -47,7 +40,7 @@ class UtilitiesDriver(uvm_driver):
     """Driver for utilities test."""
     
     def build_phase(self):
-        self.seq_item_port = uvm_seq_item_pull_port("seq_item_port", self)
+        self.seq_item_port = uvm_seq_item_pull_port("utilities_seq_item_port", self)
     
     async def run_phase(self):
         while True:

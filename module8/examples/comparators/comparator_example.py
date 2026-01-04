@@ -4,30 +4,33 @@ Demonstrates using comparators for transaction comparison in scoreboards.
 """
 
 from pyuvm import *
-# Explicitly import uvm_analysis_imp - it may not be exported by from pyuvm import *
-# Try multiple possible import paths
-_uvm_analysis_imp = None
-try:
-    # First try: check if it's in the namespace after from pyuvm import *
-    _uvm_analysis_imp = globals()['uvm_analysis_imp']
-except KeyError:
-    # Second try: import from pyuvm module directly
-    import pyuvm
-    if hasattr(pyuvm, 'uvm_analysis_imp'):
-        _uvm_analysis_imp = pyuvm.uvm_analysis_imp
-    else:
-        # Third try: try TLM module paths
-        for module_name in ['s15_uvm_tlm_1', 's15_uvm_tlm', 's16_uvm_tlm_1', 's16_uvm_tlm']:
-            try:
-                tlm_module = __import__(f'pyuvm.{module_name}', fromlist=['uvm_analysis_imp'])
-                if hasattr(tlm_module, 'uvm_analysis_imp'):
-                    _uvm_analysis_imp = tlm_module.uvm_analysis_imp
-                    break
-            except (ImportError, AttributeError):
-                continue
+# Subscriber classes for expected and actual transactions
+class ExpectedSubscriber(uvm_subscriber):
+    """Subscriber for expected transactions."""
 
-if _uvm_analysis_imp is not None:
-    globals()['uvm_analysis_imp'] = _uvm_analysis_imp
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+        self.parent = parent
+
+    def write(self, txn):
+        """Receive expected transaction."""
+        if hasattr(self.parent, 'receive_expected'):
+            self.parent.receive_expected(txn)
+
+
+class ActualSubscriber(uvm_subscriber):
+    """Subscriber for actual transactions."""
+
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+        self.parent = parent
+
+    def write(self, txn):
+        """Receive actual transaction."""
+        if hasattr(self.parent, 'receive_actual'):
+            self.parent.receive_actual(txn)
+
+
 import cocotb
 
 
@@ -64,18 +67,26 @@ class InOrderComparator(uvm_component):
     
     def __init__(self, name="InOrderComparator", parent=None):
         super().__init__(name, parent)
-        self.expected_ap = uvm_analysis_export("expected_ap", self)
-        self.actual_ap = uvm_analysis_export("actual_ap", self)
-        self.expected_imp = uvm_analysis_imp("expected_imp", self)
-        self.actual_imp = uvm_analysis_imp("actual_imp", self)
-        self.expected_ap.connect(self.expected_imp)
-        self.actual_ap.connect(self.actual_imp)
-        
+        self.expected_subscriber = ExpectedSubscriber("expected_subscriber", self)
+        self.actual_subscriber = ActualSubscriber("actual_subscriber", self)
+
         self.expected_queue = []
         self.actual_queue = []
         self.matches = 0
         self.mismatches = 0
-    
+
+    def receive_expected(self, txn):
+        """Receive expected transaction."""
+        self.expected_queue.append(txn)
+        self.logger.debug(f"[{self.get_name()}] Expected: {txn}")
+        self.compare()
+
+    def receive_actual(self, txn):
+        """Receive actual transaction."""
+        self.actual_queue.append(txn)
+        self.logger.debug(f"[{self.get_name()}] Actual: {txn}")
+        self.compare()
+
     def write_expected(self, txn):
         """Receive expected transaction."""
         self.expected_queue.append(txn)
@@ -120,18 +131,36 @@ class AlgorithmicComparator(uvm_component):
     
     def __init__(self, name="AlgorithmicComparator", parent=None, compare_func=None):
         super().__init__(name, parent)
-        self.expected_ap = uvm_analysis_export("expected_ap", self)
-        self.actual_ap = uvm_analysis_export("actual_ap", self)
-        self.expected_imp = uvm_analysis_imp("expected_imp", self)
-        self.actual_imp = uvm_analysis_imp("actual_imp", self)
-        self.expected_ap.connect(self.expected_imp)
-        self.actual_ap.connect(self.actual_imp)
-        
+        self.expected_subscriber = ExpectedSubscriber("expected_subscriber", self)
+        self.actual_subscriber = ActualSubscriber("actual_subscriber", self)
+
         self.compare_func = compare_func or self.default_compare
         self.expected_dict = {}
         self.matches = 0
         self.mismatches = 0
-    
+
+    def receive_expected(self, txn):
+        """Receive expected transaction."""
+        key = (txn.data, txn.address)
+        self.expected_dict[key] = txn
+        self.logger.debug(f"[{self.get_name()}] Expected: {txn}")
+
+    def receive_actual(self, txn):
+        """Receive actual transaction."""
+        key = (txn.data, txn.address)
+        if key in self.expected_dict:
+            expected = self.expected_dict[key]
+            if self.compare_func(expected, txn):
+                self.matches += 1
+                self.logger.info(f"[{self.get_name()}] Match: {txn}")
+            else:
+                self.mismatches += 1
+                self.logger.error(f"[{self.get_name()}] Mismatch: expected {expected}, got {txn}")
+            del self.expected_dict[key]
+        else:
+            self.mismatches += 1
+            self.logger.error(f"[{self.get_name()}] Unexpected actual: {txn}")
+
     def default_compare(self, expected, actual):
         """Default comparison function."""
         return expected == actual
@@ -183,8 +212,8 @@ class ComparatorScoreboard(uvm_scoreboard):
     
     def connect_phase(self):
         self.logger.info("Connecting Comparator Scoreboard")
-        self.expected_ap.connect(self.comparator.expected_ap)
-        self.actual_ap.connect(self.comparator.actual_ap)
+        self.expected_ap.connect(self.comparator.expected_subscriber.analysis_export)
+        self.actual_ap.connect(self.comparator.actual_subscriber.analysis_export)
     
     def write_expected(self, txn):
         """Write expected transaction."""

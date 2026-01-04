@@ -1,8 +1,8 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1767521098" />
-    <testcase name="test_recorder" classname="recorder_example" file="/mnt/d/proj/learn_uvm_pyuvm/module8/examples/recorders/recorder_example.py" lineno="248" time="0.07803225517272949" sim_time_ns="0.0" ratio_time="0.0">
-      <failure error_type="NameError" error_msg="name 'uvm_analysis_imp' is not defined" />
+    <property name="random_seed" value="1767533981" />
+    <testcase name="test_recorder" classname="recorder_example" file="/data1/luwangzilu/yongfu/learn_uvm_pyuvm/module8/examples/recorders/recorder_example.py" lineno="239" time="0.005497455596923828" sim_time_ns="0.0" ratio_time="0.0">
+      <failure error_type="NameError" error_msg="name 'Timer' is not defined" />
     </testcase>
   </testsuite>
 </testsuites>

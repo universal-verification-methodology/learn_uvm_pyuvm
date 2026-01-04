@@ -8,6 +8,9 @@ import sys
 import cocotb
 from cocotb.triggers import Timer
 
+# Use uvm_seq_item_port (pyuvm doesn't have uvm_seq_item_pull_port)
+uvm_seq_item_pull_port = uvm_seq_item_port
+
 
 class CLPTransaction(uvm_sequence_item):
     """Transaction for CLP example."""
@@ -97,7 +100,7 @@ class CLPDriver(uvm_driver):
     """Simple driver for CLP example."""
     
     def build_phase(self):
-        self.seq_item_port = uvm_seq_item_pull_port("seq_item_port", self)
+        self.seq_item_port = uvm_seq_item_pull_port("clp_seq_item_port", self)
     
     async def run_phase(self):
         """Run phase - consume transactions from sequencer."""

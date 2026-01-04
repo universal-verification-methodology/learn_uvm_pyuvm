@@ -4,6 +4,8 @@ Demonstrates transaction recording for analysis.
 """
 
 from pyuvm import *
+import cocotb
+from cocotb.triggers import Timer
 # Explicitly import uvm_analysis_imp - it may not be exported by from pyuvm import *
 # Try multiple possible import paths
 _uvm_analysis_imp = None
@@ -56,18 +58,15 @@ class RecorderTransaction(uvm_sequence_item):
         }
 
 
-class TextRecorder(uvm_component):
+class TextRecorder(uvm_subscriber):
     """
     Text recorder for transactions.
-    
+
     Records transactions to a text file.
     """
-    
+
     def __init__(self, name="TextRecorder", parent=None, filename="transactions.txt"):
         super().__init__(name, parent)
-        self.ap = uvm_analysis_export("ap", self)
-        self.imp = uvm_analysis_imp("imp", self)
-        self.ap.connect(self.imp)
         self.filename = filename
         self.recorded_count = 0
     
@@ -94,18 +93,15 @@ class TextRecorder(uvm_component):
         self.logger.info(f"[{self.get_name()}] Recorded {self.recorded_count} transactions to {self.filename}")
 
 
-class JSONRecorder(uvm_component):
+class JSONRecorder(uvm_subscriber):
     """
     JSON recorder for transactions.
-    
+
     Records transactions to a JSON file.
     """
-    
+
     def __init__(self, name="JSONRecorder", parent=None, filename="transactions.json"):
         super().__init__(name, parent)
-        self.ap = uvm_analysis_export("ap", self)
-        self.imp = uvm_analysis_imp("imp", self)
-        self.ap.connect(self.imp)
         self.filename = filename
         self.transactions = []
         self.recorded_count = 0
@@ -138,18 +134,15 @@ class JSONRecorder(uvm_component):
         self.logger.info(f"[{self.get_name()}] Recorded {self.recorded_count} transactions to {self.filename}")
 
 
-class TransactionDatabase(uvm_component):
+class TransactionDatabase(uvm_subscriber):
     """
     Transaction database for storing and querying transactions.
-    
+
     In-memory database for transaction analysis.
     """
-    
+
     def __init__(self, name="TransactionDatabase", parent=None):
         super().__init__(name, parent)
-        self.ap = uvm_analysis_export("ap", self)
-        self.imp = uvm_analysis_imp("imp", self)
-        self.ap.connect(self.imp)
         self.database = []
         self.recorded_count = 0
     
@@ -201,9 +194,9 @@ class RecorderEnv(uvm_env):
     def connect_phase(self):
         self.logger.info("Connecting Recorder Environment")
         # Connect to all recorders
-        self.ap.connect(self.text_recorder.ap)
-        self.ap.connect(self.json_recorder.ap)
-        self.ap.connect(self.database.ap)
+        self.ap.connect(self.text_recorder.analysis_export)
+        self.ap.connect(self.json_recorder.analysis_export)
+        self.ap.connect(self.database.analysis_export)
 
 
 # Note: @uvm_test() decorator removed to avoid import-time TypeError
