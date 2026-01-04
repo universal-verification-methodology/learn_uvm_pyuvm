@@ -117,19 +117,29 @@ async def test_counter_overflow(dut):
     # Enable counter
     dut.enable.value = 1
     
-    # Count to near overflow
-    for _ in range(254):
+    # Count to near overflow (254 = 255 - 1, testing boundary condition)
+    # For an 8-bit counter, maximum value is 255 (0xFF)
+    # We count to 254 to test the overflow behavior on the next increment
+    MAX_COUNT = 255  # Maximum value for 8-bit counter
+    COUNT_TO_OVERFLOW = MAX_COUNT - 1  # 254
+    
+    for _ in range(COUNT_TO_OVERFLOW):
         await RisingEdge(dut.clk)
         await Timer(1, units="ns")
     
-    # Check we're at 254
-    assert dut.count.value == 254, "Should be at 254"
+    # Check we're at the expected pre-overflow value
+    assert dut.count.value == COUNT_TO_OVERFLOW, \
+        f"Should be at {COUNT_TO_OVERFLOW} before overflow, got {dut.count.value}"
     
     # Next increment should wrap to 0 (or continue to 255, depending on implementation)
+    # This tests the counter's overflow behavior
     await RisingEdge(dut.clk)
     await Timer(1, units="ns")
-    # Note: This test depends on counter implementation
-    # Most counters will wrap to 0, but some may continue to 255
+    # Note: Counter behavior depends on implementation:
+    # - Wrapping counter: 254 -> 255 -> 0 (wraps on next increment)
+    # - Saturating counter: 254 -> 255 -> 255 (saturates at max)
+    # This test accepts both behaviors as valid
     final_count = dut.count.value.integer
-    assert final_count in [0, 255], f"Counter should wrap or saturate, got {final_count}"
+    assert final_count in [0, MAX_COUNT], \
+        f"Counter should wrap to 0 or saturate at {MAX_COUNT}, got {final_count}"
 

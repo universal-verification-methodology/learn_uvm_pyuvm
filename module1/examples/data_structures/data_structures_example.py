@@ -97,15 +97,49 @@ class CoverageCollector:
     Coverage data collector.
     
     Demonstrates set and dictionary for coverage.
+    
+    In real verification environments, coverage models define the total
+    possible values for each coverage bin. This example uses a configurable
+    approach where you specify the total possible values per bin.
     """
     
     def __init__(self) -> None:
-        """Initialize coverage collector."""
+        """
+        Initialize coverage collector.
+        
+        Creates dictionaries to track:
+        - covered_bins: Set of covered values per bin
+        - hit_counts: Count of hits per value per bin
+        - total_possible: Total possible values per bin (for coverage calculation)
+        """
         self.covered_bins: Dict[str, set] = {}
         self.hit_counts: Dict[str, Counter] = {}
+        self.total_possible: Dict[str, int] = {}
+    
+    def define_bin(self, bin_name: str, total_possible_values: int) -> None:
+        """
+        Define a coverage bin with total possible values.
+        
+        In real verification, this would come from a coverage model definition.
+        This method allows you to specify the coverage space for each bin.
+        
+        Args:
+            bin_name: Name of the coverage bin
+            total_possible_values: Total number of possible values for this bin
+        """
+        if bin_name not in self.covered_bins:
+            self.covered_bins[bin_name] = set()
+            self.hit_counts[bin_name] = Counter()
+        self.total_possible[bin_name] = total_possible_values
     
     def add_coverage(self, bin_name: str, value: Any) -> None:
-        """Add coverage point."""
+        """
+        Add coverage point.
+        
+        Args:
+            bin_name: Name of the coverage bin
+            value: Value that was covered
+        """
         if bin_name not in self.covered_bins:
             self.covered_bins[bin_name] = set()
             self.hit_counts[bin_name] = Counter()
@@ -114,16 +148,43 @@ class CoverageCollector:
         self.hit_counts[bin_name][value] += 1
     
     def get_coverage(self, bin_name: str) -> float:
-        """Get coverage percentage for a bin."""
+        """
+        Get coverage percentage for a bin.
+        
+        Coverage = (number of unique covered values / total possible values) * 100
+        
+        Args:
+            bin_name: Name of the coverage bin
+            
+        Returns:
+            Coverage percentage (0.0 to 100.0)
+            
+        Raises:
+            KeyError: If bin_name is not defined (no total_possible set)
+        """
         if bin_name not in self.covered_bins:
             return 0.0
         
-        # Assume we know the total possible values
-        # In practice, this would come from coverage model
-        return len(self.covered_bins[bin_name]) / 10.0 * 100.0  # Example: 10 possible values
+        if bin_name not in self.total_possible:
+            raise KeyError(
+                f"Coverage bin '{bin_name}' not defined. "
+                f"Call define_bin() first to set total_possible_values."
+            )
+        
+        total = self.total_possible[bin_name]
+        if total == 0:
+            return 0.0
+        
+        covered_count = len(self.covered_bins[bin_name])
+        return (covered_count / total) * 100.0
     
     def get_all_coverage(self) -> Dict[str, float]:
-        """Get coverage for all bins."""
+        """
+        Get coverage for all bins.
+        
+        Returns:
+            Dictionary mapping bin names to coverage percentages
+        """
         return {bin_name: self.get_coverage(bin_name) 
                 for bin_name in self.covered_bins.keys()}
 
@@ -170,6 +231,12 @@ def main() -> None:
     # Example 3: Coverage Collector
     print("3. Coverage Collector (set, Counter):")
     coverage = CoverageCollector()
+    
+    # Define coverage bins with total possible values
+    # In real verification, these would come from coverage model definitions
+    coverage.define_bin('address', total_possible_values=10)
+    coverage.define_bin('data', total_possible_values=10)
+    coverage.define_bin('opcode', total_possible_values=10)
     
     # Add coverage points
     for _ in range(20):

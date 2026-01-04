@@ -7,15 +7,32 @@ import asyncio
 from typing import List, Coroutine
 import time
 
+# Simulation time scaling factor
+# In real hardware simulation with cocotb, you would use cocotb.triggers.Timer
+# which handles actual simulation time. This factor is only for demonstration
+# purposes to make the async examples runnable without a simulator.
+# 
+# For demonstration: 1 nanosecond = 0.000001 seconds (1 microsecond)
+# This makes simulation delays visible but fast enough for examples.
+SIM_TIME_SCALE_FACTOR: float = 0.000001  # nanoseconds to seconds conversion
+
 
 async def wait_ns(nanoseconds: int) -> None:
     """
     Wait for a specified number of nanoseconds (simulated).
     
-    In real cocotb, this would use cocotb.triggers.Timer.
+    This is a demonstration function. In real cocotb testbenches, you would use:
+    ```python
+    from cocotb.triggers import Timer
+    await Timer(nanoseconds, units="ns")
+    ```
+    
+    Args:
+        nanoseconds: Number of nanoseconds to wait (simulated)
     """
-    # Simulate waiting (1 ns = 0.001 ms for demo purposes)
-    await asyncio.sleep(nanoseconds * 0.000001)
+    # Convert nanoseconds to seconds using the simulation time scale factor
+    # In real cocotb, Timer handles this automatically
+    await asyncio.sleep(nanoseconds * SIM_TIME_SCALE_FACTOR)
 
 
 async def clock_generator(period_ns: int, num_cycles: int) -> List[int]:
