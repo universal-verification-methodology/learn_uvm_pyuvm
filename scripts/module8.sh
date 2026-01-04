@@ -30,7 +30,7 @@ RUN_STRING_UTILS=false
 RUN_MATH_UTILS=false
 RUN_RANDOM_UTILS=false
 RUN_INTEGRATION=false
-RUN_PYUVM_TESTS=false
+RUN_PYUVM_TESTS=true
 USE_VENV=true
 SIMULATOR="verilator"
 
@@ -154,9 +154,9 @@ check_prerequisites() {
     print_status $GREEN "Prerequisites check passed"
 }
 
-# Function to run Python example (syntax check)
+# Function to run Python example (run with cocotb)
 run_python_example() {
-    local example_file=$1
+    local example_dir=$1
     local example_name=$2
     
     print_header "Running: $example_name"
@@ -165,13 +165,23 @@ run_python_example() {
         source "$VENV_DIR/bin/activate"
     fi
     
-    # Check syntax only (don't execute, as these are structural examples)
-    if python3 -m py_compile "$example_file" 2>&1; then
-        print_status $GREEN "✓ $example_name syntax check passed"
-        print_status $YELLOW "Note: This is a structural example. Run with cocotb for full simulation."
+    # Check if Makefile exists
+    if [[ ! -f "$MODULE8_DIR/examples/$example_dir/Makefile" ]]; then
+        print_status $RED "✗ Makefile not found for $example_name"
+        return 1
+    fi
+    
+    # Run with cocotb using make
+    cd "$MODULE8_DIR/examples/$example_dir"
+    
+    print_status $BLUE "Running pyuvm test for $example_name..."
+    if make SIM="$SIMULATOR" 2>&1 | tee "/tmp/pyuvm_${example_dir}.log"; then
+        print_status $GREEN "✓ $example_name completed successfully"
+        cd "$PROJECT_ROOT"
         return 0
     else
-        print_status $RED "✗ $example_name syntax check failed"
+        print_status $RED "✗ $example_name failed"
+        cd "$PROJECT_ROOT"
         return 1
     fi
 }
@@ -337,80 +347,60 @@ main() {
        [[ "$RUN_MATH_UTILS" == true ]] || [[ "$RUN_RANDOM_UTILS" == true ]] || \
        [[ "$RUN_INTEGRATION" == true ]]; then
         
-        print_header "UVM Utilities Examples"
-        print_status $YELLOW "Note: Examples are pyuvm structural examples."
-        print_status $YELLOW "They demonstrate UVM utility usage patterns."
+        print_header "Running UVM Utilities Examples"
         
         if [[ "$RUN_CLP" == true ]]; then
-            cd "$MODULE8_DIR/examples/clp"
-            if ! run_python_example "clp_example.py" "Command Line Processor"; then
+            if ! run_python_example "clp" "Command Line Processor"; then
                 errors=$((errors + 1))
             fi
-            cd "$PROJECT_ROOT"
         fi
         
         if [[ "$RUN_COMPARATORS" == true ]]; then
-            cd "$MODULE8_DIR/examples/comparators"
-            if ! run_python_example "comparator_example.py" "Comparators"; then
+            if ! run_python_example "comparators" "Comparators"; then
                 errors=$((errors + 1))
             fi
-            cd "$PROJECT_ROOT"
         fi
         
         if [[ "$RUN_RECORDERS" == true ]]; then
-            cd "$MODULE8_DIR/examples/recorders"
-            if ! run_python_example "recorder_example.py" "Recorders"; then
+            if ! run_python_example "recorders" "Recorders"; then
                 errors=$((errors + 1))
             fi
-            cd "$PROJECT_ROOT"
         fi
         
         if [[ "$RUN_POOLS" == true ]]; then
-            cd "$MODULE8_DIR/examples/pools"
-            if ! run_python_example "pool_example.py" "Pools"; then
+            if ! run_python_example "pools" "Pools"; then
                 errors=$((errors + 1))
             fi
-            cd "$PROJECT_ROOT"
         fi
         
         if [[ "$RUN_QUEUES" == true ]]; then
-            cd "$MODULE8_DIR/examples/queues"
-            if ! run_python_example "queue_example.py" "Queues"; then
+            if ! run_python_example "queues" "Queues"; then
                 errors=$((errors + 1))
             fi
-            cd "$PROJECT_ROOT"
         fi
         
         if [[ "$RUN_STRING_UTILS" == true ]]; then
-            cd "$MODULE8_DIR/examples/string_utils"
-            if ! run_python_example "string_utils_example.py" "String Utilities"; then
+            if ! run_python_example "string_utils" "String Utilities"; then
                 errors=$((errors + 1))
             fi
-            cd "$PROJECT_ROOT"
         fi
         
         if [[ "$RUN_MATH_UTILS" == true ]]; then
-            cd "$MODULE8_DIR/examples/math_utils"
-            if ! run_python_example "math_utils_example.py" "Math Utilities"; then
+            if ! run_python_example "math_utils" "Math Utilities"; then
                 errors=$((errors + 1))
             fi
-            cd "$PROJECT_ROOT"
         fi
         
         if [[ "$RUN_RANDOM_UTILS" == true ]]; then
-            cd "$MODULE8_DIR/examples/random_utils"
-            if ! run_python_example "random_utils_example.py" "Random Utilities"; then
+            if ! run_python_example "random_utils" "Random Utilities"; then
                 errors=$((errors + 1))
             fi
-            cd "$PROJECT_ROOT"
         fi
         
         if [[ "$RUN_INTEGRATION" == true ]]; then
-            cd "$MODULE8_DIR/examples/integration"
-            if ! run_python_example "integration_example.py" "Utility Integration"; then
+            if ! run_python_example "integration" "Utility Integration"; then
                 errors=$((errors + 1))
             fi
-            cd "$PROJECT_ROOT"
         fi
     fi
     

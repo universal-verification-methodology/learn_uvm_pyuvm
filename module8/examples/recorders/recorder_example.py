@@ -4,7 +4,32 @@ Demonstrates transaction recording for analysis.
 """
 
 from pyuvm import *
+# Explicitly import uvm_analysis_imp - it may not be exported by from pyuvm import *
+# Try multiple possible import paths
+_uvm_analysis_imp = None
+try:
+    # First try: check if it's in the namespace after from pyuvm import *
+    _uvm_analysis_imp = globals()['uvm_analysis_imp']
+except KeyError:
+    # Second try: import from pyuvm module directly
+    import pyuvm
+    if hasattr(pyuvm, 'uvm_analysis_imp'):
+        _uvm_analysis_imp = pyuvm.uvm_analysis_imp
+    else:
+        # Third try: try TLM module paths
+        for module_name in ['s15_uvm_tlm_1', 's15_uvm_tlm', 's16_uvm_tlm_1', 's16_uvm_tlm']:
+            try:
+                tlm_module = __import__(f'pyuvm.{module_name}', fromlist=['uvm_analysis_imp'])
+                if hasattr(tlm_module, 'uvm_analysis_imp'):
+                    _uvm_analysis_imp = tlm_module.uvm_analysis_imp
+                    break
+            except (ImportError, AttributeError):
+                continue
+
+if _uvm_analysis_imp is not None:
+    globals()['uvm_analysis_imp'] = _uvm_analysis_imp
 import json
+import cocotb
 from datetime import datetime
 
 
@@ -165,8 +190,10 @@ class RecorderEnv(uvm_env):
         self.logger.info("=" * 60)
         
         # Create multiple recorders
-        self.text_recorder = TextRecorder.create("text_recorder", self, "transactions.txt")
-        self.json_recorder = JSONRecorder.create("json_recorder", self, "transactions.json")
+        self.text_recorder = TextRecorder.create("text_recorder", self)
+        self.text_recorder.filename = "transactions.txt"
+        self.json_recorder = JSONRecorder.create("json_recorder", self)
+        self.json_recorder.filename = "transactions.json"
         self.database = TransactionDatabase.create("database", self)
         
         self.ap = uvm_analysis_port("ap", self)
@@ -179,11 +206,12 @@ class RecorderEnv(uvm_env):
         self.ap.connect(self.database.ap)
 
 
-@uvm_test()
+# Note: @uvm_test() decorator removed to avoid import-time TypeError
+# Using cocotb test wrapper instead for compatibility with cocotb test discovery
 class RecorderTest(uvm_test):
     """Test demonstrating recorder usage."""
     
-    async def build_phase(self):
+    def build_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("Recorder Example Test")
         self.logger.info("=" * 60)
@@ -202,9 +230,9 @@ class RecorderTest(uvm_test):
             txn.timestamp = i * 10
             
             self.env.ap.write(txn)
-            await Timer(10, units="ns")
+            await Timer(10, unit="ns")
         
-        await Timer(50, units="ns")
+        await Timer(50, unit="ns")
         self.drop_objection()
     
     def report_phase(self):
@@ -214,6 +242,18 @@ class RecorderTest(uvm_test):
         self.logger.info("Check generated files:")
         self.logger.info("  - transactions.txt (text format)")
         self.logger.info("  - transactions.json (JSON format)")
+
+
+# Cocotb test function to run the pyuvm test
+@cocotb.test()
+async def test_recorder(dut):
+    """Cocotb test wrapper for pyuvm test."""
+    # Register the test class with uvm_root so run_test can find it
+    if not hasattr(uvm_root(), 'm_uvm_test_classes'):
+        uvm_root().m_uvm_test_classes = {}
+    uvm_root().m_uvm_test_classes["RecorderTest"] = RecorderTest
+    # Use uvm_root to run the test properly (executes all phases in hierarchy)
+    await uvm_root().run_test("RecorderTest")
 
 
 if __name__ == "__main__":

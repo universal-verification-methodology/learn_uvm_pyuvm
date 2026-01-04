@@ -4,6 +4,31 @@ Demonstrates queue data structures for transaction management.
 """
 
 from pyuvm import *
+# Explicitly import uvm_analysis_imp - it may not be exported by from pyuvm import *
+# Try multiple possible import paths
+_uvm_analysis_imp = None
+try:
+    # First try: check if it's in the namespace after from pyuvm import *
+    _uvm_analysis_imp = globals()['uvm_analysis_imp']
+except KeyError:
+    # Second try: import from pyuvm module directly
+    import pyuvm
+    if hasattr(pyuvm, 'uvm_analysis_imp'):
+        _uvm_analysis_imp = pyuvm.uvm_analysis_imp
+    else:
+        # Third try: try TLM module paths
+        for module_name in ['s15_uvm_tlm_1', 's15_uvm_tlm', 's16_uvm_tlm_1', 's16_uvm_tlm']:
+            try:
+                tlm_module = __import__(f'pyuvm.{module_name}', fromlist=['uvm_analysis_imp'])
+                if hasattr(tlm_module, 'uvm_analysis_imp'):
+                    _uvm_analysis_imp = tlm_module.uvm_analysis_imp
+                    break
+            except (ImportError, AttributeError):
+                continue
+
+if _uvm_analysis_imp is not None:
+    globals()['uvm_analysis_imp'] = _uvm_analysis_imp
+import cocotb
 from collections import deque
 
 
@@ -36,6 +61,9 @@ class TransactionQueue(uvm_component):
         self.overflow_count = 0
     
     def build_phase(self):
+        # Ensure max_size is set (default to None if not set)
+        if not hasattr(self, 'max_size'):
+            self.max_size = None
         self.logger.info(f"[{self.get_name()}] Building Transaction Queue (max_size: {self.max_size or 'unlimited'})")
     
     def push(self, item):
@@ -146,7 +174,8 @@ class QueueScoreboard(uvm_scoreboard):
     
     def build_phase(self):
         self.logger.info("Building Queue Scoreboard")
-        self.queue = TransactionQueue.create("queue", self, max_size=100)
+        self.queue = TransactionQueue.create("queue", self)
+        self.queue.max_size = 100
         self.ap = uvm_analysis_port("ap", self)
         self.imp = uvm_analysis_imp("imp", self)
         self.ap.connect(self.imp)
@@ -162,7 +191,7 @@ class QueueScoreboard(uvm_scoreboard):
             if not self.queue.is_empty():
                 txn = self.queue.pop()
                 self.logger.info(f"[{self.get_name()}] Processing: {txn}")
-            await Timer(10, units="ns")
+            await Timer(10, unit="ns")
 
 
 class QueueEnv(uvm_env):
@@ -181,11 +210,12 @@ class QueueEnv(uvm_env):
         self.ap.connect(self.scoreboard.ap)
 
 
-@uvm_test()
+# Note: @uvm_test() decorator removed to avoid import-time TypeError
+# Using cocotb test wrapper instead for compatibility with cocotb test discovery
 class QueueTest(uvm_test):
     """Test demonstrating queue usage."""
     
-    async def build_phase(self):
+    def build_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("Queue Example Test")
         self.logger.info("=" * 60)
@@ -202,7 +232,7 @@ class QueueTest(uvm_test):
             txn.address = i * 0x100
             txn.priority = i % 3
             self.env.ap.write(txn)
-            await Timer(10, units="ns")
+            await Timer(10, unit="ns")
         
         # Test priority queue
         for i in range(5):
@@ -212,13 +242,25 @@ class QueueTest(uvm_test):
             txn.priority = 5 - i  # Higher priority first
             self.env.priority_queue.push(txn)
         
-        await Timer(100, units="ns")
+        await Timer(100, unit="ns")
         self.drop_objection()
     
     def report_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("Queue test completed")
         self.logger.info("=" * 60)
+
+
+# Cocotb test function to run the pyuvm test
+@cocotb.test()
+async def test_queue(dut):
+    """Cocotb test wrapper for pyuvm test."""
+    # Register the test class with uvm_root so run_test can find it
+    if not hasattr(uvm_root(), 'm_uvm_test_classes'):
+        uvm_root().m_uvm_test_classes = {}
+    uvm_root().m_uvm_test_classes["QueueTest"] = QueueTest
+    # Use uvm_root to run the test properly (executes all phases in hierarchy)
+    await uvm_root().run_test("QueueTest")
 
 
 if __name__ == "__main__":

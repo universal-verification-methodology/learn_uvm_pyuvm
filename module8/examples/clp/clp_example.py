@@ -5,6 +5,8 @@ Demonstrates using UVM Command Line Processor for test configuration.
 
 from pyuvm import *
 import sys
+import cocotb
+from cocotb.triggers import Timer
 
 
 class CLPTransaction(uvm_sequence_item):
@@ -39,6 +41,9 @@ class CLPEnv(uvm_env):
         self.logger.info(f"  debug_level: {self.debug_level}")
         self.logger.info(f"  num_transactions: {self.num_transactions}")
         self.logger.info(f"  seed: {self.seed}")
+        
+        # Create agent for sequence execution
+        self.agent = CLPAgent.create("agent", self)
     
     def get_clp_arg(self, arg_name, default_value):
         """
@@ -73,15 +78,14 @@ class CLPEnv(uvm_env):
 class CLPSequence(uvm_sequence):
     """Sequence using CLP configuration."""
     
+    def __init__(self, name="CLPSequence", num_transactions=10):
+        super().__init__(name)
+        self.num_transactions = num_transactions
+    
     async def body(self):
         """Generate transactions based on CLP configuration."""
-        # Get configuration from environment
-        env = self.get_env()
-        num_txns = env.num_transactions if hasattr(env, 'num_transactions') else 10
-        
-        self.logger.info(f"Generating {num_txns} transactions based on CLP configuration")
-        
-        for i in range(num_txns):
+        # Note: Sequences don't have logger, so we skip logging here
+        for i in range(self.num_transactions):
             txn = CLPTransaction()
             txn.data = i * 0x10
             txn.address = i * 0x100
@@ -89,18 +93,37 @@ class CLPSequence(uvm_sequence):
             await self.finish_item(txn)
 
 
+class CLPDriver(uvm_driver):
+    """Simple driver for CLP example."""
+    
+    def build_phase(self):
+        self.seq_item_port = uvm_seq_item_pull_port("seq_item_port", self)
+    
+    async def run_phase(self):
+        """Run phase - consume transactions from sequencer."""
+        while True:
+            txn = await self.seq_item_port.get_next_item()
+            self.logger.info(f"[{self.get_name()}] Received transaction: {txn}")
+            # Simulate processing
+            await Timer(1, unit="ns")
+            await self.seq_item_port.item_done()
+
+
 class CLPAgent(uvm_agent):
     """Agent for CLP example."""
     
     def build_phase(self):
         self.logger.info("Building CLP agent")
+        self.driver = CLPDriver.create("driver", self)
         self.seqr = uvm_sequencer("sequencer", self)
     
     def connect_phase(self):
         self.logger.info("Connecting CLP agent")
+        self.driver.seq_item_port.connect(self.seqr.seq_item_export)
 
 
-@uvm_test()
+# Note: @uvm_test() decorator removed to avoid import-time TypeError
+# Using cocotb test wrapper instead for compatibility with cocotb test discovery
 class CLPTest(uvm_test):
     """
     Test demonstrating Command Line Processor usage.
@@ -109,7 +132,7 @@ class CLPTest(uvm_test):
         python clp_example.py +test_mode=stress +debug_level=2 +num_transactions=20 +seed=12345
     """
     
-    async def build_phase(self):
+    def build_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("Command Line Processor Example Test")
         self.logger.info("=" * 60)
@@ -130,11 +153,13 @@ class CLPTest(uvm_test):
         else:
             self.logger.info("Normal test mode: Running standard test")
         
-        # Start sequence
+        # Start sequence with configuration from environment
+        num_txns = self.env.num_transactions if hasattr(self.env, 'num_transactions') else 10
         seq = CLPSequence.create("seq")
-        await seq.start(self.env.agent.seqr if hasattr(self.env, 'agent') else None)
+        seq.num_transactions = num_txns
+        await seq.start(self.env.agent.seqr)
         
-        await Timer(100, units="ns")
+        await Timer(100, unit="ns")
         self.drop_objection()
     
     def report_phase(self):
@@ -146,6 +171,18 @@ class CLPTest(uvm_test):
         self.logger.info(f"  debug_level: {self.env.debug_level}")
         self.logger.info(f"  num_transactions: {self.env.num_transactions}")
         self.logger.info(f"  seed: {self.env.seed}")
+
+
+# Cocotb test function to run the pyuvm test
+@cocotb.test()
+async def test_clp(dut):
+    """Cocotb test wrapper for pyuvm test."""
+    # Register the test class with uvm_root so run_test can find it
+    if not hasattr(uvm_root(), 'm_uvm_test_classes'):
+        uvm_root().m_uvm_test_classes = {}
+    uvm_root().m_uvm_test_classes["CLPTest"] = CLPTest
+    # Use uvm_root to run the test properly (executes all phases in hierarchy)
+    await uvm_root().run_test("CLPTest")
 
 
 if __name__ == "__main__":

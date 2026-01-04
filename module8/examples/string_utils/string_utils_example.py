@@ -4,6 +4,8 @@ Demonstrates string manipulation utilities for UVM.
 """
 
 from pyuvm import *
+import cocotb
+from cocotb.triggers import Timer
 
 
 class StringUtilsExample(uvm_component):
@@ -74,11 +76,12 @@ class StringUtilsExample(uvm_component):
         self.logger.info("=" * 60)
 
 
-@uvm_test()
+# Note: @uvm_test() decorator removed to avoid import-time TypeError
+# Using cocotb test wrapper instead for compatibility with cocotb test discovery
 class StringUtilsTest(uvm_test):
     """Test demonstrating string utilities."""
     
-    async def build_phase(self):
+    def build_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("String Utilities Test")
         self.logger.info("=" * 60)
@@ -86,8 +89,20 @@ class StringUtilsTest(uvm_test):
     
     async def run_phase(self):
         self.raise_objection()
-        await Timer(10, units="ns")
+        await Timer(10, unit="ns")
         self.drop_objection()
+
+
+# Cocotb test function to run the pyuvm test
+@cocotb.test()
+async def test_string_utils(dut):
+    """Cocotb test wrapper for pyuvm test."""
+    # Register the test class with uvm_root so run_test can find it
+    if not hasattr(uvm_root(), 'm_uvm_test_classes'):
+        uvm_root().m_uvm_test_classes = {}
+    uvm_root().m_uvm_test_classes["StringUtilsTest"] = StringUtilsTest
+    # Use uvm_root to run the test properly (executes all phases in hierarchy)
+    await uvm_root().run_test("StringUtilsTest")
 
 
 if __name__ == "__main__":

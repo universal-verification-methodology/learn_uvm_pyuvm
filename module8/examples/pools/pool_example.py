@@ -4,6 +4,7 @@ Demonstrates object pooling for performance optimization.
 """
 
 from pyuvm import *
+import cocotb
 
 
 class PoolTransaction(uvm_sequence_item):
@@ -39,6 +40,9 @@ class TransactionPool(uvm_component):
         self.reused_count = 0
     
     def build_phase(self):
+        # Ensure pool_size is set (default to 10 if not set)
+        if not hasattr(self, 'pool_size') or self.pool_size is None:
+            self.pool_size = 10
         self.logger.info(f"[{self.get_name()}] Building Transaction Pool (size: {self.pool_size})")
         # Pre-allocate pool
         for _ in range(self.pool_size):
@@ -92,7 +96,8 @@ class PoolAgent(uvm_agent):
     
     def build_phase(self):
         self.logger.info("Building Pool Agent")
-        self.pool = TransactionPool.create("pool", self, pool_size=5)
+        self.pool = TransactionPool.create("pool", self)
+        self.pool.pool_size = 5
         self.seqr = uvm_sequencer("sequencer", self)
     
     def connect_phase(self):
@@ -126,7 +131,7 @@ class PoolSequence(uvm_sequence):
             if pool:
                 pool.put(txn)
             
-            await Timer(10, units="ns")
+            await Timer(10, unit="ns")
 
 
 class PoolEnv(uvm_env):
@@ -142,11 +147,12 @@ class PoolEnv(uvm_env):
         self.logger.info("Connecting Pool Environment")
 
 
-@uvm_test()
+# Note: @uvm_test() decorator removed to avoid import-time TypeError
+# Using cocotb test wrapper instead for compatibility with cocotb test discovery
 class PoolTest(uvm_test):
     """Test demonstrating pool usage."""
     
-    async def build_phase(self):
+    def build_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("Pool Example Test")
         self.logger.info("=" * 60)
@@ -160,13 +166,25 @@ class PoolTest(uvm_test):
         seq = PoolSequence.create("seq")
         await seq.start(self.env.agent.seqr)
         
-        await Timer(50, units="ns")
+        await Timer(50, unit="ns")
         self.drop_objection()
     
     def report_phase(self):
         self.logger.info("=" * 60)
         self.logger.info("Pool test completed")
         self.logger.info("=" * 60)
+
+
+# Cocotb test function to run the pyuvm test
+@cocotb.test()
+async def test_pool(dut):
+    """Cocotb test wrapper for pyuvm test."""
+    # Register the test class with uvm_root so run_test can find it
+    if not hasattr(uvm_root(), 'm_uvm_test_classes'):
+        uvm_root().m_uvm_test_classes = {}
+    uvm_root().m_uvm_test_classes["PoolTest"] = PoolTest
+    # Use uvm_root to run the test properly (executes all phases in hierarchy)
+    await uvm_root().run_test("PoolTest")
 
 
 if __name__ == "__main__":
