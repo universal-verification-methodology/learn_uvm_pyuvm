@@ -21,12 +21,12 @@ MODULE3_DIR="$PROJECT_ROOT/module3"
 VENV_DIR="$PROJECT_ROOT/.venv"
 
 # Options
-RUN_CLASS_HIERARCHY=false
-RUN_PHASES=false
-RUN_REPORTING=false
-RUN_CONFIGDB=false
-RUN_FACTORY=false
-RUN_OBJECTIONS=false
+RUN_CLASS_HIERARCHY=true
+RUN_PHASES=true
+RUN_REPORTING=true
+RUN_CONFIGDB=true
+RUN_FACTORY=true
+RUN_OBJECTIONS=true
 RUN_PYUVM_TESTS=true
 USE_VENV=true
 SIMULATOR="verilator"
@@ -162,6 +162,15 @@ run_python_example() {
     # Run with cocotb using make
     cd "$MODULE3_DIR/examples/$example_dir"
     
+    # Clean previous build artifacts to avoid hardcoded path issues
+    print_status $YELLOW "Cleaning previous build artifacts..."
+    if [[ -d "sim_build" ]]; then
+        rm -rf sim_build
+        print_status $GREEN "Removed sim_build directory"
+    fi
+    # Try make clean if available (ignore errors if target doesn't exist)
+    make clean 2>/dev/null || true
+    
     print_status $BLUE "Running pyuvm test for $example_name..."
     if make SIM="$SIMULATOR" 2>&1 | tee "/tmp/pyuvm_${example_dir}.log"; then
         print_status $GREEN "✓ $example_name completed successfully"
@@ -183,6 +192,15 @@ run_pyuvm_tests() {
     fi
     
     cd "$MODULE3_DIR/tests/pyuvm_tests"
+    
+    # Clean previous build artifacts to avoid hardcoded path issues
+    print_status $YELLOW "Cleaning previous build artifacts..."
+    if [[ -d "sim_build" ]]; then
+        rm -rf sim_build
+        print_status $GREEN "Removed sim_build directory"
+    fi
+    # Try make clean if available (ignore errors if target doesn't exist)
+    make clean 2>/dev/null || true
     
     print_status $BLUE "Running simple UVM test..."
     if make SIM="$SIMULATOR" TEST=test_simple_uvm 2>&1 | tee /tmp/pyuvm_test.log; then

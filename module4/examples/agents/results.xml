@@ -1,7 +1,7 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1767530670" />
-    <testcase name="test_complete_agent" classname="agent_example" file="/data1/luwangzilu/yongfu/learn_uvm_pyuvm/module4/examples/agents/agent_example.py" lineno="300" time="0.002253293991088867" sim_time_ns="100.0" ratio_time="44379.47307163263" />
-    <testcase name="test_passive_agent" classname="agent_example" file="/data1/luwangzilu/yongfu/learn_uvm_pyuvm/module4/examples/agents/agent_example.py" lineno="323" time="0.002483844757080078" sim_time_ns="100.0" ratio_time="40260.16509886734" />
+    <property name="random_seed" value="1768574448" />
+    <testcase name="test_complete_agent" classname="agent_example" file="/home/yongfu/proj/learn_uvm_pyuvm/module4/examples/agents/agent_example.py" lineno="300" time="0.0012578964233398438" sim_time_ns="100.0" ratio_time="79497.8013646702" />
+    <testcase name="test_passive_agent" classname="agent_example" file="/home/yongfu/proj/learn_uvm_pyuvm/module4/examples/agents/agent_example.py" lineno="323" time="0.0009851455688476562" sim_time_ns="100.0" ratio_time="101507.84123910939" />
   </testsuite>
 </testsuites>

@@ -21,13 +21,13 @@ MODULE4_DIR="$PROJECT_ROOT/module4"
 VENV_DIR="$PROJECT_ROOT/.venv"
 
 # Options
-RUN_DRIVERS=false
-RUN_MONITORS=false
-RUN_SEQUENCERS=false
-RUN_TLM=false
-RUN_SCOREBOARDS=false
-RUN_TRANSACTIONS=false
-RUN_AGENTS=false
+RUN_DRIVERS=true
+RUN_MONITORS=true
+RUN_SEQUENCERS=true
+RUN_TLM=true
+RUN_SCOREBOARDS=true
+RUN_TRANSACTIONS=true
+RUN_AGENTS=true
 RUN_PYUVM_TESTS=true
 USE_VENV=true
 SIMULATOR="verilator"
@@ -145,6 +145,29 @@ check_prerequisites() {
     print_status $GREEN "Prerequisites check passed"
 }
 
+# Function to clean build artifacts
+clean_build_artifacts() {
+    print_status $BLUE "Cleaning build artifacts..."
+    
+    # Clean all sim_build directories in module4
+    local cleaned=0
+    while IFS= read -r -d '' dir; do
+        if [[ -d "$dir" ]]; then
+            rm -rf "$dir"
+            cleaned=$((cleaned + 1))
+        fi
+    done < <(find "$MODULE4_DIR" -type d -name "sim_build" -print0 2>/dev/null || true)
+    
+    # Also clean results.xml files
+    find "$MODULE4_DIR" -name "results.xml" -type f -delete 2>/dev/null || true
+    
+    if [[ $cleaned -gt 0 ]]; then
+        print_status $GREEN "Cleaned $cleaned sim_build directory(ies)"
+    else
+        print_status $BLUE "No build artifacts to clean"
+    fi
+}
+
 # Function to run Python example (run with cocotb)
 run_python_example() {
     local example_dir=$1
@@ -164,6 +187,11 @@ run_python_example() {
     
     # Run with cocotb using make
     cd "$MODULE4_DIR/examples/$example_dir"
+    
+    # Clean before building to avoid stale dependency files
+    if [[ -d "sim_build" ]]; then
+        rm -rf sim_build
+    fi
     
     print_status $BLUE "Running pyuvm test for $example_name..."
     if make SIM="$SIMULATOR" 2>&1 | tee "/tmp/pyuvm_${example_dir}.log"; then
@@ -186,6 +214,11 @@ run_pyuvm_tests() {
     fi
     
     cd "$MODULE4_DIR/tests/pyuvm_tests"
+    
+    # Clean before building to avoid stale dependency files
+    if [[ -d "sim_build" ]]; then
+        rm -rf sim_build
+    fi
     
     print_status $BLUE "Running complete agent test..."
     if make SIM="$SIMULATOR" TEST=test_complete_agent 2>&1 | tee /tmp/pyuvm_test.log; then
@@ -312,6 +345,9 @@ main() {
     
     # Check prerequisites
     check_prerequisites
+    
+    # Clean build artifacts before running tests
+    clean_build_artifacts
     
     local errors=0
     

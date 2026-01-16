@@ -10,12 +10,10 @@
 
 class Vtop__Syms;
 
-class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule {
+class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final {
   public:
 
     // DESIGN SPECIFIC STATE
-    CData/*0:0*/ axi4_lite_slave__DOT__ACLK;
-    CData/*0:0*/ axi4_lite_slave__DOT__ARESETn;
     VL_IN8(ACLK,0,0);
     VL_IN8(ARESETn,0,0);
     VL_IN8(AWVALID,0,0);
@@ -33,6 +31,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     VL_OUT8(RVALID,0,0);
     VL_IN8(RREADY,0,0);
     VL_OUT8(RRESP,1,0);
+    CData/*0:0*/ axi4_lite_slave__DOT__ACLK;
+    CData/*0:0*/ axi4_lite_slave__DOT__ARESETn;
     CData/*0:0*/ axi4_lite_slave__DOT__AWVALID;
     CData/*0:0*/ axi4_lite_slave__DOT__AWREADY;
     CData/*2:0*/ axi4_lite_slave__DOT__AWPROT;
@@ -54,7 +54,6 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     CData/*0:0*/ __VicoFirstIteration;
     CData/*0:0*/ __Vtrigprevexpr___TOP__axi4_lite_slave__DOT__ACLK__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__axi4_lite_slave__DOT__ARESETn__0;
-    CData/*0:0*/ __VactContinue;
     VL_IN(AWADDR,31,0);
     VL_IN(WDATA,31,0);
     VL_IN(ARADDR,31,0);
@@ -65,13 +64,14 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     IData/*31:0*/ axi4_lite_slave__DOT__RDATA;
     IData/*31:0*/ __VactIterCount;
     VlUnpacked<IData/*31:0*/, 1024> axi4_lite_slave__DOT__memory;
-    VlTriggerVec<1> __VstlTriggered;
-    VlTriggerVec<1> __VicoTriggered;
-    VlTriggerVec<2> __VactTriggered;
-    VlTriggerVec<2> __VnbaTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VstlTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VicoTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VactTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VnbaTriggered;
 
     // INTERNAL VARIABLES
-    Vtop__Syms* const vlSymsp;
+    Vtop__Syms* vlSymsp;
+    const char* vlNamep;
 
     // PARAMETERS
     static constexpr CData/*0:0*/ axi4_lite_slave__DOT__WRITE_IDLE = 0U;
@@ -80,7 +80,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     static constexpr CData/*0:0*/ axi4_lite_slave__DOT__READ_DATA = 1U;
 
     // CONSTRUCTORS
-    Vtop___024root(Vtop__Syms* symsp, const char* v__name);
+    Vtop___024root(Vtop__Syms* symsp, const char* namep);
     ~Vtop___024root();
     VL_UNCOPYABLE(Vtop___024root);
 

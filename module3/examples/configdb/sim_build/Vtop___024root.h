@@ -10,18 +10,18 @@
 
 class Vtop__Syms;
 
-class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule {
+class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final {
   public:
 
     // DESIGN SPECIFIC STATE
-    CData/*0:0*/ adder__DOT__clk;
-    CData/*0:0*/ adder__DOT__rst_n;
     VL_IN8(clk,0,0);
     VL_IN8(rst_n,0,0);
     VL_IN8(a,7,0);
     VL_IN8(b,7,0);
     VL_OUT8(sum,7,0);
     VL_OUT8(carry,0,0);
+    CData/*0:0*/ adder__DOT__clk;
+    CData/*0:0*/ adder__DOT__rst_n;
     CData/*7:0*/ adder__DOT__a;
     CData/*7:0*/ adder__DOT__b;
     CData/*7:0*/ adder__DOT__sum;
@@ -30,18 +30,18 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     CData/*0:0*/ __VicoFirstIteration;
     CData/*0:0*/ __Vtrigprevexpr___TOP__adder__DOT__clk__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__adder__DOT__rst_n__0;
-    CData/*0:0*/ __VactContinue;
     IData/*31:0*/ __VactIterCount;
-    VlTriggerVec<1> __VstlTriggered;
-    VlTriggerVec<1> __VicoTriggered;
-    VlTriggerVec<2> __VactTriggered;
-    VlTriggerVec<2> __VnbaTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VstlTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VicoTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VactTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VnbaTriggered;
 
     // INTERNAL VARIABLES
-    Vtop__Syms* const vlSymsp;
+    Vtop__Syms* vlSymsp;
+    const char* vlNamep;
 
     // CONSTRUCTORS
-    Vtop___024root(Vtop__Syms* symsp, const char* v__name);
+    Vtop___024root(Vtop__Syms* symsp, const char* namep);
     ~Vtop___024root();
     VL_UNCOPYABLE(Vtop___024root);
 

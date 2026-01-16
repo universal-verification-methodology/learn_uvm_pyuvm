@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1767530654" />
-    <testcase name="test_driver" classname="driver_example" file="/data1/luwangzilu/yongfu/learn_uvm_pyuvm/module4/examples/drivers/driver_example.py" lineno="169" time="0.0013210773468017578" sim_time_ns="50.0" ratio_time="37847.89749142754" />
+    <property name="random_seed" value="1768574439" />
+    <testcase name="test_driver" classname="driver_example" file="/home/yongfu/proj/learn_uvm_pyuvm/module4/examples/drivers/driver_example.py" lineno="169" time="0.0006589889526367188" sim_time_ns="50.0" ratio_time="75873.80607814761" />
   </testsuite>
 </testsuites>

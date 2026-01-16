@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1767533535" />
-    <testcase name="test_i2c" classname="i2c_example" file="/data1/luwangzilu/yongfu/learn_uvm_pyuvm/module7/examples/protocols/i2c_example.py" lineno="186" time="0.009109258651733398" sim_time_ns="1400.0" ratio_time="153689.78459444604" />
+    <property name="random_seed" value="1768574401" />
+    <testcase name="test_i2c" classname="i2c_example" file="/home/yongfu/proj/learn_uvm_pyuvm/module7/examples/protocols/i2c_example.py" lineno="186" time="0.003863811492919922" sim_time_ns="1400.0" ratio_time="362336.51733925706" />
   </testsuite>
 </testsuites>

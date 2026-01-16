@@ -10,17 +10,17 @@
 
 class Vtop__Syms;
 
-class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule {
+class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final {
   public:
 
     // DESIGN SPECIFIC STATE
-    CData/*0:0*/ simple_dma__DOT__clk;
-    CData/*0:0*/ simple_dma__DOT__rst_n;
     VL_IN8(clk,0,0);
     VL_IN8(rst_n,0,0);
     VL_IN8(dma_start,0,0);
     VL_OUT8(dma_done,0,0);
     VL_IN8(dma_channel,2,0);
+    CData/*0:0*/ simple_dma__DOT__clk;
+    CData/*0:0*/ simple_dma__DOT__rst_n;
     CData/*0:0*/ simple_dma__DOT__dma_start;
     CData/*0:0*/ simple_dma__DOT__dma_done;
     CData/*2:0*/ simple_dma__DOT__dma_channel;
@@ -29,7 +29,6 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     CData/*0:0*/ __VicoFirstIteration;
     CData/*0:0*/ __Vtrigprevexpr___TOP__simple_dma__DOT__clk__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__simple_dma__DOT__rst_n__0;
-    CData/*0:0*/ __VactContinue;
     VL_IN16(dma_length,15,0);
     SData/*15:0*/ simple_dma__DOT__dma_length;
     SData/*15:0*/ simple_dma__DOT__length_reg;
@@ -41,16 +40,17 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     IData/*31:0*/ simple_dma__DOT__src_addr_reg;
     IData/*31:0*/ simple_dma__DOT__dst_addr_reg;
     IData/*31:0*/ __VactIterCount;
-    VlTriggerVec<1> __VstlTriggered;
-    VlTriggerVec<1> __VicoTriggered;
-    VlTriggerVec<2> __VactTriggered;
-    VlTriggerVec<2> __VnbaTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VstlTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VicoTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VactTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VnbaTriggered;
 
     // INTERNAL VARIABLES
-    Vtop__Syms* const vlSymsp;
+    Vtop__Syms* vlSymsp;
+    const char* vlNamep;
 
     // CONSTRUCTORS
-    Vtop___024root(Vtop__Syms* symsp, const char* v__name);
+    Vtop___024root(Vtop__Syms* symsp, const char* namep);
     ~Vtop___024root();
     VL_UNCOPYABLE(Vtop___024root);
 

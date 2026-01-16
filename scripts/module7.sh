@@ -21,12 +21,12 @@ MODULE7_DIR="$PROJECT_ROOT/module7"
 VENV_DIR="$PROJECT_ROOT/.venv"
 
 # Options
-RUN_DMA=false
-RUN_UART=false
-RUN_SPI=false
-RUN_I2C=false
-RUN_VIP=false
-RUN_BEST_PRACTICES=false
+RUN_DMA=true
+RUN_UART=true
+RUN_SPI=true
+RUN_I2C=true
+RUN_VIP=true
+RUN_BEST_PRACTICES=true
 RUN_PYUVM_TESTS=true
 USE_VENV=true
 SIMULATOR="verilator"
