@@ -1,0 +1,5 @@
+flowchart TD
+  B[build_phase] --> C[connect_phase]
+  C --> R[run_phase + objections]
+  R --> X[extract / report]
+  X --> P{UVM TEST PASSED?}

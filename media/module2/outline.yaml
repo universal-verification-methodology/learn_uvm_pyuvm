@@ -1,0 +1,457 @@
+title: Module 2 — cocotb Fundamentals
+course: learn_uvm_pyuvm
+module: 2
+subtitle: Master cocotb for hardware verification
+footer: learn_uvm_pyuvm / Module 2
+slides:
+- type: title
+  title: Module 2
+  subtitle: cocotb Fundamentals
+- type: bullets
+  title: Learning objectives
+  bullets:
+  - Master cocotb for hardware verification
+- type: bullets
+  title: Prerequisites
+  bullets:
+  - See module README
+- type: image
+  title: Learning path
+  image: assets/diagrams/learning_path.png
+  caption: Master cocotb for hardware verification
+- type: bullets
+  title: Overview
+  bullets:
+  - This module provides comprehensive coverage of cocotb, the coroutine-based testbench
+    framework that enables Python testbenches for hardware designs. You'll learn how
+    to interact with simulators, drive signals, sample val
+- type: section
+  title: Design architecture
+- type: image
+  title: RTL / block architecture
+  image: assets/diagrams/rtl_architecture.png
+  caption: 'Module 2: DUT structure and key interfaces (see common_dut/rtl/).'
+- type: image
+  title: Verification environment architecture
+  image: assets/diagrams/verification_architecture.png
+  caption: 'Module 2: UVM layers, agents, and checkers for this phase.'
+- type: bullets
+  title: 1. RTL portfolio architecture
+  bullets:
+  - '`simple_register.v` — 8-bit register, enable, synchronous reset (primary lab
+    DUT)'
+  - '`shift_register.v` — serial in/out, parallel tap; exercises multi-cycle behavior'
+  - '`simple_fifo.v` — 16×8 FIFO with full/empty flags (reference for extension)'
+  - '`simple_fsm.v` — IDLE/START/WORK/DONE four-state controller'
+  notes: From MODULE2 Design Architecture.
+- type: bullets
+  title: 2. cocotb testbench architecture
+  bullets:
+  - Test module → coroutines (`@cocotb.test`) → DUT signals via `dut.signal` handles
+  - Clock generators in examples decouple timing from test logic
+  - No UVM hierarchy; flat Python functions and shared fixtures via Makefile `TEST=`
+    selection
+  notes: From MODULE2 Design Architecture.
+- type: bullets
+  title: 3. Example vs test separation
+  bullets:
+  - '`module2/examples/` — signal access, clocks, triggers, reset patterns (runnable
+    tutorials)'
+  - '`module2/tests/cocotb_tests/` — regression tests bound to specific DUTs'
+  - Orchestrator `scripts/module2.sh` routes flags to examples or cocotb makes
+  notes: From MODULE2 Design Architecture.
+- type: section
+  title: Verification & testing methods
+- type: image
+  title: Testing and closure flow
+  image: assets/diagrams/testing_methods.png
+  caption: 'Module 2: how tests, checks, and metrics close verification goals.'
+- type: bullets
+  title: 1. Stimulus and observation
+  bullets:
+  - Directed writes/reads on register ports; shift tests exercise serial timing
+  - '`RisingEdge`/`FallingEdge`/`Timer` triggers structure concurrent activity'
+  - Reset tests run first in regression order to establish known state
+  notes: From MODULE2 Verification & Testing Methods.
+- type: bullets
+  title: 2. Regression and Makefile flow
+  bullets:
+  - '`make SIM=verilator TEST=test_simple_register` selects cocotb test module'
+  - Regression runner executes multiple tests; pass/fail per `cocotb.regression`
+  - Boundary tests (`test_register_all_values`) cover 0x00, 0x7F, 0x80, 0xFF
+  notes: From MODULE2 Verification & Testing Methods.
+- type: bullets
+  title: 3. Debug and closure
+  bullets:
+  - Logging via `cocotb.log`; VCD from simulator flags for waveform debug
+  - '`./scripts/module2.sh --check` validates examples and key cocotb tests'
+  - 'Assessment: clocks, triggers, reset sequences, structured cocotb tests'
+  notes: From MODULE2 Verification & Testing Methods.
+- type: section
+  title: Syllabus topics
+- type: bullets
+  title: 1. cocotb Architecture and Concepts (1/3)
+  bullets:
+  - What is cocotb?
+  - Coroutine-based testbench framework
+  - Python testbenches for Verilog/VHDL
+  - Simulator abstraction
+  - History and motivation
+  - cocotb Architecture
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 1. cocotb Architecture and Concepts (2/3)
+  bullets:
+  - Python testbench layer
+  - Simulator interface layer
+  - DUT interaction
+  - Event scheduling
+  - Key Concepts
+  - Coroutines for simulation
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 1. cocotb Architecture and Concepts (3/3)
+  bullets:
+  - Triggers for synchronization
+  - Handles for signal access
+  - Simulation time management
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 2. Simulator Integration (1/3)
+  bullets:
+  - Supported Simulators
+  - Verilator (recommended)
+  - Icarus Verilog
+  - ModelSim/QuestaSim
+  - GHDL (VHDL)
+  - VCS, Xcelium (commercial)
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 2. Simulator Integration (2/3)
+  bullets:
+  - Simulator Selection
+  - Environment variables
+  - Makefile configuration
+  - Simulator-specific features
+  - Compilation Process
+  - Verilog compilation
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 2. Simulator Integration (3/3)
+  bullets:
+  - cocotb library compilation
+  - Linking process
+  - Makefile structure
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 3. Clock Generation and Management (1/3)
+  bullets:
+  - Clock Generation
+  - '`Clock` class usage'
+  - Clock parameters (period, units)
+  - Starting clocks
+  - Multiple clocks
+  - Clock Patterns
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 3. Clock Generation and Management (2/3)
+  bullets:
+  - Regular clocks
+  - Gated clocks
+  - Clock division
+  - Clock stopping
+  - Clock Domain Management
+  - Multiple clock domains
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 3. Clock Generation and Management (3/3)
+  bullets:
+  - Clock domain crossing
+  - Synchronization between domains
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 4. Signal Access and Driving (1/4)
+  bullets:
+  - Signal Handles
+  - Accessing DUT signals
+  - '`dut.signal_name` syntax'
+  - Signal value types
+  - Signal properties
+  - Reading Signal Values
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 4. Signal Access and Driving (2/4)
+  bullets:
+  - '`.value` property'
+  - Integer conversion
+  - Binary representation
+  - Signal state checking
+  - Driving Signals
+  - Assigning values
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 4. Signal Access and Driving (3/4)
+  bullets:
+  - Integer assignment
+  - Binary string assignment
+  - High-impedance (Z) and unknown (X)
+  - Signal Types
+  - Single-bit signals
+  - Multi-bit signals (vectors)
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 4. Signal Access and Driving (4/4)
+  bullets:
+  - Buses and arrays
+  - Bidirectional signals
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 5. Triggers and Coroutines (1/4)
+  bullets:
+  - Trigger Types
+  - '`RisingEdge(signal)`'
+  - '`FallingEdge(signal)`'
+  - '`Edge(signal)` (any edge)'
+  - '`Timer(time, units)`'
+  - '`ReadOnly()` (end of time step)'
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 5. Triggers and Coroutines (2/4)
+  bullets:
+  - '`ReadWrite()` (during time step)'
+  - '`Combine(*triggers)` (multiple triggers)'
+  - '`First(*triggers)` (first to occur)'
+  - Coroutine Execution
+  - Defining coroutines
+  - Starting coroutines
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 5. Triggers and Coroutines (3/4)
+  bullets:
+  - '`cocotb.start_soon()` vs `await`'
+  - Parallel execution
+  - Coroutine Synchronization
+  - Waiting for triggers
+  - Coordinating multiple coroutines
+  - Timeout handling
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 5. Triggers and Coroutines (4/4)
+  bullets:
+  - Exception propagation
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 6. Test Structure and Organization (1/3)
+  bullets:
+  - Test Function Structure
+  - '`@cocotb.test()` decorator'
+  - Test function signature
+  - DUT parameter
+  - Test organization
+  - Test Phases
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 6. Test Structure and Organization (2/3)
+  bullets:
+  - Setup phase
+  - Test execution
+  - Cleanup phase
+  - Error handling
+  - Multiple Tests
+  - Test discovery
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 6. Test Structure and Organization (3/3)
+  bullets:
+  - Test selection
+  - Test parameters
+  - Test fixtures
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 7. Reset and Initialization (1/2)
+  bullets:
+  - Reset Strategies
+  - Synchronous reset
+  - Asynchronous reset
+  - Reset sequences
+  - Reset verification
+  - Initialization Patterns
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 7. Reset and Initialization (2/2)
+  bullets:
+  - Signal initialization
+  - State initialization
+  - Configuration setup
+  - Initial conditions
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 8. Common Verification Patterns (1/3)
+  bullets:
+  - Stimulus Generation
+  - Sequential patterns
+  - Random patterns
+  - Constrained random
+  - File-based stimulus
+  - Response Checking
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 8. Common Verification Patterns (2/3)
+  bullets:
+  - Immediate checking
+  - Deferred checking
+  - Reference model comparison
+  - Scoreboard patterns
+  - Transaction-Level Modeling
+  - Transaction classes
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 8. Common Verification Patterns (3/3)
+  bullets:
+  - Transaction generation
+  - Transaction execution
+  - Transaction checking
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 9. Debugging with cocotb (1/4)
+  bullets:
+  - Logging and Reporting
+  - cocotb logging
+  - Log levels
+  - Log formatting
+  - Debug messages
+  - Waveform Generation
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 9. Debugging with cocotb (2/4)
+  bullets:
+  - VCD file generation
+  - FST file generation
+  - Waveform viewing
+  - Signal tracing
+  - Interactive Debugging
+  - Python debugger (pdb)
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 9. Debugging with cocotb (3/4)
+  bullets:
+  - Breakpoints
+  - Variable inspection
+  - Step-through debugging
+  - Common Issues
+  - Signal access errors
+  - Timing issues
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 9. Debugging with cocotb (4/4)
+  bullets:
+  - Simulation hangs
+  - Value conversion problems
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 10. Advanced cocotb Features (1/3)
+  bullets:
+  - Memory Access
+  - Memory modeling
+  - Memory initialization
+  - Memory access patterns
+  - Bus Functional Models (BFM)
+  - BFM concepts
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 10. Advanced cocotb Features (2/3)
+  bullets:
+  - BFM implementation
+  - Reusable BFMs
+  - Performance Optimization
+  - Coroutine efficiency
+  - Trigger optimization
+  - Simulation speed
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 10. Advanced cocotb Features (3/3)
+  bullets:
+  - Memory usage
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 11. Integration with pytest (1/2)
+  bullets:
+  - pytest Integration
+  - Using pytest with cocotb
+  - Test discovery
+  - Fixtures
+  - Parametrization
+  - Test Organization
+  notes: From MODULE2 Topics Covered.
+- type: bullets
+  title: 11. Integration with pytest (2/2)
+  bullets:
+  - Test directory structure
+  - Test naming conventions
+  - Test grouping
+  - Test execution
+  notes: From MODULE2 Topics Covered.
+- type: section
+  title: Hands-on examples
+- type: demo
+  title: Module 2 self-check
+  command: ./scripts/module2.sh --check
+  screenshot: assets/screenshots/module2_check.png
+  expect_stdout_contains: All required checks passed
+  notes: Run from course repository root.
+- type: code
+  title: Exercise scaffold
+  language: bash
+  source_file: scripts/module2.sh
+  code: ./scripts/module2.sh --scaffold
+- type: demo
+  title: 'Demo: Signal Access'
+  command: .venv/bin/python module2/examples/signal_access/signal_access_example.py
+  screenshot: assets/screenshots/ex01_signal_access.png
+  notes: 'Hands-on: module2/examples/signal_access/'
+- type: demo
+  title: 'Demo: Clock Generation'
+  command: .venv/bin/python module2/examples/clock_generation/clock_generation_example.py
+  screenshot: assets/screenshots/ex02_clock_generation.png
+  notes: 'Hands-on: module2/examples/clock_generation/'
+- type: demo
+  title: 'Demo: Triggers'
+  command: .venv/bin/python module2/examples/triggers/triggers_example.py
+  screenshot: assets/screenshots/ex03_triggers.png
+  notes: 'Hands-on: module2/examples/triggers/'
+- type: demo
+  title: 'Demo: Reset Patterns'
+  command: .venv/bin/python module2/examples/reset_patterns/reset_patterns_example.py
+  screenshot: assets/screenshots/ex04_reset_patterns.png
+  notes: 'Hands-on: module2/examples/reset_patterns/'
+- type: demo
+  title: 'Demo: Common Verification Patterns'
+  command: .venv/bin/python module2/examples/common_patterns/common_patterns_example.py
+  screenshot: assets/screenshots/ex05_common_patterns.png
+  notes: 'Hands-on: module2/examples/common_patterns/'
+- type: section
+  title: Practice & assessment
+- type: bullets
+  title: Exercises
+  bullets:
+  - Clock Management
+  - Signal Operations
+  - Trigger Patterns
+  - Test Structure
+  - Debugging
+- type: bullets
+  title: Assessment checklist
+  bullets:
+  - Understands cocotb architecture
+  - Can integrate with simulators
+  - Can generate and manage clocks
+  - Can access and drive signals
+  - Can use triggers effectively
+  - Can structure tests properly
+- type: bullets
+  title: Summary & next steps
+  bullets:
+  - Master cocotb for hardware verification
+  - Complete module2/CHECKLIST.md
+  - Run ./scripts/module2.sh --check
+  - 'Next: Next module in course'

@@ -1,0 +1,8 @@
+flowchart TB
+  VS[virtual sequencer] --> A0[agent 0]
+  VS --> A1[agent 1]
+  A0 --> DUT[(multi_channel)]
+  A1 --> DUT
+  MON[monitors] --> COV[coverage]
+  MON --> CB[callbacks]
+  REG[register model] --> DUT

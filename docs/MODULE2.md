@@ -61,6 +61,49 @@ cd module2/examples/signal_access
 # Create a Makefile or run with cocotb directly
 ```
 
+<!-- module-architecture:auto:start -->
+## Design Architecture
+
+### 1. RTL portfolio architecture
+
+- `simple_register.v` — 8-bit register, enable, synchronous reset (primary lab DUT)
+- `shift_register.v` — serial in/out, parallel tap; exercises multi-cycle behavior
+- `simple_fifo.v` — 16×8 FIFO with full/empty flags (reference for extension)
+- `simple_fsm.v` — IDLE/START/WORK/DONE four-state controller
+
+### 2. cocotb testbench architecture
+
+- Test module → coroutines (`@cocotb.test`) → DUT signals via `dut.signal` handles
+- Clock generators in examples decouple timing from test logic
+- No UVM hierarchy; flat Python functions and shared fixtures via Makefile `TEST=` selection
+
+### 3. Example vs test separation
+
+- `module2/examples/` — signal access, clocks, triggers, reset patterns (runnable tutorials)
+- `module2/tests/cocotb_tests/` — regression tests bound to specific DUTs
+- Orchestrator `scripts/module2.sh` routes flags to examples or cocotb makes
+
+## Verification & Testing Methods
+
+### 1. Stimulus and observation
+
+- Directed writes/reads on register ports; shift tests exercise serial timing
+- `RisingEdge`/`FallingEdge`/`Timer` triggers structure concurrent activity
+- Reset tests run first in regression order to establish known state
+
+### 2. Regression and Makefile flow
+
+- `make SIM=verilator TEST=test_simple_register` selects cocotb test module
+- Regression runner executes multiple tests; pass/fail per `cocotb.regression`
+- Boundary tests (`test_register_all_values`) cover 0x00, 0x7F, 0x80, 0xFF
+
+### 3. Debug and closure
+
+- Logging via `cocotb.log`; VCD from simulator flags for waveform debug
+- `./scripts/module2.sh --check` validates examples and key cocotb tests
+- Assessment: clocks, triggers, reset sequences, structured cocotb tests
+
+<!-- module-architecture:auto:end -->
 ## Topics Covered
 
 ### 1. cocotb Architecture and Concepts

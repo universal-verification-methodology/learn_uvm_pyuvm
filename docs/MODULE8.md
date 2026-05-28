@@ -62,6 +62,49 @@ make SIM=verilator TEST=test_utilities
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-architecture:auto:start -->
+## Design Architecture
+
+### 1. Utility layer in the testbench
+
+- No new large DUT focus — utilities plug into existing envs from prior modules
+- CLP (`uvm_cmdline_processor`) configures tests without recompilation
+- Comparators, recorders, pools, queues support analysis and debug infrastructure
+
+### 2. How utilities attach
+
+- Comparators sit on analysis ports beside scoreboards
+- Recorders log transactions to files for offline review
+- Pools/queues manage recycled objects and ordered work lists
+- String/math/random helpers reduce boilerplate in checks and stimulus
+
+### 3. Integration architecture
+
+- `module8/examples/integration/` wires multiple utilities in one mini-env
+- Tests under `module8/tests/pyuvm_tests/` prove utilities under simulation
+- Pattern: configure via CLP → run sequence → compare → record → report
+
+## Verification & Testing Methods
+
+### 1. Utility-focused test methods
+
+- Comparator tests: equal/less/greater policies on transaction streams
+- Recorder tests: verify log format and flush on phase boundaries
+- CLP tests: plusargs override seed, verbosity, and test name
+
+### 2. Efficiency and reuse
+
+- Object pools cut allocation churn in high-transaction regressions
+- Queues order deferred checks or secondary stimulus
+- Random/string/math utils keep constraints readable in sequences
+
+### 3. Closure
+
+- `./scripts/module8.sh --check` across all utility examples
+- Assessment: CLP, comparators, recorders, pools, queues, integration
+- Capstone: combine utilities with Module 6/7 style envs in your own project
+
+<!-- module-architecture:auto:end -->
 ## Topics Covered
 
 ### 1. UVM Command Line Processor (CLP)

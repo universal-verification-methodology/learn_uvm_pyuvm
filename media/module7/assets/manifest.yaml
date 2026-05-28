@@ -1,0 +1,86 @@
+module: 7
+course: learn_uvm_pyuvm
+assets:
+- id: learning_path
+  type: diagram
+  file: assets/diagrams/learning_path.png
+  source: assets/diagrams/learning_path.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 4
+  - 4
+  license: learn_uvm_pyuvm course materials
+- id: rtl_architecture
+  type: diagram
+  file: assets/diagrams/rtl_architecture.png
+  source: assets/diagrams/rtl_architecture.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 7
+  license: learn_uvm_pyuvm course materials
+- id: verification_architecture
+  type: diagram
+  file: assets/diagrams/verification_architecture.png
+  source: assets/diagrams/verification_architecture.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 8
+  license: learn_uvm_pyuvm course materials
+- id: testing_methods
+  type: diagram
+  file: assets/diagrams/testing_methods.png
+  source: assets/diagrams/testing_methods.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 13
+  license: learn_uvm_pyuvm course materials
+- id: module7_check
+  type: screenshot
+  file: assets/screenshots/module7_check.png
+  capture_command: ./scripts/module7.sh --check
+  cwd: .
+  slides:
+  - 49
+  expect_stdout_contains: All required checks passed
+- id: ex01_dma
+  type: screenshot
+  file: assets/screenshots/ex01_dma.png
+  capture_command: .venv/bin/python module7/examples/dma/dma_example.py
+  cwd: .
+  slides:
+  - 50
+- id: ex02_protocols
+  type: screenshot
+  file: assets/screenshots/ex02_protocols.png
+  capture_command: .venv/bin/python module7/examples/protocols/uart_example.py
+  cwd: .
+  slides:
+  - 51
+- id: ex03_protocols
+  type: screenshot
+  file: assets/screenshots/ex03_protocols.png
+  capture_command: .venv/bin/python module7/examples/protocols/spi_example.py
+  cwd: .
+  slides:
+  - 52
+- id: ex04_protocols
+  type: screenshot
+  file: assets/screenshots/ex04_protocols.png
+  capture_command: .venv/bin/python module7/examples/protocols/i2c_example.py
+  cwd: .
+  slides:
+  - 53
+- id: ex05_vip
+  type: screenshot
+  file: assets/screenshots/ex05_vip.png
+  capture_command: .venv/bin/python module7/examples/vip/vip_example.py
+  cwd: .
+  slides:
+  - 54
+- id: ex06_best_practices
+  type: screenshot
+  file: assets/screenshots/ex06_best_practices.png
+  capture_command: .venv/bin/python module7/examples/best_practices/best_practices_example.py
+  cwd: .
+  slides:
+  - 55

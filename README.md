@@ -54,6 +54,7 @@ This project is a complete educational resource for learning UVM verification me
 - ✅ **Virtual Environment Support**: Isolated Python environments
 - ✅ **Git Submodules**: Easy tool management
 - ✅ **Comprehensive Documentation**: Detailed guides for every concept
+- ✅ **Slides & video**: Per-module `slides.pptx` under `media/` (see `./scripts/build_all_media.sh`)
 - ✅ **Production Quality**: Best practices and industry patterns
 - ✅ **Exercises**: Hands-on practice for each module
 
@@ -103,6 +104,15 @@ chmod +x scripts/*.sh
 ./scripts/module1.sh --cocotb-tests
 ```
 
+### Slides and video
+
+```bash
+./scripts/build_all_media.sh --regenerate-outlines --pptx-only   # decks only
+./scripts/build_all_media.sh --install-deps                      # + PDF + video
+```
+
+See [media/INDEX.md](media/INDEX.md) for links to each module deck.
+
 ### 4. Start Learning
 
 Begin with [Module 0: Installation and Setup](docs/MODULE0.md) and follow the modules sequentially.
@@ -140,7 +150,10 @@ learn_uvm_pyuvm/
 ├── module7/                   # Real-world applications
 ├── module8/                   # UVM utilities
 │
+├── media/                     # Slides, PDF, video (module-to-slides-video)
+│   └── moduleN/              # outline.yaml, slides.pptx, assets/
 ├── scripts/                   # Automation scripts
+│   ├── build_all_media.sh    # Build all module decks + PDF + video
 │   ├── module0.sh            # Install all tools
 │   ├── module1.sh            # Run Module 1 examples
 │   ├── ...                    # Module orchestrators

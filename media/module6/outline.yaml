@@ -1,0 +1,387 @@
+title: Module 6 — Complex Testbenches
+course: learn_uvm_pyuvm
+module: 6
+subtitle: Build complex multi-agent testbenches with protocol verification
+footer: learn_uvm_pyuvm / Module 6
+slides:
+- type: title
+  title: Module 6
+  subtitle: Complex Testbenches
+- type: bullets
+  title: Learning objectives
+  bullets:
+  - Build complex multi-agent testbenches with protocol verification
+- type: bullets
+  title: Prerequisites
+  bullets:
+  - See module README
+- type: image
+  title: Learning path
+  image: assets/diagrams/learning_path.png
+  caption: Build complex multi-agent testbenches with protocol verification
+- type: bullets
+  title: Overview
+  bullets:
+  - This module focuses on building complex verification environments with multiple
+    agents, protocol verification, advanced testbench architecture, and debugging
+    techniques. You'll learn industry patterns and best practices.
+- type: section
+  title: Design architecture
+- type: image
+  title: RTL / block architecture
+  image: assets/diagrams/rtl_architecture.png
+  caption: 'Module 6: DUT structure and key interfaces (see common_dut/rtl/).'
+- type: image
+  title: Verification environment architecture
+  image: assets/diagrams/verification_architecture.png
+  caption: 'Module 6: UVM layers, agents, and checkers for this phase.'
+- type: bullets
+  title: 1. Protocol DUT architecture
+  bullets:
+  - '`module6/dut/protocols/axi4_lite_slave.v` — five-channel AXI4-Lite slave + memory
+    interface'
+  - Separate address/write/read response channels exercise real protocol timing
+  - Multi-agent TB can attach initiator agents while DUT acts as slave
+  notes: From MODULE6 Design Architecture.
+- type: bullets
+  title: 2. Complex testbench architecture
+  bullets:
+  - Multiple agents (e.g., master, memory, low-speed peripheral) under one `uvm_env`
+  - Protocol checkers validate handshake rules independent of scoreboard
+  - 'Layered scoreboards: per-agent checks + system-level consistency'
+  - Architecture example documents reusable env patterns and package boundaries
+  notes: From MODULE6 Design Architecture.
+- type: bullets
+  title: 3. Data flow
+  bullets:
+  - Virtual sequences coordinate cross-agent scenarios (config then traffic)
+  - Monitors on each interface feed checkers and coverage
+  - Reference models optional for memory content golden checks
+  notes: From MODULE6 Design Architecture.
+- type: section
+  title: Verification & testing methods
+- type: image
+  title: Testing and closure flow
+  image: assets/diagrams/testing_methods.png
+  caption: 'Module 6: how tests, checks, and metrics close verification goals.'
+- type: bullets
+  title: 1. Protocol verification methods
+  bullets:
+  - Protocol checker asserts AW/W/B/AR/R channel rules and ordering
+  - Directed AXI transactions in `protocol_example.py` and `test_complex_testbench`
+  - Multi-agent tests verify concurrent masters do not violate slave assumptions
+  notes: From MODULE6 Verification & Testing Methods.
+- type: bullets
+  title: 2. System-level checking
+  bullets:
+  - Scoreboard correlates transactions across ports (address, data, response)
+  - Architecture tests validate env wiring before long regressions
+  - 'Debug: transaction logs, UVM verbosity, Verilator waveforms'
+  notes: From MODULE6 Verification & Testing Methods.
+- type: bullets
+  title: 3. Closure
+  bullets:
+  - '`./scripts/module6.sh --check`; exercises extend multi-agent and protocol checkers'
+  - 'Assessment: multi-agent envs, protocol verification, complex scoreboards, architecture
+    patterns'
+  notes: From MODULE6 Verification & Testing Methods.
+- type: section
+  title: Syllabus topics
+- type: bullets
+  title: 1. Multi-Agent Environments (1/3)
+  bullets:
+  - Environment Architecture
+  - Multiple agent coordination
+  - Agent communication
+  - Environment hierarchy
+  - Environment patterns
+  - Agent Coordination
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 1. Multi-Agent Environments (2/3)
+  bullets:
+  - Master-slave agents
+  - Peer-to-peer agents
+  - Multi-channel agents
+  - Agent synchronization
+  - Environment Patterns
+  - Layered environments
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 1. Multi-Agent Environments (3/3)
+  bullets:
+  - Hierarchical environments
+  - Flat environments
+  - Mixed environments
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 2. Protocol Verification (1/4)
+  bullets:
+  - Protocol Verification Overview
+  - What is protocol verification?
+  - Protocol compliance
+  - Protocol checking
+  - Protocol coverage
+  - AXI Protocol Verification
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 2. Protocol Verification (2/4)
+  bullets:
+  - AXI protocol basics
+  - AXI4-Lite agent
+  - AXI4 agent
+  - AXI protocol checker
+  - Custom Protocol Verification
+  - Protocol definition
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 2. Protocol Verification (3/4)
+  bullets:
+  - Protocol agent creation
+  - Protocol checker implementation
+  - Protocol coverage
+  - Protocol Checkers
+  - Checker implementation
+  - Protocol rule checking
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 2. Protocol Verification (4/4)
+  bullets:
+  - Error detection
+  - Protocol compliance
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 3. Testbench Architecture Patterns (1/3)
+  bullets:
+  - Layered Testbench
+  - Abstraction layers
+  - Layer communication
+  - Layer organization
+  - Layer patterns
+  - Reusable Components
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 3. Testbench Architecture Patterns (2/3)
+  bullets:
+  - Component design
+  - Component reuse
+  - Component libraries
+  - Component patterns
+  - Testbench Templates
+  - Standard templates
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 3. Testbench Architecture Patterns (3/3)
+  bullets:
+  - Template customization
+  - Template patterns
+  - Template best practices
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 4. Debugging and Analysis (1/4)
+  bullets:
+  - UVM Debugging Techniques
+  - Phase debugging
+  - Component debugging
+  - Transaction debugging
+  - Configuration debugging
+  - Transaction Recording
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 4. Debugging and Analysis (2/4)
+  bullets:
+  - Transaction logging
+  - Transaction tracing
+  - Transaction replay
+  - Transaction analysis
+  - Waveform Analysis
+  - VCD/FST generation
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 4. Debugging and Analysis (3/4)
+  bullets:
+  - Waveform viewing
+  - Signal tracing
+  - Timing analysis
+  - Log Analysis
+  - Log parsing
+  - Error analysis
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 4. Debugging and Analysis (4/4)
+  bullets:
+  - Performance analysis
+  - Coverage analysis
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 5. Multi-Channel Verification (1/2)
+  bullets:
+  - Channel Coordination
+  - Multiple channels
+  - Channel synchronization
+  - Channel independence
+  - Channel patterns
+  - Bidirectional Interfaces
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 5. Multi-Channel Verification (2/2)
+  bullets:
+  - Master-slave interfaces
+  - Bidirectional agents
+  - Interface coordination
+  - Interface patterns
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 6. Performance Verification (1/2)
+  bullets:
+  - Performance Monitoring
+  - Performance metrics
+  - Performance collection
+  - Performance analysis
+  - Performance reporting
+  - Throughput Analysis
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 6. Performance Verification (2/2)
+  bullets:
+  - Throughput measurement
+  - Bandwidth analysis
+  - Latency measurement
+  - Performance optimization
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 7. Error Injection and Recovery (1/2)
+  bullets:
+  - Error Injection
+  - Error scenarios
+  - Error injection mechanisms
+  - Error patterns
+  - Error testing
+  - Recovery Testing
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 7. Error Injection and Recovery (2/2)
+  bullets:
+  - Recovery scenarios
+  - Recovery verification
+  - Recovery patterns
+  - Recovery testing
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 8. Testbench Integration (1/2)
+  bullets:
+  - Component Integration
+  - Integration strategies
+  - Integration testing
+  - Integration patterns
+  - Integration best practices
+  - System Integration
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 8. Testbench Integration (2/2)
+  bullets:
+  - System-level integration
+  - Integration verification
+  - Integration patterns
+  - Integration challenges
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 9. Advanced Scoreboarding (1/2)
+  bullets:
+  - Multi-Channel Scoreboards
+  - Multiple channel checking
+  - Channel coordination
+  - Scoreboard patterns
+  - Scoreboard optimization
+  - Time-Based Matching
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 9. Advanced Scoreboarding (2/2)
+  bullets:
+  - Temporal matching
+  - Time windows
+  - Matching algorithms
+  - Matching patterns
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 10. Testbench Maintenance (1/2)
+  bullets:
+  - Code Organization
+  - File organization
+  - Class organization
+  - Namespace management
+  - Documentation
+  - Version Control
+  notes: From MODULE6 Topics Covered.
+- type: bullets
+  title: 10. Testbench Maintenance (2/2)
+  bullets:
+  - Git workflows
+  - Branching strategies
+  - Code review
+  - Release management
+  notes: From MODULE6 Topics Covered.
+- type: section
+  title: Hands-on examples
+- type: demo
+  title: Module 6 self-check
+  command: ./scripts/module6.sh --check
+  screenshot: assets/screenshots/module6_check.png
+  expect_stdout_contains: All required checks passed
+  notes: Run from course repository root.
+- type: code
+  title: Exercise scaffold
+  language: bash
+  source_file: scripts/module6.sh
+  code: ./scripts/module6.sh --scaffold
+- type: demo
+  title: 'Demo: Multi-Agent Environment'
+  command: .venv/bin/python module6/examples/multi_agent/multi_agent_example.py
+  screenshot: assets/screenshots/ex01_multi_agent.png
+  notes: 'Hands-on: module6/examples/multi_agent/'
+- type: demo
+  title: 'Demo: Protocol Verification'
+  command: .venv/bin/python module6/examples/protocol/protocol_example.py
+  screenshot: assets/screenshots/ex02_protocol.png
+  notes: 'Hands-on: module6/examples/protocol/'
+- type: demo
+  title: 'Demo: Protocol Checker'
+  command: .venv/bin/python module6/examples/protocol_checkers/protocol_checker_example.py
+  screenshot: assets/screenshots/ex03_protocol_checkers.png
+  notes: 'Hands-on: module6/examples/protocol_checkers/'
+- type: demo
+  title: 'Demo: Multi-Channel Scoreboard'
+  command: .venv/bin/python module6/examples/scoreboards/multi_channel_scoreboard_example.py
+  screenshot: assets/screenshots/ex04_scoreboards.png
+  notes: 'Hands-on: module6/examples/scoreboards/'
+- type: demo
+  title: 'Demo: Testbench Architecture'
+  command: .venv/bin/python module6/examples/architecture/architecture_example.py
+  screenshot: assets/screenshots/ex05_architecture.png
+  notes: 'Hands-on: module6/examples/architecture/'
+- type: section
+  title: Practice & assessment
+- type: bullets
+  title: Exercises
+  bullets:
+  - Multi-Agent Environment
+  - Protocol Verification
+  - Testbench Architecture
+  - Debugging
+  - Performance Analysis
+- type: bullets
+  title: Assessment checklist
+  bullets:
+  - Can design multi-agent environments
+  - Can implement protocol verification
+  - Understands architecture patterns
+  - Can debug complex testbenches
+  - Can analyze simulation results
+  - Can coordinate multiple channels
+- type: bullets
+  title: Summary & next steps
+  bullets:
+  - Build complex multi-agent testbenches with protocol verification
+  - Complete module6/CHECKLIST.md
+  - Run ./scripts/module6.sh --check
+  - 'Next: Next module in course'

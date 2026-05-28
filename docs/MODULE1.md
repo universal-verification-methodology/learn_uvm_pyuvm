@@ -68,6 +68,49 @@ make SIM=verilator TEST=test_and_gate
 make SIM=verilator TEST=test_counter
 ```
 
+<!-- module-architecture:auto:start -->
+## Design Architecture
+
+### 1. RTL block architecture
+
+- DUTs in `module1/dut/simple_gates/` (AND gate) and `module1/dut/counters/` (counter with enable/reset)
+- Synchronous blocks: clock, active-low reset, multi-bit data paths
+- Flat hierarchy — no buses; ideal for first cocotb signal access and pyuvm hook-up
+
+### 2. Python verification layer architecture
+
+- `module1/examples/` — pure Python (transactions, decorators, async, data structures, logging)
+- `module1/tests/cocotb_tests/` — coroutine testbenches driving RTL via cocotb handles
+- `module1/tests/pyuvm_tests/` — minimal UVM-style hierarchy introduction
+- Transaction classes in `examples/python_basics/transaction.py` model stimulus items reused in TB thinking
+
+### 3. Testbench mental model
+
+- DUT (RTL) ← driver/stimulus ← test ← checker/scoreboard ← monitor → observations
+- Simulation time advances on clock edges; Python coroutines (`async`/`await`) align with cocotb
+- Assertions and logging close the loop between expected and actual behavior
+
+## Verification & Testing Methods
+
+### 1. cocotb testing methods
+
+- Tests in `test_and_gate.py`, `test_counter.py`: reset, directed vectors, edge cases
+- Run: `cd module1/tests/cocotb_tests && make SIM=verilator TEST=test_and_gate`
+- Triggers: `RisingEdge(clk)`, `ReadOnly`/`Write` phases for signal stability
+
+### 2. pyuvm and Python unit-style checks
+
+- `./scripts/module1.sh --pyuvm-tests` — compile/run introductory pyuvm tests against simple DUTs
+- Examples run without simulator (`python3 module1/examples/...`) to teach OOP patterns first
+- Error-handling example shows structured logging for debuggable regressions
+
+### 3. Closure and self-check
+
+- `./scripts/module1.sh --check` runs required examples and tests
+- Combine directed cocotb tests with transaction equality (`__eq__`, `__hash__`) from Python examples
+- Assessment: OOP for verification, basic TB structure, cocotb + pyuvm entry points
+
+<!-- module-architecture:auto:end -->
 ## Topics Covered
 
 ### 1. Python Classes and Inheritance for Verification

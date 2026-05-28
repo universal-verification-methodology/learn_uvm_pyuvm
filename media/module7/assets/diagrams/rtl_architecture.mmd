@@ -1,0 +1,7 @@
+flowchart TB
+  subgraph soc["module7 IP blocks"]
+    DMA[simple_dma]
+    UART[uart]
+  end
+  BUS[internal control] --> DMA
+  BUS --> UART

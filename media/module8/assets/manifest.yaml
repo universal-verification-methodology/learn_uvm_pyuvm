@@ -1,0 +1,107 @@
+module: 8
+course: learn_uvm_pyuvm
+assets:
+- id: learning_path
+  type: diagram
+  file: assets/diagrams/learning_path.png
+  source: assets/diagrams/learning_path.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 4
+  - 4
+  license: learn_uvm_pyuvm course materials
+- id: rtl_architecture
+  type: diagram
+  file: assets/diagrams/rtl_architecture.png
+  source: assets/diagrams/rtl_architecture.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 7
+  license: learn_uvm_pyuvm course materials
+- id: verification_architecture
+  type: diagram
+  file: assets/diagrams/verification_architecture.png
+  source: assets/diagrams/verification_architecture.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 8
+  license: learn_uvm_pyuvm course materials
+- id: testing_methods
+  type: diagram
+  file: assets/diagrams/testing_methods.png
+  source: assets/diagrams/testing_methods.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 13
+  license: learn_uvm_pyuvm course materials
+- id: module8_check
+  type: screenshot
+  file: assets/screenshots/module8_check.png
+  capture_command: ./scripts/module8.sh --check
+  cwd: .
+  slides:
+  - 60
+  expect_stdout_contains: All required checks passed
+- id: ex01_clp
+  type: screenshot
+  file: assets/screenshots/ex01_clp.png
+  capture_command: .venv/bin/python module8/examples/clp/clp_example.py
+  cwd: .
+  slides:
+  - 61
+- id: ex02_comparators
+  type: screenshot
+  file: assets/screenshots/ex02_comparators.png
+  capture_command: .venv/bin/python module8/examples/comparators/comparator_example.py
+  cwd: .
+  slides:
+  - 62
+- id: ex03_recorders
+  type: screenshot
+  file: assets/screenshots/ex03_recorders.png
+  capture_command: .venv/bin/python module8/examples/recorders/recorder_example.py
+  cwd: .
+  slides:
+  - 63
+- id: ex04_pools
+  type: screenshot
+  file: assets/screenshots/ex04_pools.png
+  capture_command: .venv/bin/python module8/examples/pools/pool_example.py
+  cwd: .
+  slides:
+  - 64
+- id: ex05_queues
+  type: screenshot
+  file: assets/screenshots/ex05_queues.png
+  capture_command: .venv/bin/python module8/examples/queues/queue_example.py
+  cwd: .
+  slides:
+  - 65
+- id: ex06_string_utils
+  type: screenshot
+  file: assets/screenshots/ex06_string_utils.png
+  capture_command: .venv/bin/python module8/examples/string_utils/string_utils_example.py
+  cwd: .
+  slides:
+  - 66
+- id: ex07_math_utils
+  type: screenshot
+  file: assets/screenshots/ex07_math_utils.png
+  capture_command: .venv/bin/python module8/examples/math_utils/math_utils_example.py
+  cwd: .
+  slides:
+  - 67
+- id: ex08_random_utils
+  type: screenshot
+  file: assets/screenshots/ex08_random_utils.png
+  capture_command: .venv/bin/python module8/examples/random_utils/random_utils_example.py
+  cwd: .
+  slides:
+  - 68
+- id: ex09_integration
+  type: screenshot
+  file: assets/screenshots/ex09_integration.png
+  capture_command: .venv/bin/python module8/examples/integration/integration_example.py
+  cwd: .
+  slides:
+  - 69

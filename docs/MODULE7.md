@@ -57,6 +57,47 @@ make SIM=verilator TEST=test_real_world
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-architecture:auto:start -->
+## Design Architecture
+
+### 1. Real-world DUT blocks
+
+- `module7/dut/dma/simple_dma.v` — DMA controller with channel descriptors
+- `module7/dut/protocols/uart.v` — serial framing for protocol agent labs
+- Blocks represent IP-style interfaces students will see in SoC verification
+
+### 2. Verification IP (VIP) architecture
+
+- Reusable agents package protocol knowledge (transactions, sequences, checkers)
+- Env composes DMA + UART (or other) agents with shared config and scoreboard fabric
+- Best-practices example shows directory layout, naming, and review-friendly TB structure
+
+### 3. Integration view
+
+- Software-visible registers drive DMA; UART provides async serial path
+- Scoreboard and coverage span multiple IPs in one regression
+- Exercises push toward production-style reuse and documentation
+
+## Verification & Testing Methods
+
+### 1. Application-level test methods
+
+- DMA tests: descriptor programming, transfer completion, interrupt/status flags
+- UART tests: baud framing, TX/RX loops, error injection in exercises
+- VIP tests encapsulate protocol rules so tests focus on scenarios not bit toggling
+
+### 2. Regression and sign-off practices
+
+- `./scripts/module7.sh` runs DMA, protocol, VIP, and best-practices demos
+- Layered regressions: smoke (short), nightly (full EXAMPLES), release (with coverage goals)
+- Waveforms and transaction logs for post-mortem on failures
+
+### 3. Closure
+
+- `module7.sh --check`; assessment covers VIP reuse, protocols, and integration
+- Prepares for Module 8 utilities used in production regressions (CLP, recorders)
+
+<!-- module-architecture:auto:end -->
 ## Topics Covered
 
 ### 1. DMA Verification

@@ -1,0 +1,515 @@
+title: Module 0 — Installation and Setup
+course: learn_uvm_pyuvm
+module: 0
+subtitle: Set up development environment and verify installation
+footer: learn_uvm_pyuvm / Module 0
+slides:
+- type: title
+  title: Module 0
+  subtitle: Installation and Setup
+- type: bullets
+  title: Learning objectives
+  bullets:
+  - Set up development environment and verify installation
+- type: bullets
+  title: Prerequisites
+  bullets:
+  - See module README
+- type: image
+  title: Learning path
+  image: assets/diagrams/learning_path.png
+  caption: Set up development environment and verify installation
+- type: bullets
+  title: Overview
+  bullets:
+  - This module covers the complete setup of your verification environment, including
+    all required tools and dependencies. By the end of this module, you should have
+    a working environment capable of running pyuvm testbenches
+- type: section
+  title: Design architecture
+- type: image
+  title: RTL / block architecture
+  image: assets/diagrams/rtl_architecture.png
+  caption: 'Module 0: DUT structure and key interfaces (see common_dut/rtl/).'
+- type: image
+  title: Verification environment architecture
+  image: assets/diagrams/verification_architecture.png
+  caption: 'Module 0: UVM layers, agents, and checkers for this phase.'
+- type: bullets
+  title: 1. Toolchain and repository layout
+  bullets:
+  - 'Course root: `docs/`, `moduleN/`, `scripts/moduleN.sh`, `media/moduleN/` for
+    slides and video'
+  - Python 3.10+ virtual environment (`.venv`) holds cocotb, pyuvm, and course dependencies
+  - Verilator compiles RTL when modules include `dut/`; cocotb bridges Python testbenches
+    to the simulator
+  - Orchestrator `scripts/module0.sh` installs and verifies Verilator, cocotb, and
+    pyuvm in order
+  notes: From MODULE0 Design Architecture.
+- type: bullets
+  title: 2. Verification stack architecture
+  bullets:
+  - 'Bottom layer: OS, compiler (GCC/Clang), Make/Ninja, Git'
+  - 'Simulator layer: Verilator (default) produces fast cycle-accurate models from
+    SystemVerilog/Verilog'
+  - 'Testbench layer: cocotb (coroutine-driven) and pyuvm (UVM 1.2 in Python) share
+    the same venv'
+  - 'Artifacts: logs under module runs, optional VCD/FST waveforms from Make targets'
+  notes: From MODULE0 Design Architecture.
+- type: bullets
+  title: 3. What is not in this module
+  bullets:
+  - No DUT or UVM hierarchy yet — focus is reproducible environment setup
+  - Later modules attach Python tests to RTL under `moduleN/dut/`
+  - Self-check only validates tools; functional verification starts in Module 1
+  notes: From MODULE0 Design Architecture.
+- type: section
+  title: Verification & testing methods
+- type: image
+  title: Testing and closure flow
+  image: assets/diagrams/testing_methods.png
+  caption: 'Module 0: how tests, checks, and metrics close verification goals.'
+- type: bullets
+  title: 1. Installation verification strategy
+  bullets:
+  - Run `./scripts/module0.sh` for full install or per-tool flags (`--verilator-mode`,
+    `--cocotb-mode`, `--pyuvm-mode`)
+  - '`./scripts/module0.sh --check` confirms `verilator`, `cocotb-config`, and importable
+    `pyuvm`'
+  - Version probes (`verilator --version`, `python -c 'import cocotb'`) catch PATH
+    and venv mistakes early
+  notes: From MODULE0 Verification & Testing Methods.
+- type: bullets
+  title: 2. Smoke and regression mindset
+  bullets:
+  - 'Treat install as the first regression: every tool must pass before Module 1 labs'
+  - Re-run `--check` after OS updates or submodule pulls
+  - Document failures in install logs; fix one layer at a time (compiler → Verilator
+    → Python packages)
+  notes: From MODULE0 Verification & Testing Methods.
+- type: bullets
+  title: 3. Closure for Module 0
+  bullets:
+  - 'Pass criteria: all install scripts succeed and `--check` reports required tools
+    present'
+  - 'Optional: run a minimal cocotb compile in Module 1 only after Module 0 passes'
+  - Assessment checklist in MODULE0 maps environment readiness to course progress
+  notes: From MODULE0 Verification & Testing Methods.
+- type: section
+  title: Syllabus topics
+- type: bullets
+  title: 1. System Requirements and Prerequisites (1/3)
+  bullets:
+  - Operating System Support
+  - Linux (Ubuntu/Debian, CentOS/RHEL, Fedora)
+  - macOS (Intel and Apple Silicon)
+  - Windows (WSL2 recommended)
+  - Hardware Requirements
+  - Minimum 4GB RAM (8GB+ recommended)
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 1. System Requirements and Prerequisites (2/3)
+  bullets:
+  - 10GB free disk space
+  - Multi-core processor recommended
+  - Software Prerequisites
+  - Python 3.8+ (3.10+ recommended)
+  - Git
+  - C/C++ compiler (GCC, Clang, or MSVC)
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 1. System Requirements and Prerequisites (3/3)
+  bullets:
+  - Make or Ninja build system
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 2. Python Environment Setup (1/3)
+  bullets:
+  - Python Installation
+  - Installing Python 3.10+ on Linux
+  - Installing Python 3.10+ on macOS
+  - Installing Python 3.10+ on Windows/WSL2
+  - Verifying Python installation
+  - Virtual Environment Management
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 2. Python Environment Setup (2/3)
+  bullets:
+  - Using `venv` (Python built-in)
+  - Using `conda` (Anaconda/Miniconda)
+  - Using `uv` or `rye` (modern Python package managers)
+  - Best practices for virtual environments
+  - Package Management
+  - pip basics
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 2. Python Environment Setup (3/3)
+  bullets:
+  - requirements.txt management
+  - Dependency resolution
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 3. Verilator Installation (1/6)
+  bullets:
+  - What is Verilator?
+  - Open-source Verilog/SystemVerilog simulator
+  - Fast compilation and simulation
+  - Integration with cocotb
+  - Automated Installation (Recommended)
+  - 'Using the installation script:'
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 3. Verilator Installation (2/6)
+  bullets:
+  - 'The script automatically:'
+  - Checks for existing installations
+  - Installs system dependencies (build tools, libraries)
+  - Sets up git submodule in `tools/verilator/`
+  - Builds and installs Verilator
+  - Verifies the installation
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 3. Verilator Installation (3/6)
+  bullets:
+  - Manual Installation Methods
+  - Linux Installation
+  - 'Ubuntu/Debian: `sudo apt-get install verilator`'
+  - 'CentOS/RHEL: `sudo yum install verilator` or `sudo dnf install verilator`'
+  - 'Fedora: `sudo dnf install verilator`'
+  - Building from source (latest features)
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 3. Verilator Installation (4/6)
+  bullets:
+  - macOS Installation
+  - 'Homebrew installation: `brew install verilator`'
+  - MacPorts installation (alternative)
+  - Building from source
+  - Windows/WSL2 Installation
+  - 'Installing in WSL2 Ubuntu: `sudo apt-get install verilator`'
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 3. Verilator Installation (5/6)
+  bullets:
+  - Building from source in WSL2
+  - Verifying installation
+  - Uninstallation
+  - Verification Steps
+  - 'Check Verilator version: `verilator --version`'
+  - Run simple Verilator test
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 3. Verilator Installation (6/6)
+  bullets:
+  - Verify compilation works
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 4. cocotb Installation and Verification (1/5)
+  bullets:
+  - What is cocotb?
+  - Coroutine-based testbench framework
+  - Python testbenches for hardware
+  - Simulator abstraction layer
+  - Automated Installation (Recommended)
+  - 'Using the installation script:'
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 4. cocotb Installation and Verification (2/5)
+  bullets:
+  - 'The script automatically:'
+  - 'Creates/uses virtual environment (default: `.venv`)'
+  - Sets up git submodule in `tools/cocotb/` (if using submodule mode)
+  - Installs dependencies
+  - Installs cocotb (via pip or from source)
+  - Verifies the installation
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 4. cocotb Installation and Verification (3/5)
+  bullets:
+  - Manual Installation Methods
+  - 'pip installation (recommended):'
+  - Development installation from source
+  - 'Version pinning for stability: `pip install cocotb==2.0.0`'
+  - Uninstallation
+  - Simulator Configuration
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 4. cocotb Installation and Verification (4/5)
+  bullets:
+  - Verilator configuration
+  - Icarus Verilog configuration (alternative)
+  - ModelSim/QuestaSim configuration (if available)
+  - GHDL configuration (VHDL support)
+  - Environment Variables
+  - '`COCOTB_REDUCED_LOG_FMT`'
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 4. cocotb Installation and Verification (5/5)
+  bullets:
+  - '`MODULE` and `TESTCASE`'
+  - '`SIM` variable for simulator selection'
+  - Verification Steps
+  - 'Import cocotb successfully: `python3 -c "import cocotb; print(cocotb.__version__)"`'
+  - Run simple cocotb test
+  - Verify simulator integration
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 5. pyuvm Installation and Verification (1/5)
+  bullets:
+  - What is pyuvm?
+  - Python implementation of UVM 1.2
+  - Works with cocotb
+  - Full UVM methodology support
+  - Automated Installation (Recommended)
+  - 'Using the installation script:'
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 5. pyuvm Installation and Verification (2/5)
+  bullets:
+  - 'The script automatically:'
+  - 'Creates/uses virtual environment (default: `.venv`)'
+  - Sets up git submodule in `tools/pyuvm/` (if using submodule mode)
+  - Installs dependencies
+  - Installs pyuvm (via pip or from source)
+  - Verifies the installation
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 5. pyuvm Installation and Verification (3/5)
+  bullets:
+  - Manual Installation Methods
+  - 'pip installation:'
+  - Installation from source (development)
+  - 'Version selection and compatibility: `pip install pyuvm==2.9.0`'
+  - Uninstallation
+  - Dependencies
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 5. pyuvm Installation and Verification (4/5)
+  bullets:
+  - Understanding pyuvm dependencies
+  - Resolving dependency conflicts
+  - Updating pyuvm
+  - Verification Steps
+  - 'Import pyuvm successfully: `python3 -c "import pyuvm; print(pyuvm.__version__)"`'
+  - Check pyuvm version
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 5. pyuvm Installation and Verification (5/5)
+  bullets:
+  - Run simple pyuvm test
+  - Verify UVM classes available
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 6. IDE Setup and Configuration (1/4)
+  bullets:
+  - Recommended IDEs
+  - VS Code with Python extension
+  - PyCharm (Community or Professional)
+  - Vim/Neovim with LSP
+  - Emacs with Python support
+  - VS Code Configuration
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 6. IDE Setup and Configuration (2/4)
+  bullets:
+  - Python extension setup
+  - Pylance/Pyright configuration
+  - Debugging configuration
+  - Task runner setup for simulations
+  - Extension recommendations
+  - PyCharm Configuration
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 6. IDE Setup and Configuration (3/4)
+  bullets:
+  - Python interpreter setup
+  - Virtual environment configuration
+  - Run configurations for tests
+  - Debugging setup
+  - Editor Configuration
+  - Python formatting (Black, Ruff)
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 6. IDE Setup and Configuration (4/4)
+  bullets:
+  - Linting (pylint, flake8, ruff)
+  - Type checking (mypy, pyright)
+  - Code formatting on save
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 7. Project Structure Setup (1/4)
+  bullets:
+  - Directory Structure
+  - Source code organization
+  - Test directory structure
+  - DUT (Design Under Test) organization
+  - Configuration files
+  - '`tools/` directory for git submodules (Verilator, cocotb, pyuvm)'
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 7. Project Structure Setup (2/4)
+  bullets:
+  - Git Submodules Management
+  - Tools are managed as git submodules in the `tools/` directory
+  - 'Initialize submodules: `./scripts/init_submodules.sh` or `git submodule update
+    --init --recursive`'
+  - 'Update submodules: `./scripts/update_submodules.sh` or `git submodule update
+    --remote`'
+  - 'Add new submodule: `./scripts/add_submodule.sh <repo_url> <path>`'
+  - 'Remove submodule: `./scripts/remove_submodule.sh <path>`'
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 7. Project Structure Setup (3/4)
+  bullets:
+  - Makefile/Configuration
+  - Simple Makefile for running tests
+  - pytest configuration
+  - cocotb Makefile setup
+  - Environment variable management
+  - Version Control
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 7. Project Structure Setup (4/4)
+  bullets:
+  - Git initialization
+  - .gitignore for Python and simulation (include `.venv/`, `__pycache__/`, build
+    artifacts)
+  - Initial commit structure
+  - Git submodules in `.gitmodules` file
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 8. First "Hello World" Verification Test (1/3)
+  bullets:
+  - Prerequisites
+  - 'Ensure all tools are installed: `./scripts/module0.sh --verify-only`'
+  - 'Activate virtual environment: `source .venv/bin/activate` (if using venv)'
+  - Verify tools are accessible
+  - Simple DUT Creation
+  - Basic Verilog module (e.g., AND gate)
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 8. First "Hello World" Verification Test (2/3)
+  bullets:
+  - Simple testbench structure
+  - cocotb Test
+  - Basic cocotb test structure
+  - Clock generation
+  - Signal driving and reading
+  - Running the test (requires Verilator and cocotb to be installed)
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 8. First "Hello World" Verification Test (3/3)
+  bullets:
+  - pyuvm Test
+  - First UVM test class
+  - Basic UVM phases
+  - Running pyuvm test (requires cocotb and pyuvm to be installed)
+  - Understanding output
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 9. Troubleshooting Common Issues (1/4)
+  bullets:
+  - Python Issues
+  - Python version conflicts
+  - Virtual environment activation problems
+  - Package installation failures
+  - Verilator Issues
+  - Compilation errors
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 9. Troubleshooting Common Issues (2/4)
+  bullets:
+  - Missing dependencies
+  - Version compatibility
+  - Path issues
+  - cocotb Issues
+  - Simulator not found
+  - Import errors
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 9. Troubleshooting Common Issues (3/4)
+  bullets:
+  - Environment variable problems
+  - Module loading issues
+  - pyuvm Issues
+  - Import errors
+  - Version compatibility
+  - Dependency conflicts
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 9. Troubleshooting Common Issues (4/4)
+  bullets:
+  - IDE Issues
+  - Python interpreter not found
+  - Import resolution problems
+  - Debugging not working
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 10. Verification Checklist (1/3)
+  bullets:
+  - Python 3.10+ installed and working
+  - Virtual environment created and activated (or use `./scripts/module0.sh` which
+    creates it automatically)
+  - Verilator installed and verified
+  - 'Using script: `./scripts/install_verilator.sh --from-submodule`'
+  - 'Verify: `verilator --version`'
+  - cocotb installed and verified
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 10. Verification Checklist (2/3)
+  bullets:
+  - 'Using script: `./scripts/install_cocotb.sh --pip --venv .venv`'
+  - 'Verify: `python3 -c "import cocotb; print(cocotb.__version__)"`'
+  - pyuvm installed and verified
+  - 'Using script: `./scripts/install_pyuvm.sh --pip --venv .venv`'
+  - 'Verify: `python3 -c "import pyuvm; print(pyuvm.__version__)"`'
+  - 'All tools verified together: `./scripts/module0.sh --verify-only`'
+  notes: From MODULE0 Topics Covered.
+- type: bullets
+  title: 10. Verification Checklist (3/3)
+  bullets:
+  - IDE configured and working
+  - First test runs successfully
+  - Can create and run simple testbench
+  - Understand basic project structure
+  - Know how to get help when stuck
+  notes: From MODULE0 Topics Covered.
+- type: section
+  title: Hands-on examples
+- type: demo
+  title: Module 0 self-check
+  command: ./scripts/module0.sh --check
+  screenshot: assets/screenshots/module0_check.png
+  expect_stdout_contains: All required checks passed
+  notes: Run from course repository root.
+- type: code
+  title: Exercise scaffold
+  language: bash
+  source_file: scripts/module0.sh
+  code: ./scripts/module0.sh --scaffold
+- type: section
+  title: Practice & assessment
+- type: bullets
+  title: Exercises
+  bullets:
+  - Installation Verification
+  - Environment Setup
+  - First Test
+  - IDE Configuration
+  - Project Structure
+- type: bullets
+  title: Assessment checklist
+  bullets:
+  - Can install all required tools independently
+  - Can set up Python virtual environment
+  - Can verify Verilator installation
+  - Can verify cocotb installation
+  - Can verify pyuvm installation
+  - Can configure IDE for verification work
+- type: bullets
+  title: Summary & next steps
+  bullets:
+  - Set up development environment and verify installation
+  - Complete module0/CHECKLIST.md
+  - Run ./scripts/module0.sh --check
+  - 'Next: Next module in course'

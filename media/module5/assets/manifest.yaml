@@ -1,0 +1,79 @@
+module: 5
+course: learn_uvm_pyuvm
+assets:
+- id: learning_path
+  type: diagram
+  file: assets/diagrams/learning_path.png
+  source: assets/diagrams/learning_path.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 4
+  - 4
+  license: learn_uvm_pyuvm course materials
+- id: rtl_architecture
+  type: diagram
+  file: assets/diagrams/rtl_architecture.png
+  source: assets/diagrams/rtl_architecture.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 7
+  license: learn_uvm_pyuvm course materials
+- id: verification_architecture
+  type: diagram
+  file: assets/diagrams/verification_architecture.png
+  source: assets/diagrams/verification_architecture.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 8
+  license: learn_uvm_pyuvm course materials
+- id: testing_methods
+  type: diagram
+  file: assets/diagrams/testing_methods.png
+  source: assets/diagrams/testing_methods.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 13
+  license: learn_uvm_pyuvm course materials
+- id: module5_check
+  type: screenshot
+  file: assets/screenshots/module5_check.png
+  capture_command: ./scripts/module5.sh --check
+  cwd: .
+  slides:
+  - 52
+  expect_stdout_contains: All required checks passed
+- id: ex01_virtual_sequences
+  type: screenshot
+  file: assets/screenshots/ex01_virtual_sequences.png
+  capture_command: .venv/bin/python module5/examples/virtual_sequences/virtual_sequence_example.py
+  cwd: .
+  slides:
+  - 54
+- id: ex02_coverage
+  type: screenshot
+  file: assets/screenshots/ex02_coverage.png
+  capture_command: .venv/bin/python module5/examples/coverage/coverage_example.py
+  cwd: .
+  slides:
+  - 55
+- id: ex03_configuration
+  type: screenshot
+  file: assets/screenshots/ex03_configuration.png
+  capture_command: .venv/bin/python module5/examples/configuration/configuration_example.py
+  cwd: .
+  slides:
+  - 56
+- id: ex04_callbacks
+  type: screenshot
+  file: assets/screenshots/ex04_callbacks.png
+  capture_command: .venv/bin/python module5/examples/callbacks/callback_example.py
+  cwd: .
+  slides:
+  - 57
+- id: ex05_register_model
+  type: screenshot
+  file: assets/screenshots/ex05_register_model.png
+  capture_command: .venv/bin/python module5/examples/register_model/register_model_example.py
+  cwd: .
+  slides:
+  - 58

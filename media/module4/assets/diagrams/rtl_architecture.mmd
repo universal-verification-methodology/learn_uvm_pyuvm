@@ -1,0 +1,7 @@
+flowchart LR
+  subgraph ifc["simple_interface.v"]
+    V[valid/ready]
+    AD[addr / data]
+    RES[result]
+  end
+  CLK[clk] --> ifc

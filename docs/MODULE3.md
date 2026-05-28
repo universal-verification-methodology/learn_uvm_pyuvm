@@ -58,6 +58,48 @@ make SIM=verilator TEST=test_simple_uvm
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-architecture:auto:start -->
+## Design Architecture
+
+### 1. RTL and interfaces
+
+- Primary DUT: `module3/dut/simple_blocks/adder.v` — combinational operands and sum
+- Clock/reset scaffolding for pyuvm tests that mirror industry TB hooks
+- Flat block; no protocol channels — focus stays on UVM structure, not bus complexity
+
+### 2. UVM testbench architecture
+
+- Hierarchy: `uvm_test` → `uvm_env` → `uvm_agent` (driver, monitor, sequencer) → DUT
+- `uvm_sequence_item` / `uvm_sequence` carry transactions; driver converts items to pin wiggles
+- ConfigDB publishes virtual interfaces and parameters before `build_phase`
+- Factory + objections control creation and phase lifetime
+
+### 3. Module layout
+
+- `module3/examples/` — isolated API demos (phases, reporting, configdb, factory, objections)
+- `module3/tests/pyuvm_tests/` — integrated `make SIM=verilator TEST=test_simple_uvm` flows
+
+## Verification & Testing Methods
+
+### 1. Phase-based test execution
+
+- build → connect → end_of_elaboration → start_of_simulation → run → extract → report
+- Objections in run phase prevent premature finish until sequences complete
+- Reporting verbosity filters debug vs error messages
+
+### 2. Stimulus and checking
+
+- Directed sequences on adder operands; monitor samples outputs for scoreboard hooks
+- Factory overrides swap test/agent types without editing hierarchy code
+- ConfigDB sets agent active/passive and interface handles
+
+### 3. Closure
+
+- `./scripts/module3.sh --check` and per-topic flags (`--phases`, `--factory`, …)
+- Pass when simulation report shows UVM TEST PASSED and no fatal errors
+- Assessment: class hierarchy, phases, configdb, factory, objections
+
+<!-- module-architecture:auto:end -->
 ## Topics Covered
 
 ### 1. Introduction to UVM

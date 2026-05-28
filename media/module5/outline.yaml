@@ -1,0 +1,449 @@
+title: Module 5 — Advanced UVM Concepts
+course: learn_uvm_pyuvm
+module: 5
+subtitle: Master sequences, coverage, configuration, and virtual sequences
+footer: learn_uvm_pyuvm / Module 5
+slides:
+- type: title
+  title: Module 5
+  subtitle: Advanced UVM Concepts
+- type: bullets
+  title: Learning objectives
+  bullets:
+  - Master sequences, coverage, configuration, and virtual sequences
+- type: bullets
+  title: Prerequisites
+  bullets:
+  - See module README
+- type: image
+  title: Learning path
+  image: assets/diagrams/learning_path.png
+  caption: Master sequences, coverage, configuration, and virtual sequences
+- type: bullets
+  title: Overview
+  bullets:
+  - This module covers advanced UVM concepts including virtual sequences, coverage
+    models, complex configuration, callbacks, and advanced register model usage. These
+    concepts are essential for building sophisticated verifica
+- type: section
+  title: Design architecture
+- type: image
+  title: RTL / block architecture
+  image: assets/diagrams/rtl_architecture.png
+  caption: 'Module 5: DUT structure and key interfaces (see common_dut/rtl/).'
+- type: image
+  title: Verification environment architecture
+  image: assets/diagrams/verification_architecture.png
+  caption: 'Module 5: UVM layers, agents, and checkers for this phase.'
+- type: bullets
+  title: 1. Advanced DUT architecture
+  bullets:
+  - '`module5/dut/advanced/multi_channel.v` — multiple logical channels for coordination
+    labs'
+  - Designed for virtual sequences and multi-stream scoreboarding
+  - Register abstraction layer examples align with memory-mapped control/status
+  notes: From MODULE5 Design Architecture.
+- type: bullets
+  title: 2. Advanced UVM environment architecture
+  bullets:
+  - Virtual sequencers coordinate multiple agents on different channels
+  - Coverage collectors sample transaction fields and cross coverage
+  - Callbacks extend driver/monitor without subclass explosion
+  - Configuration objects centralize knobs (active/passive, timeouts, enable flags)
+  notes: From MODULE5 Design Architecture.
+- type: bullets
+  title: 3. Register model layer
+  bullets:
+  - 'RAL-style maps: registers, fields, access policies (RW, RO, WO)'
+  - Adapter links bus transactions to register reads/writes in tests
+  - Predictor/update paths keep mirror model consistent with DUT
+  notes: From MODULE5 Design Architecture.
+- type: section
+  title: Verification & testing methods
+- type: image
+  title: Testing and closure flow
+  image: assets/diagrams/testing_methods.png
+  caption: 'Module 5: how tests, checks, and metrics close verification goals.'
+- type: bullets
+  title: 1. Coverage-driven verification
+  bullets:
+  - Functional coverage on transaction types, channel IDs, and corner field values
+  - Coverage goals gate regression sign-off in advanced flows
+  - Examples under `module5/examples/coverage/` show sampling hooks
+  notes: From MODULE5 Verification & Testing Methods.
+- type: bullets
+  title: 2. Virtual sequences and configuration tests
+  bullets:
+  - Virtual sequences start child sequences on multiple sequencers in order
+  - Config tests prove ConfigDB + config object overrides change behavior
+  - Callback tests inject errors or delays to validate robustness
+  notes: From MODULE5 Verification & Testing Methods.
+- type: bullets
+  title: 3. Closure
+  bullets:
+  - '`./scripts/module5.sh --check`; register model and callback demos in EXAMPLES.md'
+  - 'Assessment: virtual sequences, coverage, callbacks, configuration, register model'
+  notes: From MODULE5 Verification & Testing Methods.
+- type: section
+  title: Syllabus topics
+- type: bullets
+  title: 1. Advanced Sequences (1/4)
+  bullets:
+  - Virtual Sequences
+  - What are virtual sequences?
+  - Virtual sequence purpose
+  - Multiple sequencer coordination
+  - Virtual sequence implementation
+  - Sequence Libraries
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 1. Advanced Sequences (2/4)
+  bullets:
+  - Base sequence classes
+  - Derived sequences
+  - Sequence reuse patterns
+  - Sequence organization
+  - Sequence Arbitration
+  - Sequencer arbitration
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 1. Advanced Sequences (3/4)
+  bullets:
+  - Priority mechanisms
+  - Lock and grab
+  - Sequence coordination
+  - Layered Sequences
+  - High-level sequences
+  - Low-level sequences
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 1. Advanced Sequences (4/4)
+  bullets:
+  - Sequence composition
+  - Protocol layering
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 2. UVM Coverage Models (1/4)
+  bullets:
+  - Coverage Overview
+  - What is coverage?
+  - Coverage types
+  - Coverage goals
+  - Coverage metrics
+  - Functional Coverage
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 2. UVM Coverage Models (2/4)
+  bullets:
+  - Coverage models
+  - Coverage groups
+  - Coverpoints
+  - Coverage bins
+  - Coverage Implementation
+  - Coverage class structure
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 2. UVM Coverage Models (3/4)
+  bullets:
+  - Coverage sampling
+  - Coverage analysis
+  - Coverage reporting
+  - Coverage Patterns
+  - Transaction coverage
+  - Protocol coverage
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 2. UVM Coverage Models (4/4)
+  bullets:
+  - State coverage
+  - Cross coverage
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 3. Complex Configuration Objects (1/4)
+  bullets:
+  - Configuration Objects
+  - Configuration class design
+  - Configuration fields
+  - Configuration methods
+  - Configuration validation
+  - Configuration Hierarchy
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 3. Complex Configuration Objects (2/4)
+  bullets:
+  - Hierarchical configuration
+  - Configuration inheritance
+  - Configuration override
+  - Configuration patterns
+  - Resource Database
+  - Resource database usage
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 3. Complex Configuration Objects (3/4)
+  bullets:
+  - Resource types
+  - Resource lookup
+  - Resource management
+  - Configuration Callbacks
+  - Configuration callbacks
+  - Pre/post callbacks
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 3. Complex Configuration Objects (4/4)
+  bullets:
+  - Callback registration
+  - Callback execution
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 4. UVM Callbacks (1/4)
+  bullets:
+  - Callback Overview
+  - What are callbacks?
+  - Callback purpose
+  - Callback types
+  - Callback benefits
+  - Callback Implementation
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 4. UVM Callbacks (2/4)
+  bullets:
+  - Callback class definition
+  - Callback registration
+  - Callback execution
+  - Callback patterns
+  - Pre/Post Callbacks
+  - Pre-callbacks
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 4. UVM Callbacks (3/4)
+  bullets:
+  - Post-callbacks
+  - Callback ordering
+  - Callback control
+  - Callback Use Cases
+  - Driver callbacks
+  - Monitor callbacks
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 4. UVM Callbacks (4/4)
+  bullets:
+  - Scoreboard callbacks
+  - Test callbacks
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 5. UVM Register Model (Advanced) (1/5)
+  bullets:
+  - Register Model Overview
+  - Register model purpose
+  - Register model structure
+  - Register model benefits
+  - Register model components
+  - Register Model Components
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 5. UVM Register Model (Advanced) (2/5)
+  bullets:
+  - '`uvm_reg_block` - Register blocks'
+  - '`uvm_reg` - Registers'
+  - '`uvm_reg_field` - Register fields'
+  - '`uvm_reg_map` - Address maps'
+  - Register Operations
+  - Register read
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 5. UVM Register Model (Advanced) (3/5)
+  bullets:
+  - Register write
+  - Register peek/poke
+  - Register update
+  - Register Sequences
+  - Register access sequences
+  - Register test sequences
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 5. UVM Register Model (Advanced) (4/5)
+  bullets:
+  - Register model integration
+  - Register predictor
+  - Backdoor Access
+  - Backdoor read/write
+  - Backdoor vs frontdoor
+  - Backdoor use cases
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 5. UVM Register Model (Advanced) (5/5)
+  bullets:
+  - Backdoor implementation
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 6. Virtual Sequences and Virtual Sequencers (1/3)
+  bullets:
+  - Virtual Sequencer
+  - Virtual sequencer purpose
+  - Virtual sequencer structure
+  - Multiple sequencer references
+  - Virtual sequencer implementation
+  - Virtual Sequence Coordination
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 6. Virtual Sequences and Virtual Sequencers (2/3)
+  bullets:
+  - Coordinating multiple sequencers
+  - Parallel sequence execution
+  - Sequence synchronization
+  - Sequence coordination patterns
+  - Virtual Sequence Patterns
+  - Master-slave coordination
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 6. Virtual Sequences and Virtual Sequencers (3/3)
+  bullets:
+  - Multi-channel coordination
+  - Protocol coordination
+  - Test coordination
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 7. Coverage Analysis and Closure (1/3)
+  bullets:
+  - Coverage Analysis
+  - Coverage collection
+  - Coverage reporting
+  - Coverage gaps
+  - Coverage analysis tools
+  - Coverage Closure
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 7. Coverage Analysis and Closure (2/3)
+  bullets:
+  - Coverage goals
+  - Coverage strategies
+  - Coverage improvement
+  - Coverage metrics
+  - Coverage Patterns
+  - Functional coverage
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 7. Coverage Analysis and Closure (3/3)
+  bullets:
+  - Code coverage
+  - Assertion coverage
+  - Coverage correlation
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 8. Advanced Configuration Patterns (1/2)
+  bullets:
+  - Configuration Strategies
+  - Top-down configuration
+  - Bottom-up configuration
+  - Mixed configuration
+  - Configuration best practices
+  - Dynamic Configuration
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 8. Advanced Configuration Patterns (2/2)
+  bullets:
+  - Runtime configuration
+  - Configuration updates
+  - Configuration validation
+  - Configuration debugging
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 9. Performance Optimization (1/2)
+  bullets:
+  - Testbench Performance
+  - Performance bottlenecks
+  - Optimization strategies
+  - Memory optimization
+  - Simulation speed
+  - Sequence Optimization
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 9. Performance Optimization (2/2)
+  bullets:
+  - Efficient sequence design
+  - Sequence reuse
+  - Sequence caching
+  - Sequence performance
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 10. Advanced Debugging Techniques (1/2)
+  bullets:
+  - UVM Debugging
+  - UVM debugging tools
+  - Phase debugging
+  - Component debugging
+  - Transaction debugging
+  - Coverage Debugging
+  notes: From MODULE5 Topics Covered.
+- type: bullets
+  title: 10. Advanced Debugging Techniques (2/2)
+  bullets:
+  - Coverage gaps
+  - Coverage analysis
+  - Coverage improvement
+  - Coverage tools
+  notes: From MODULE5 Topics Covered.
+- type: section
+  title: Hands-on examples
+- type: demo
+  title: Module 5 self-check
+  command: ./scripts/module5.sh --check
+  screenshot: assets/screenshots/module5_check.png
+  expect_stdout_contains: All required checks passed
+  notes: Run from course repository root.
+- type: code
+  title: Exercise scaffold
+  language: bash
+  source_file: scripts/module5.sh
+  code: ./scripts/module5.sh --scaffold
+- type: demo
+  title: 'Demo: Virtual Sequences'
+  command: .venv/bin/python module5/examples/virtual_sequences/virtual_sequence_example.py
+  screenshot: assets/screenshots/ex01_virtual_sequences.png
+  notes: 'Hands-on: module5/examples/virtual_sequences/'
+- type: demo
+  title: 'Demo: Coverage Models'
+  command: .venv/bin/python module5/examples/coverage/coverage_example.py
+  screenshot: assets/screenshots/ex02_coverage.png
+  notes: 'Hands-on: module5/examples/coverage/'
+- type: demo
+  title: 'Demo: Configuration Objects'
+  command: .venv/bin/python module5/examples/configuration/configuration_example.py
+  screenshot: assets/screenshots/ex03_configuration.png
+  notes: 'Hands-on: module5/examples/configuration/'
+- type: demo
+  title: 'Demo: UVM Callbacks'
+  command: .venv/bin/python module5/examples/callbacks/callback_example.py
+  screenshot: assets/screenshots/ex04_callbacks.png
+  notes: 'Hands-on: module5/examples/callbacks/'
+- type: demo
+  title: 'Demo: Register Model'
+  command: .venv/bin/python module5/examples/register_model/register_model_example.py
+  screenshot: assets/screenshots/ex05_register_model.png
+  notes: 'Hands-on: module5/examples/register_model/'
+- type: section
+  title: Practice & assessment
+- type: bullets
+  title: Exercises
+  bullets:
+  - Virtual Sequences
+  - Coverage Implementation
+  - Configuration Design
+  - Callback Implementation
+  - Register Model
+- type: bullets
+  title: Assessment checklist
+  bullets:
+  - Can create virtual sequences
+  - Can implement coverage models
+  - Can design configuration objects
+  - Can use callbacks effectively
+  - Can use advanced register model
+  - Can coordinate multiple sequencers
+- type: bullets
+  title: Summary & next steps
+  bullets:
+  - Master sequences, coverage, configuration, and virtual sequences
+  - Complete module5/CHECKLIST.md
+  - Run ./scripts/module5.sh --check
+  - 'Next: Next module in course'

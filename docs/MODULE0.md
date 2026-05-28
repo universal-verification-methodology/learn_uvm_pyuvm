@@ -37,6 +37,50 @@ chmod +x scripts/*.sh
 
 For detailed usage of each script, see the corresponding installation sections below.
 
+<!-- module-architecture:auto:start -->
+## Design Architecture
+
+### 1. Toolchain and repository layout
+
+- Course root: `docs/`, `moduleN/`, `scripts/moduleN.sh`, `media/moduleN/` for slides and video
+- Python 3.10+ virtual environment (`.venv`) holds cocotb, pyuvm, and course dependencies
+- Verilator compiles RTL when modules include `dut/`; cocotb bridges Python testbenches to the simulator
+- Orchestrator `scripts/module0.sh` installs and verifies Verilator, cocotb, and pyuvm in order
+
+### 2. Verification stack architecture
+
+- Bottom layer: OS, compiler (GCC/Clang), Make/Ninja, Git
+- Simulator layer: Verilator (default) produces fast cycle-accurate models from SystemVerilog/Verilog
+- Testbench layer: cocotb (coroutine-driven) and pyuvm (UVM 1.2 in Python) share the same venv
+- Artifacts: logs under module runs, optional VCD/FST waveforms from Make targets
+
+### 3. What is not in this module
+
+- No DUT or UVM hierarchy yet — focus is reproducible environment setup
+- Later modules attach Python tests to RTL under `moduleN/dut/`
+- Self-check only validates tools; functional verification starts in Module 1
+
+## Verification & Testing Methods
+
+### 1. Installation verification strategy
+
+- Run `./scripts/module0.sh` for full install or per-tool flags (`--verilator-mode`, `--cocotb-mode`, `--pyuvm-mode`)
+- `./scripts/module0.sh --check` confirms `verilator`, `cocotb-config`, and importable `pyuvm`
+- Version probes (`verilator --version`, `python -c 'import cocotb'`) catch PATH and venv mistakes early
+
+### 2. Smoke and regression mindset
+
+- Treat install as the first regression: every tool must pass before Module 1 labs
+- Re-run `--check` after OS updates or submodule pulls
+- Document failures in install logs; fix one layer at a time (compiler → Verilator → Python packages)
+
+### 3. Closure for Module 0
+
+- Pass criteria: all install scripts succeed and `--check` reports required tools present
+- Optional: run a minimal cocotb compile in Module 1 only after Module 0 passes
+- Assessment checklist in MODULE0 maps environment readiness to course progress
+
+<!-- module-architecture:auto:end -->
 ## Topics Covered
 
 ### 1. System Requirements and Prerequisites

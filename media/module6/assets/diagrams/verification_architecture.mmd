@@ -1,0 +1,8 @@
+flowchart TB
+  ENV[uvm_env] --> MA[master agent]
+  ENV --> SA[slave / memory agent]
+  ENV --> PC[protocol checker]
+  MA --> DUT[(AXI slave)]
+  SA --> DUT
+  MON[monitors] --> SB[scoreboard]
+  PC --> DUT

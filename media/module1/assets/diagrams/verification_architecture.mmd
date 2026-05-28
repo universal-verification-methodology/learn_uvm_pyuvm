@@ -1,0 +1,10 @@
+flowchart LR
+  subgraph py["Python layer"]
+    EX[examples: transactions]
+    CT[cocotb_tests]
+    PT[pyuvm_tests]
+  end
+  EX --> CT
+  EX --> PT
+  CT --> DUT[(RTL DUT)]
+  PT --> DUT

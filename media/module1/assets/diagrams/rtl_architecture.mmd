@@ -1,0 +1,9 @@
+flowchart TB
+  subgraph dut["module1/dut"]
+    AND[simple_gates/and_gate]
+    CTR[counters/counter]
+  end
+  CLK[clk / rst_n] --> AND
+  CLK --> CTR
+  AND --> OUT1[result]
+  CTR --> OUT2[count]

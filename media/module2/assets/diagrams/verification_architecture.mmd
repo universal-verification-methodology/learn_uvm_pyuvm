@@ -1,0 +1,5 @@
+flowchart LR
+  TB[cocotb @test coroutines] --> DRV[drive dut ports]
+  DRV --> DUT[(register / shift DUT)]
+  DUT --> MON[sample on triggers]
+  MON --> CHK[assert + log]

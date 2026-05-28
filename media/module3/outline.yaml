@@ -1,0 +1,482 @@
+title: Module 3 — UVM Basics
+course: learn_uvm_pyuvm
+module: 3
+subtitle: Master UVM class hierarchy and phases
+footer: learn_uvm_pyuvm / Module 3
+slides:
+- type: title
+  title: Module 3
+  subtitle: UVM Basics
+- type: bullets
+  title: Learning objectives
+  bullets:
+  - Master UVM class hierarchy and phases
+- type: bullets
+  title: Prerequisites
+  bullets:
+  - See module README
+- type: image
+  title: Learning path
+  image: assets/diagrams/learning_path.png
+  caption: Master UVM class hierarchy and phases
+- type: bullets
+  title: Overview
+  bullets:
+  - This module introduces the Universal Verification Methodology (UVM) and its implementation
+    in pyuvm. You'll learn the fundamental UVM concepts, class hierarchy, phases,
+    and how to structure UVM testbenches.
+- type: section
+  title: Design architecture
+- type: image
+  title: RTL / block architecture
+  image: assets/diagrams/rtl_architecture.png
+  caption: 'Module 3: DUT structure and key interfaces (see common_dut/rtl/).'
+- type: image
+  title: Verification environment architecture
+  image: assets/diagrams/verification_architecture.png
+  caption: 'Module 3: UVM layers, agents, and checkers for this phase.'
+- type: bullets
+  title: 1. RTL and interfaces
+  bullets:
+  - 'Primary DUT: `module3/dut/simple_blocks/adder.v` — combinational operands and
+    sum'
+  - Clock/reset scaffolding for pyuvm tests that mirror industry TB hooks
+  - Flat block; no protocol channels — focus stays on UVM structure, not bus complexity
+  notes: From MODULE3 Design Architecture.
+- type: bullets
+  title: 2. UVM testbench architecture
+  bullets:
+  - 'Hierarchy: `uvm_test` → `uvm_env` → `uvm_agent` (driver, monitor, sequencer)
+    → DUT'
+  - '`uvm_sequence_item` / `uvm_sequence` carry transactions; driver converts items
+    to pin wiggles'
+  - ConfigDB publishes virtual interfaces and parameters before `build_phase`
+  - Factory + objections control creation and phase lifetime
+  notes: From MODULE3 Design Architecture.
+- type: bullets
+  title: 3. Module layout
+  bullets:
+  - '`module3/examples/` — isolated API demos (phases, reporting, configdb, factory,
+    objections)'
+  - '`module3/tests/pyuvm_tests/` — integrated `make SIM=verilator TEST=test_simple_uvm`
+    flows'
+  notes: From MODULE3 Design Architecture.
+- type: section
+  title: Verification & testing methods
+- type: image
+  title: Testing and closure flow
+  image: assets/diagrams/testing_methods.png
+  caption: 'Module 3: how tests, checks, and metrics close verification goals.'
+- type: bullets
+  title: 1. Phase-based test execution
+  bullets:
+  - build → connect → end_of_elaboration → start_of_simulation → run → extract → report
+  - Objections in run phase prevent premature finish until sequences complete
+  - Reporting verbosity filters debug vs error messages
+  notes: From MODULE3 Verification & Testing Methods.
+- type: bullets
+  title: 2. Stimulus and checking
+  bullets:
+  - Directed sequences on adder operands; monitor samples outputs for scoreboard hooks
+  - Factory overrides swap test/agent types without editing hierarchy code
+  - ConfigDB sets agent active/passive and interface handles
+  notes: From MODULE3 Verification & Testing Methods.
+- type: bullets
+  title: 3. Closure
+  bullets:
+  - '`./scripts/module3.sh --check` and per-topic flags (`--phases`, `--factory`,
+    …)'
+  - Pass when simulation report shows UVM TEST PASSED and no fatal errors
+  - 'Assessment: class hierarchy, phases, configdb, factory, objections'
+  notes: From MODULE3 Verification & Testing Methods.
+- type: section
+  title: Syllabus topics
+- type: bullets
+  title: 1. Introduction to UVM (1/3)
+  bullets:
+  - What is UVM?
+  - Universal Verification Methodology
+  - Industry standard for verification
+  - Methodology vs library
+  - History and evolution
+  - Why UVM?
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 1. Introduction to UVM (2/3)
+  bullets:
+  - Reusability
+  - Standardization
+  - Scalability
+  - Maintainability
+  - UVM in Python (pyuvm)
+  - Python implementation of UVM 1.2
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 1. Introduction to UVM (3/3)
+  bullets:
+  - Advantages over SystemVerilog UVM
+  - Compatibility and features
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 2. UVM Class Hierarchy (1/4)
+  bullets:
+  - Base Classes
+  - '`uvm_object` - Base for all UVM objects'
+  - '`uvm_component` - Base for all UVM components'
+  - Differences and use cases
+  - Component Classes
+  - '`uvm_test` - Top-level test class'
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 2. UVM Class Hierarchy (2/4)
+  bullets:
+  - '`uvm_env` - Environment container'
+  - '`uvm_agent` - Agent (driver, monitor, sequencer)'
+  - '`uvm_driver` - Drives transactions to DUT'
+  - '`uvm_monitor` - Monitors DUT signals'
+  - '`uvm_sequencer` - Manages sequences'
+  - '`uvm_scoreboard` - Checks results'
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 2. UVM Class Hierarchy (3/4)
+  bullets:
+  - Object Classes
+  - '`uvm_sequence_item` - Transaction objects'
+  - '`uvm_sequence` - Sequence of transactions'
+  - '`uvm_config_object` - Configuration objects'
+  - Class Relationships
+  - Inheritance hierarchy
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 2. UVM Class Hierarchy (4/4)
+  bullets:
+  - Composition patterns
+  - Factory pattern
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 3. UVM Phases (1/6)
+  bullets:
+  - Phase Overview
+  - Why phases exist
+  - Phase execution order
+  - Phase synchronization
+  - Phase types
+  - Build Phases
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 3. UVM Phases (2/6)
+  bullets:
+  - '`build_phase()` - Component construction'
+  - '`connect_phase()` - Component connections'
+  - '`end_of_elaboration_phase()` - Final setup'
+  - Run Phases
+  - '`run_phase()` - Main test execution'
+  - '`pre_reset_phase()` - Before reset'
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 3. UVM Phases (3/6)
+  bullets:
+  - '`reset_phase()` - Reset sequence'
+  - '`post_reset_phase()` - After reset'
+  - '`pre_configure_phase()` - Before configuration'
+  - '`configure_phase()` - Configuration'
+  - '`post_configure_phase()` - After configuration'
+  - '`pre_main_phase()` - Before main test'
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 3. UVM Phases (4/6)
+  bullets:
+  - '`main_phase()` - Main test execution'
+  - '`post_main_phase()` - After main test'
+  - '`pre_shutdown_phase()` - Before shutdown'
+  - '`shutdown_phase()` - Shutdown sequence'
+  - '`post_shutdown_phase()` - After shutdown'
+  - Cleanup Phases
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 3. UVM Phases (5/6)
+  bullets:
+  - '`extract_phase()` - Extract results'
+  - '`check_phase()` - Final checks'
+  - '`report_phase()` - Generate reports'
+  - '`final_phase()` - Final cleanup'
+  - Phase Implementation
+  - Synchronous phases (build, connect)
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 3. UVM Phases (6/6)
+  bullets:
+  - Asynchronous phases (run phases)
+  - Phase methods
+  - Phase ordering
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 4. UVM Reporting System (1/5)
+  bullets:
+  - Reporting Overview
+  - UVM messaging system
+  - Severity levels
+  - Verbosity levels
+  - Message formatting
+  - Severity Levels
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 4. UVM Reporting System (2/5)
+  bullets:
+  - '`UVM_FATAL` - Fatal errors'
+  - '`UVM_ERROR` - Errors'
+  - '`UVM_WARNING` - Warnings'
+  - '`UVM_INFO` - Informational'
+  - '`UVM_DEBUG` - Debug messages'
+  - Verbosity Levels
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 4. UVM Reporting System (3/5)
+  bullets:
+  - '`UVM_NONE` - No messages'
+  - '`UVM_LOW` - Low verbosity'
+  - '`UVM_MEDIUM` - Medium verbosity'
+  - '`UVM_HIGH` - High verbosity'
+  - '`UVM_FULL` - Full verbosity'
+  - '`UVM_DEBUG` - Debug verbosity'
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 4. UVM Reporting System (4/5)
+  bullets:
+  - Using Reporting
+  - '`self.logger.info()`'
+  - '`self.logger.warning()`'
+  - '`self.logger.error()`'
+  - '`self.logger.fatal()`'
+  - Message formatting
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 4. UVM Reporting System (5/5)
+  bullets:
+  - Verbosity control
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 5. UVM Configuration Database (ConfigDB) (1/4)
+  bullets:
+  - ConfigDB Overview
+  - What is ConfigDB?
+  - Why use ConfigDB?
+  - Configuration hierarchy
+  - Setting Configuration
+  - '`ConfigDB().set()`'
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 5. UVM Configuration Database (ConfigDB) (2/4)
+  bullets:
+  - Configuration paths
+  - Configuration objects
+  - Scalar configuration
+  - Getting Configuration
+  - '`ConfigDB().get()`'
+  - Configuration lookup
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 5. UVM Configuration Database (ConfigDB) (3/4)
+  bullets:
+  - Default values
+  - Configuration checking
+  - Configuration Patterns
+  - Agent configuration
+  - Environment configuration
+  - Test configuration
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 5. UVM Configuration Database (ConfigDB) (4/4)
+  bullets:
+  - Hierarchical configuration
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 6. Factory Pattern (1/2)
+  bullets:
+  - Factory Overview
+  - What is the factory?
+  - Why use factory?
+  - Factory benefits
+  - Factory Usage
+  - Type registration
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 6. Factory Pattern (2/2)
+  bullets:
+  - Object creation
+  - Override mechanism
+  - Factory patterns
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 7. First UVM Test Class (1/3)
+  bullets:
+  - Test Structure
+  - Test class definition
+  - Inheriting from `uvm_test`
+  - Required methods
+  - Test organization
+  - Environment Creation
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 7. First UVM Test Class (2/3)
+  bullets:
+  - Creating environment
+  - Environment hierarchy
+  - Component instantiation
+  - Test Execution
+  - '`run_phase()` implementation'
+  - Objection mechanism
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 7. First UVM Test Class (3/3)
+  bullets:
+  - Test flow
+  - Completion
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 8. Environment Structure (1/3)
+  bullets:
+  - Environment Basics
+  - What is environment?
+  - Environment purpose
+  - Environment structure
+  - Environment Components
+  - Agent instantiation
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 8. Environment Structure (2/3)
+  bullets:
+  - Scoreboard instantiation
+  - Coverage instantiation
+  - Other components
+  - Environment Connections
+  - Component connections
+  - Analysis port connections
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 8. Environment Structure (3/3)
+  bullets:
+  - TLM connections
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 9. Objection Mechanism (1/3)
+  bullets:
+  - Objections Overview
+  - What are objections?
+  - Why objections?
+  - Objection lifecycle
+  - Using Objections
+  - '`raise_objection()`'
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 9. Objection Mechanism (2/3)
+  bullets:
+  - '`drop_objection()`'
+  - Objection timing
+  - Multiple objections
+  - Objection Patterns
+  - Test objections
+  - Sequence objections
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 9. Objection Mechanism (3/3)
+  bullets:
+  - Component objections
+  - Best practices
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 10. UVM Test Execution (1/3)
+  bullets:
+  - Test Flow
+  - Test startup
+  - Phase execution
+  - Test completion
+  - Cleanup
+  - Running Tests
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 10. UVM Test Execution (2/3)
+  bullets:
+  - '`uvm_root().run_test()`'
+  - Test selection
+  - Test parameters
+  - Test execution
+  - Test Organization
+  - Multiple tests
+  notes: From MODULE3 Topics Covered.
+- type: bullets
+  title: 10. UVM Test Execution (3/3)
+  bullets:
+  - Test inheritance
+  - Test libraries
+  - Test selection
+  notes: From MODULE3 Topics Covered.
+- type: section
+  title: Hands-on examples
+- type: demo
+  title: Module 3 self-check
+  command: ./scripts/module3.sh --check
+  screenshot: assets/screenshots/module3_check.png
+  expect_stdout_contains: All required checks passed
+  notes: Run from course repository root.
+- type: code
+  title: Exercise scaffold
+  language: bash
+  source_file: scripts/module3.sh
+  code: ./scripts/module3.sh --scaffold
+- type: demo
+  title: 'Demo: Class Hierarchy'
+  command: .venv/bin/python module3/examples/class_hierarchy/class_hierarchy_example.py
+  screenshot: assets/screenshots/ex01_class_hierarchy.png
+  notes: 'Hands-on: module3/examples/class_hierarchy/'
+- type: demo
+  title: 'Demo: UVM Phases'
+  command: .venv/bin/python module3/examples/phases/phases_example.py
+  screenshot: assets/screenshots/ex02_phases.png
+  notes: 'Hands-on: module3/examples/phases/'
+- type: demo
+  title: 'Demo: UVM Reporting'
+  command: .venv/bin/python module3/examples/reporting/reporting_example.py
+  screenshot: assets/screenshots/ex03_reporting.png
+  notes: 'Hands-on: module3/examples/reporting/'
+- type: demo
+  title: 'Demo: ConfigDB'
+  command: .venv/bin/python module3/examples/configdb/configdb_example.py
+  screenshot: assets/screenshots/ex04_configdb.png
+  notes: 'Hands-on: module3/examples/configdb/'
+- type: demo
+  title: 'Demo: Factory Pattern'
+  command: .venv/bin/python module3/examples/factory/factory_example.py
+  screenshot: assets/screenshots/ex05_factory.png
+  notes: 'Hands-on: module3/examples/factory/'
+- type: demo
+  title: 'Demo: Objection Mechanism'
+  command: .venv/bin/python module3/examples/objections/objections_example.py
+  screenshot: assets/screenshots/ex06_objections.png
+  notes: 'Hands-on: module3/examples/objections/'
+- type: section
+  title: Practice & assessment
+- type: bullets
+  title: Exercises
+  bullets:
+  - Test Class Creation
+  - Environment Structure
+  - Reporting
+  - Configuration
+  - Phase Understanding
+- type: bullets
+  title: Assessment checklist
+  bullets:
+  - Understands UVM methodology
+  - Can explain class hierarchy
+  - Understands all UVM phases
+  - Can use UVM reporting
+  - Can use ConfigDB
+  - Understands factory pattern
+- type: bullets
+  title: Summary & next steps
+  bullets:
+  - Master UVM class hierarchy and phases
+  - Complete module3/CHECKLIST.md
+  - Run ./scripts/module3.sh --check
+  - 'Next: Next module in course'

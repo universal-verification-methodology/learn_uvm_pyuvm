@@ -1,0 +1,7 @@
+flowchart TB
+  SEQ[sequence] --> SQR[sequencer]
+  SQR --> DRV[driver]
+  DRV --> DUT[(interface DUT)]
+  DUT --> MON[monitor]
+  MON --> AP[analysis port]
+  AP --> SB[scoreboard]

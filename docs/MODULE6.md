@@ -56,6 +56,48 @@ make SIM=verilator TEST=test_complex_testbench
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-architecture:auto:start -->
+## Design Architecture
+
+### 1. Protocol DUT architecture
+
+- `module6/dut/protocols/axi4_lite_slave.v` — five-channel AXI4-Lite slave + memory interface
+- Separate address/write/read response channels exercise real protocol timing
+- Multi-agent TB can attach initiator agents while DUT acts as slave
+
+### 2. Complex testbench architecture
+
+- Multiple agents (e.g., master, memory, low-speed peripheral) under one `uvm_env`
+- Protocol checkers validate handshake rules independent of scoreboard
+- Layered scoreboards: per-agent checks + system-level consistency
+- Architecture example documents reusable env patterns and package boundaries
+
+### 3. Data flow
+
+- Virtual sequences coordinate cross-agent scenarios (config then traffic)
+- Monitors on each interface feed checkers and coverage
+- Reference models optional for memory content golden checks
+
+## Verification & Testing Methods
+
+### 1. Protocol verification methods
+
+- Protocol checker asserts AW/W/B/AR/R channel rules and ordering
+- Directed AXI transactions in `protocol_example.py` and `test_complex_testbench`
+- Multi-agent tests verify concurrent masters do not violate slave assumptions
+
+### 2. System-level checking
+
+- Scoreboard correlates transactions across ports (address, data, response)
+- Architecture tests validate env wiring before long regressions
+- Debug: transaction logs, UVM verbosity, Verilator waveforms
+
+### 3. Closure
+
+- `./scripts/module6.sh --check`; exercises extend multi-agent and protocol checkers
+- Assessment: multi-agent envs, protocol verification, complex scoreboards, architecture patterns
+
+<!-- module-architecture:auto:end -->
 ## Topics Covered
 
 ### 1. Multi-Agent Environments

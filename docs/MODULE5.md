@@ -56,6 +56,48 @@ make SIM=verilator TEST=test_advanced_uvm
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-architecture:auto:start -->
+## Design Architecture
+
+### 1. Advanced DUT architecture
+
+- `module5/dut/advanced/multi_channel.v` — multiple logical channels for coordination labs
+- Designed for virtual sequences and multi-stream scoreboarding
+- Register abstraction layer examples align with memory-mapped control/status
+
+### 2. Advanced UVM environment architecture
+
+- Virtual sequencers coordinate multiple agents on different channels
+- Coverage collectors sample transaction fields and cross coverage
+- Callbacks extend driver/monitor without subclass explosion
+- Configuration objects centralize knobs (active/passive, timeouts, enable flags)
+
+### 3. Register model layer
+
+- RAL-style maps: registers, fields, access policies (RW, RO, WO)
+- Adapter links bus transactions to register reads/writes in tests
+- Predictor/update paths keep mirror model consistent with DUT
+
+## Verification & Testing Methods
+
+### 1. Coverage-driven verification
+
+- Functional coverage on transaction types, channel IDs, and corner field values
+- Coverage goals gate regression sign-off in advanced flows
+- Examples under `module5/examples/coverage/` show sampling hooks
+
+### 2. Virtual sequences and configuration tests
+
+- Virtual sequences start child sequences on multiple sequencers in order
+- Config tests prove ConfigDB + config object overrides change behavior
+- Callback tests inject errors or delays to validate robustness
+
+### 3. Closure
+
+- `./scripts/module5.sh --check`; register model and callback demos in EXAMPLES.md
+- Assessment: virtual sequences, coverage, callbacks, configuration, register model
+
+<!-- module-architecture:auto:end -->
 ## Topics Covered
 
 ### 1. Advanced Sequences

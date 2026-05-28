@@ -1,0 +1,8 @@
+flowchart TB
+  T[uvm_test] --> E[uvm_env]
+  E --> AG[uvm_agent]
+  AG --> SEQ[sequencer / sequences]
+  AG --> DRV[driver]
+  AG --> MON[monitor]
+  DRV --> DUT[(adder)]
+  MON --> DUT

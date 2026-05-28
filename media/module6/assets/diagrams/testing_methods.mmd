@@ -1,0 +1,5 @@
+flowchart TD
+  CHK[protocol checker rules] --> TR[AXI transactions]
+  TR --> DUT[(DUT)]
+  DUT --> SB[system scoreboard]
+  SB --> P{Consistent?}

@@ -1,0 +1,7 @@
+flowchart TB
+  subgraph mc["multi_channel.v"]
+    CH0[channel 0]
+    CH1[channel 1]
+    CH2[channel N]
+  end
+  CFG[config / registers] --> mc

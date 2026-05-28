@@ -1,0 +1,5 @@
+flowchart LR
+  VIP[verification IP agents] --> ENV[uvm_env]
+  ENV --> DMA[(DMA DUT)]
+  ENV --> UART[(UART DUT)]
+  ENV --> SB[system scoreboard]

@@ -1,0 +1,20 @@
+# Optional demo command / expect overrides for generate_outline_from_module.py
+# Keys under demos: EXAMPLES.md folder name (e.g. python_basics) or asset id (ex01_python_basics)
+
+module0:
+  demos:
+    verilator_version:
+      command: "verilator --version 2>&1 | head -1"
+      expect: "Verilator"
+    python_version:
+      command: "python3 --version"
+      expect: "Python"
+
+module1:
+  demos:
+    python_basics:
+      expect: "Transaction"
+    decorators:
+      expect: "decorator"
+    async_await:
+      expect: "Example completed"

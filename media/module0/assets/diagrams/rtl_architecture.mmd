@@ -1,0 +1,16 @@
+flowchart TB
+  subgraph host["Host environment"]
+    PY[Python 3.10+ venv]
+    GIT[Git / submodules]
+    GCC[GCC or Clang + Make]
+  end
+  subgraph sim["Simulation"]
+    VER[Verilator]
+    COC[cocotb]
+    UVM[pyuvm]
+  end
+  PY --> COC
+  PY --> UVM
+  GCC --> VER
+  VER --> COC
+  COC --> UVM

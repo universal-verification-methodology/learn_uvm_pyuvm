@@ -1,0 +1,5 @@
+flowchart LR
+  DOC[docs/MODULE0.md] --> SCR[scripts/module0.sh]
+  SCR --> INS[install_verilator / cocotb / pyuvm]
+  INS --> CHK[--check smoke]
+  CHK --> M1[Module 1 labs]

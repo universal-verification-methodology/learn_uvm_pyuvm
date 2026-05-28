@@ -60,6 +60,49 @@ make SIM=verilator TEST=test_complete_agent
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-architecture:auto:start -->
+## Design Architecture
+
+### 1. DUT and interface protocol
+
+- `module4/dut/interfaces/simple_interface.v` — valid/ready handshake, address/data/result buses
+- Clocked, resettable interface models streaming transactions
+- Agent maps one transaction type to one interface beat
+
+### 2. Agent-centric UVM architecture
+
+- Agent bundles driver, monitor, sequencer; env holds agent + scoreboard
+- TLM analysis ports connect monitor → scoreboard (and optional coverage)
+- `InterfaceTransaction` defines fields, `copy`/`compare`, and constraints
+- Complete path: sequence → sequencer → driver → DUT → monitor → scoreboard
+
+### 3. Component responsibilities
+
+- Driver: pull items from sequencer, drive pins per protocol
+- Monitor: passive observation, broadcast transactions on analysis port
+- Sequencer: arbitration and sequence execution
+- Scoreboard: expected vs actual from monitor streams
+
+## Verification & Testing Methods
+
+### 1. Integration testing method
+
+- `test_complete_agent.py` — end-to-end agent, env, and test class
+- Run: `./scripts/module4.sh --pyuvm-tests` or `make TEST=test_complete_agent`
+- Per-component examples (`driver_example.py`, …) isolate behavior before integration
+
+### 2. Checking strategy
+
+- Scoreboard compares monitored results to predicted model or golden vectors
+- Analysis port fan-out allows multiple checkers without changing monitor
+- Sequences provide repeatable stimulus; random/constrained extensions in exercises
+
+### 3. Closure
+
+- Self-check via `module4.sh --check`; demo screenshots per EXAMPLES.md section
+- Assessment: drivers, monitors, sequencers, agents, scoreboards, TLM connections
+
+<!-- module-architecture:auto:end -->
 ## Topics Covered
 
 ### 1. UVM Agent Architecture

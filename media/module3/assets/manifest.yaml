@@ -1,0 +1,86 @@
+module: 3
+course: learn_uvm_pyuvm
+assets:
+- id: learning_path
+  type: diagram
+  file: assets/diagrams/learning_path.png
+  source: assets/diagrams/learning_path.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 4
+  - 4
+  license: learn_uvm_pyuvm course materials
+- id: rtl_architecture
+  type: diagram
+  file: assets/diagrams/rtl_architecture.png
+  source: assets/diagrams/rtl_architecture.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 7
+  license: learn_uvm_pyuvm course materials
+- id: verification_architecture
+  type: diagram
+  file: assets/diagrams/verification_architecture.png
+  source: assets/diagrams/verification_architecture.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 8
+  license: learn_uvm_pyuvm course materials
+- id: testing_methods
+  type: diagram
+  file: assets/diagrams/testing_methods.png
+  source: assets/diagrams/testing_methods.mmd
+  generator: render_diagrams.sh
+  slides:
+  - 13
+  license: learn_uvm_pyuvm course materials
+- id: module3_check
+  type: screenshot
+  file: assets/screenshots/module3_check.png
+  capture_command: ./scripts/module3.sh --check
+  cwd: .
+  slides:
+  - 55
+  expect_stdout_contains: All required checks passed
+- id: ex01_class_hierarchy
+  type: screenshot
+  file: assets/screenshots/ex01_class_hierarchy.png
+  capture_command: .venv/bin/python module3/examples/class_hierarchy/class_hierarchy_example.py
+  cwd: .
+  slides:
+  - 57
+- id: ex02_phases
+  type: screenshot
+  file: assets/screenshots/ex02_phases.png
+  capture_command: .venv/bin/python module3/examples/phases/phases_example.py
+  cwd: .
+  slides:
+  - 58
+- id: ex03_reporting
+  type: screenshot
+  file: assets/screenshots/ex03_reporting.png
+  capture_command: .venv/bin/python module3/examples/reporting/reporting_example.py
+  cwd: .
+  slides:
+  - 59
+- id: ex04_configdb
+  type: screenshot
+  file: assets/screenshots/ex04_configdb.png
+  capture_command: .venv/bin/python module3/examples/configdb/configdb_example.py
+  cwd: .
+  slides:
+  - 60
+- id: ex05_factory
+  type: screenshot
+  file: assets/screenshots/ex05_factory.png
+  capture_command: .venv/bin/python module3/examples/factory/factory_example.py
+  cwd: .
+  slides:
+  - 61
+- id: ex06_objections
+  type: screenshot
+  file: assets/screenshots/ex06_objections.png
+  capture_command: .venv/bin/python module3/examples/objections/objections_example.py
+  cwd: .
+  slides:
+  - 62

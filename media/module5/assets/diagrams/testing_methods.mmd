@@ -1,0 +1,6 @@
+flowchart TD
+  VS[virtual sequence] --> COV[sample coverage]
+  COV --> G{Goals met?}
+  G -->|yes| DONE[sign-off]
+  G -->|no| MORE[add tests]
+  MORE --> VS

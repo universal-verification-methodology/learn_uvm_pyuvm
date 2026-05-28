@@ -1,0 +1,10 @@
+flowchart TB
+  subgraph axi["axi4_lite_slave"]
+    AW[AW channel]
+    W[W channel]
+    B[B channel]
+    AR[AR channel]
+    R[R channel]
+  end
+  MEM[(memory interface)]
+  axi --> MEM

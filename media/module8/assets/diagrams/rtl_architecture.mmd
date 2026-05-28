@@ -1,0 +1,9 @@
+flowchart TB
+  CLP[CLP plusargs] --> CFG[test config]
+  CFG --> ENV[existing uvm_env]
+  subgraph util["UVM utilities"]
+    CMP[comparators]
+    REC[recorders]
+    POOL[pools / queues]
+  end
+  ENV --> util

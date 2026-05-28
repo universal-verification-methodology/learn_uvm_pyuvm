@@ -1,0 +1,6 @@
+flowchart TD
+  A[Run module0.sh] --> B{Tool present?}
+  B -->|no| C[Fix install layer]
+  B -->|yes| D[--check pass]
+  D --> E[Ready for RTL testbenches]
+  C --> A

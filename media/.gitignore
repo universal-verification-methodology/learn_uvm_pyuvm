@@ -1,0 +1,4 @@
+**/frames/
+**/*.log
+**/build.log
+~$*.pptx

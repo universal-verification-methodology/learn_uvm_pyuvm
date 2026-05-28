@@ -1,0 +1,537 @@
+title: Module 4 — UVM Components
+course: learn_uvm_pyuvm
+module: 4
+subtitle: Build complete UVM agents with driver, monitor, and sequencer
+footer: learn_uvm_pyuvm / Module 4
+slides:
+- type: title
+  title: Module 4
+  subtitle: UVM Components
+- type: bullets
+  title: Learning objectives
+  bullets:
+  - Build complete UVM agents with driver, monitor, and sequencer
+- type: bullets
+  title: Prerequisites
+  bullets:
+  - See module README
+- type: image
+  title: Learning path
+  image: assets/diagrams/learning_path.png
+  caption: Build complete UVM agents with driver, monitor, and sequencer
+- type: bullets
+  title: Overview
+  bullets:
+  - This module covers the core UVM components used to build verification environments.
+    You'll learn how to create agents, drivers, monitors, sequencers, and sequences
+    to build complete verification environments.
+- type: section
+  title: Design architecture
+- type: image
+  title: RTL / block architecture
+  image: assets/diagrams/rtl_architecture.png
+  caption: 'Module 4: DUT structure and key interfaces (see common_dut/rtl/).'
+- type: image
+  title: Verification environment architecture
+  image: assets/diagrams/verification_architecture.png
+  caption: 'Module 4: UVM layers, agents, and checkers for this phase.'
+- type: bullets
+  title: 1. DUT and interface protocol
+  bullets:
+  - '`module4/dut/interfaces/simple_interface.v` — valid/ready handshake, address/data/result
+    buses'
+  - Clocked, resettable interface models streaming transactions
+  - Agent maps one transaction type to one interface beat
+  notes: From MODULE4 Design Architecture.
+- type: bullets
+  title: 2. Agent-centric UVM architecture
+  bullets:
+  - Agent bundles driver, monitor, sequencer; env holds agent + scoreboard
+  - TLM analysis ports connect monitor → scoreboard (and optional coverage)
+  - '`InterfaceTransaction` defines fields, `copy`/`compare`, and constraints'
+  - 'Complete path: sequence → sequencer → driver → DUT → monitor → scoreboard'
+  notes: From MODULE4 Design Architecture.
+- type: bullets
+  title: 3. Component responsibilities
+  bullets:
+  - 'Driver: pull items from sequencer, drive pins per protocol'
+  - 'Monitor: passive observation, broadcast transactions on analysis port'
+  - 'Sequencer: arbitration and sequence execution'
+  - 'Scoreboard: expected vs actual from monitor streams'
+  notes: From MODULE4 Design Architecture.
+- type: section
+  title: Verification & testing methods
+- type: image
+  title: Testing and closure flow
+  image: assets/diagrams/testing_methods.png
+  caption: 'Module 4: how tests, checks, and metrics close verification goals.'
+- type: bullets
+  title: 1. Integration testing method
+  bullets:
+  - '`test_complete_agent.py` — end-to-end agent, env, and test class'
+  - 'Run: `./scripts/module4.sh --pyuvm-tests` or `make TEST=test_complete_agent`'
+  - Per-component examples (`driver_example.py`, …) isolate behavior before integration
+  notes: From MODULE4 Verification & Testing Methods.
+- type: bullets
+  title: 2. Checking strategy
+  bullets:
+  - Scoreboard compares monitored results to predicted model or golden vectors
+  - Analysis port fan-out allows multiple checkers without changing monitor
+  - Sequences provide repeatable stimulus; random/constrained extensions in exercises
+  notes: From MODULE4 Verification & Testing Methods.
+- type: bullets
+  title: 3. Closure
+  bullets:
+  - Self-check via `module4.sh --check`; demo screenshots per EXAMPLES.md section
+  - 'Assessment: drivers, monitors, sequencers, agents, scoreboards, TLM connections'
+  notes: From MODULE4 Verification & Testing Methods.
+- type: section
+  title: Syllabus topics
+- type: bullets
+  title: 1. UVM Agent Architecture (1/3)
+  bullets:
+  - Agent Overview
+  - What is an agent?
+  - Agent components
+  - Agent purpose
+  - Agent types
+  - Active vs Passive Agents
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 1. UVM Agent Architecture (2/3)
+  bullets:
+  - Active agents (driver + sequencer + monitor)
+  - Passive agents (monitor only)
+  - When to use each
+  - Agent configuration
+  - Agent Structure
+  - Driver component
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 1. UVM Agent Architecture (3/3)
+  bullets:
+  - Monitor component
+  - Sequencer component
+  - Agent container
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 2. UVM Driver Implementation (1/4)
+  bullets:
+  - Driver Overview
+  - Driver purpose
+  - Driver responsibilities
+  - Driver interface
+  - Driver lifecycle
+  - Driver Implementation
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 2. UVM Driver Implementation (2/4)
+  bullets:
+  - Inheriting from `uvm_driver`
+  - '`run_phase()` implementation'
+  - Transaction reception
+  - Signal driving
+  - Driver-Sequencer Communication
+  - '`seq_item_port` interface'
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 2. UVM Driver Implementation (3/4)
+  bullets:
+  - '`get_next_item()`'
+  - '`item_done()`'
+  - Transaction flow
+  - Signal-Level Driving
+  - DUT signal access
+  - Signal value assignment
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 2. UVM Driver Implementation (4/4)
+  bullets:
+  - Timing control
+  - Protocol implementation
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 3. UVM Monitor Implementation (1/4)
+  bullets:
+  - Monitor Overview
+  - Monitor purpose
+  - Monitor responsibilities
+  - Monitor types
+  - Monitor lifecycle
+  - Monitor Implementation
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 3. UVM Monitor Implementation (2/4)
+  bullets:
+  - Inheriting from `uvm_monitor`
+  - '`run_phase()` implementation'
+  - Signal sampling
+  - Transaction creation
+  - Analysis Ports
+  - Analysis port purpose
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 3. UVM Monitor Implementation (3/4)
+  bullets:
+  - Creating analysis ports
+  - Writing to analysis ports
+  - Analysis port connections
+  - Transaction Creation
+  - Sampling signals
+  - Creating transaction objects
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 3. UVM Monitor Implementation (4/4)
+  bullets:
+  - Populating transaction fields
+  - Broadcasting transactions
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 4. UVM Sequencer and Sequences (1/5)
+  bullets:
+  - Sequencer Overview
+  - Sequencer purpose
+  - Sequencer responsibilities
+  - Sequencer types
+  - Sequencer lifecycle
+  - Sequencer Implementation
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 4. UVM Sequencer and Sequences (2/5)
+  bullets:
+  - Inheriting from `uvm_sequencer`
+  - Default sequencer usage
+  - Custom sequencer features
+  - Sequencer configuration
+  - Sequence Items
+  - '`uvm_sequence_item` base class'
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 4. UVM Sequencer and Sequences (3/5)
+  bullets:
+  - Transaction definition
+  - Transaction fields
+  - Transaction methods
+  - Sequence Basics
+  - '`uvm_sequence` base class'
+  - '`body()` method'
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 4. UVM Sequencer and Sequences (4/5)
+  bullets:
+  - Sequence execution
+  - Sequence lifecycle
+  - Sequence Operations
+  - '`start_item()`'
+  - '`finish_item()`'
+  - '`wait_for_grant()`'
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 4. UVM Sequencer and Sequences (5/5)
+  bullets:
+  - Transaction creation
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (1/11)
+  bullets:
+  - TLM Overview
+  - What is TLM?
+  - TLM benefits
+  - TLM abstraction levels
+  - TLM communication patterns
+  - TLM Interface Types
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (2/11)
+  bullets:
+  - '`put` interface - Unidirectional blocking put'
+  - '`get` interface - Unidirectional blocking get'
+  - '`peek` interface - Unidirectional non-blocking peek'
+  - '`transport` interface - Bidirectional blocking transport'
+  - Interface characteristics and use cases
+  - TLM Port Types
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (3/11)
+  bullets:
+  - '`uvm_put_port` - Put port'
+  - '`uvm_get_port` - Get port'
+  - '`uvm_peek_port` - Peek port'
+  - '`uvm_transport_port` - Transport port'
+  - Port vs export vs implementation
+  - TLM Export Types
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (4/11)
+  bullets:
+  - '`uvm_put_export` - Put export'
+  - '`uvm_get_export` - Get export'
+  - '`uvm_peek_export` - Peek export'
+  - '`uvm_transport_export` - Transport export'
+  - Export usage patterns
+  - TLM Implementation Types
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (5/11)
+  bullets:
+  - '`uvm_put_imp` - Put implementation'
+  - '`uvm_get_imp` - Get implementation'
+  - '`uvm_peek_imp` - Peek implementation'
+  - '`uvm_transport_imp` - Transport implementation'
+  - Implementation requirements
+  - Analysis Ports and Exports (Special TLM Type)
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (6/11)
+  bullets:
+  - Analysis port concept
+  - Publisher-subscriber pattern
+  - Broadcast communication
+  - One-to-many connections
+  - '`uvm_analysis_port` - Analysis port'
+  - '`uvm_analysis_export` - Analysis export'
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (7/11)
+  bullets:
+  - '`uvm_analysis_imp` - Analysis implementation'
+  - Connection patterns
+  - TLM FIFOs
+  - '`uvm_tlm_fifo` - TLM FIFO'
+  - FIFO purpose and usage
+  - FIFO capacity and blocking behavior
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (8/11)
+  bullets:
+  - FIFO connection patterns
+  - When to use FIFOs
+  - TLM Connection Patterns
+  - Direct connections (port to export)
+  - FIFO connections (port to FIFO to export)
+  - Multi-port connections
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (9/11)
+  bullets:
+  - Hierarchical connections
+  - Connection best practices
+  - TLM Usage Patterns
+  - Producer-consumer pattern
+  - Request-response pattern
+  - Broadcast pattern
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (10/11)
+  bullets:
+  - Pipeline pattern
+  - TLM vs analysis ports
+  - TLM Implementation Examples
+  - Using put/get interfaces
+  - Using transport interface
+  - Using TLM FIFOs
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 5. TLM (Transaction-Level Modeling) - Complete Coverage (11/11)
+  bullets:
+  - Combining TLM types
+  - TLM debugging
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 6. Scoreboard Implementation (1/4)
+  bullets:
+  - Scoreboard Overview
+  - Scoreboard purpose
+  - Scoreboard types
+  - Scoreboard responsibilities
+  - Scoreboard lifecycle
+  - Scoreboard Implementation
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 6. Scoreboard Implementation (2/4)
+  bullets:
+  - Inheriting from `uvm_component`
+  - Analysis port connections
+  - Transaction storage
+  - Comparison logic
+  - Scoreboard Patterns
+  - Reference model comparison
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 6. Scoreboard Implementation (3/4)
+  bullets:
+  - Expected vs actual
+  - Transaction matching
+  - Error reporting
+  - Advanced Scoreboards
+  - Multi-channel scoreboards
+  - Time-based matching
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 6. Scoreboard Implementation (4/4)
+  bullets:
+  - Complex comparison logic
+  - Performance optimization
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 7. Transaction-Level Modeling (1/3)
+  bullets:
+  - Transaction Concepts
+  - What are transactions?
+  - Transaction abstraction
+  - Transaction fields
+  - Transaction methods
+  - Transaction Design
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 7. Transaction-Level Modeling (2/3)
+  bullets:
+  - Transaction class structure
+  - Field definition
+  - Constraint definition
+  - Method implementation
+  - Transaction Operations
+  - Transaction creation
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 7. Transaction-Level Modeling (3/3)
+  bullets:
+  - Transaction copying
+  - Transaction comparison
+  - Transaction conversion
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 8. Complete Agent Example (1/3)
+  bullets:
+  - Agent Structure
+  - Agent class definition
+  - Component instantiation
+  - Component connections
+  - Agent configuration
+  - Agent Build Phase
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 8. Complete Agent Example (2/3)
+  bullets:
+  - Component creation
+  - Configuration application
+  - Active/passive selection
+  - Agent Connect Phase
+  - Driver-sequencer connection
+  - Monitor analysis port
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 8. Complete Agent Example (3/3)
+  bullets:
+  - External connections
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 9. Sequence Libraries (1/2)
+  bullets:
+  - Sequence Organization
+  - Base sequences
+  - Derived sequences
+  - Sequence libraries
+  - Sequence reuse
+  - Common Sequences
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 9. Sequence Libraries (2/2)
+  bullets:
+  - Simple sequences
+  - Random sequences
+  - Constrained sequences
+  - Layered sequences
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 10. Agent Integration (1/2)
+  bullets:
+  - Environment Integration
+  - Adding agents to environment
+  - Agent configuration
+  - Agent connections
+  - Agent coordination
+  - Test Integration
+  notes: From MODULE4 Topics Covered.
+- type: bullets
+  title: 10. Agent Integration (2/2)
+  bullets:
+  - Agent instantiation
+  - Sequence execution
+  - Test coordination
+  - Result checking
+  notes: From MODULE4 Topics Covered.
+- type: section
+  title: Hands-on examples
+- type: demo
+  title: Module 4 self-check
+  command: ./scripts/module4.sh --check
+  screenshot: assets/screenshots/module4_check.png
+  expect_stdout_contains: All required checks passed
+  notes: Run from course repository root.
+- type: code
+  title: Exercise scaffold
+  language: bash
+  source_file: scripts/module4.sh
+  code: ./scripts/module4.sh --scaffold
+- type: demo
+  title: 'Demo: Driver Implementation'
+  command: .venv/bin/python module4/examples/drivers/driver_example.py
+  screenshot: assets/screenshots/ex01_drivers.png
+  notes: 'Hands-on: module4/examples/drivers/'
+- type: demo
+  title: 'Demo: Monitor Implementation'
+  command: .venv/bin/python module4/examples/monitors/monitor_example.py
+  screenshot: assets/screenshots/ex02_monitors.png
+  notes: 'Hands-on: module4/examples/monitors/'
+- type: demo
+  title: 'Demo: Sequencer and Sequences'
+  command: .venv/bin/python module4/examples/sequencers/sequencer_example.py
+  screenshot: assets/screenshots/ex03_sequencers.png
+  notes: 'Hands-on: module4/examples/sequencers/'
+- type: demo
+  title: 'Demo: Complete Agent'
+  command: .venv/bin/python module4/examples/agents/agent_example.py
+  screenshot: assets/screenshots/ex04_agents.png
+  notes: 'Hands-on: module4/examples/agents/'
+- type: demo
+  title: 'Demo: Scoreboard Implementation'
+  command: .venv/bin/python module4/examples/scoreboards/scoreboard_example.py
+  screenshot: assets/screenshots/ex05_scoreboards.png
+  notes: 'Hands-on: module4/examples/scoreboards/'
+- type: demo
+  title: 'Demo: TLM Communication'
+  command: .venv/bin/python module4/examples/tlm/tlm_example.py
+  screenshot: assets/screenshots/ex06_tlm.png
+  notes: 'Hands-on: module4/examples/tlm/'
+- type: demo
+  title: 'Demo: Transaction Modeling'
+  command: .venv/bin/python module4/examples/transactions/transaction_example.py
+  screenshot: assets/screenshots/ex07_transactions.png
+  notes: 'Hands-on: module4/examples/transactions/'
+- type: section
+  title: Practice & assessment
+- type: bullets
+  title: Exercises
+  bullets:
+  - Driver Implementation
+  - Monitor Implementation
+  - Sequence Creation
+  - Agent Building
+  - Scoreboard Implementation
+- type: bullets
+  title: Assessment checklist
+  bullets:
+  - Understands agent architecture
+  - Can implement drivers
+  - Can implement monitors
+  - Can implement sequencers
+  - Can create sequences
+  - Can use analysis ports
+- type: bullets
+  title: Summary & next steps
+  bullets:
+  - Build complete UVM agents with driver, monitor, and sequencer
+  - Complete module4/CHECKLIST.md
+  - Run ./scripts/module4.sh --check
+  - 'Next: Next module in course'

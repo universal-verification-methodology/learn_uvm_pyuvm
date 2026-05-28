@@ -1,0 +1,423 @@
+title: Module 7 — Real-World Applications
+course: learn_uvm_pyuvm
+module: 7
+subtitle: Apply UVM to real-world verification scenarios
+footer: learn_uvm_pyuvm / Module 7
+slides:
+- type: title
+  title: Module 7
+  subtitle: Real-World Applications
+- type: bullets
+  title: Learning objectives
+  bullets:
+  - Apply UVM to real-world verification scenarios
+- type: bullets
+  title: Prerequisites
+  bullets:
+  - See module README
+- type: image
+  title: Learning path
+  image: assets/diagrams/learning_path.png
+  caption: Apply UVM to real-world verification scenarios
+- type: bullets
+  title: Overview
+  bullets:
+  - This module applies all learned concepts to real-world verification scenarios.
+    You'll work on complete verification projects, learn industry best practices,
+    and understand how to create production-quality verification en
+- type: section
+  title: Design architecture
+- type: image
+  title: RTL / block architecture
+  image: assets/diagrams/rtl_architecture.png
+  caption: 'Module 7: DUT structure and key interfaces (see common_dut/rtl/).'
+- type: image
+  title: Verification environment architecture
+  image: assets/diagrams/verification_architecture.png
+  caption: 'Module 7: UVM layers, agents, and checkers for this phase.'
+- type: bullets
+  title: 1. Real-world DUT blocks
+  bullets:
+  - '`module7/dut/dma/simple_dma.v` — DMA controller with channel descriptors'
+  - '`module7/dut/protocols/uart.v` — serial framing for protocol agent labs'
+  - Blocks represent IP-style interfaces students will see in SoC verification
+  notes: From MODULE7 Design Architecture.
+- type: bullets
+  title: 2. Verification IP (VIP) architecture
+  bullets:
+  - Reusable agents package protocol knowledge (transactions, sequences, checkers)
+  - Env composes DMA + UART (or other) agents with shared config and scoreboard fabric
+  - Best-practices example shows directory layout, naming, and review-friendly TB
+    structure
+  notes: From MODULE7 Design Architecture.
+- type: bullets
+  title: 3. Integration view
+  bullets:
+  - Software-visible registers drive DMA; UART provides async serial path
+  - Scoreboard and coverage span multiple IPs in one regression
+  - Exercises push toward production-style reuse and documentation
+  notes: From MODULE7 Design Architecture.
+- type: section
+  title: Verification & testing methods
+- type: image
+  title: Testing and closure flow
+  image: assets/diagrams/testing_methods.png
+  caption: 'Module 7: how tests, checks, and metrics close verification goals.'
+- type: bullets
+  title: 1. Application-level test methods
+  bullets:
+  - 'DMA tests: descriptor programming, transfer completion, interrupt/status flags'
+  - 'UART tests: baud framing, TX/RX loops, error injection in exercises'
+  - VIP tests encapsulate protocol rules so tests focus on scenarios not bit toggling
+  notes: From MODULE7 Verification & Testing Methods.
+- type: bullets
+  title: 2. Regression and sign-off practices
+  bullets:
+  - '`./scripts/module7.sh` runs DMA, protocol, VIP, and best-practices demos'
+  - 'Layered regressions: smoke (short), nightly (full EXAMPLES), release (with coverage
+    goals)'
+  - Waveforms and transaction logs for post-mortem on failures
+  notes: From MODULE7 Verification & Testing Methods.
+- type: bullets
+  title: 3. Closure
+  bullets:
+  - '`module7.sh --check`; assessment covers VIP reuse, protocols, and integration'
+  - Prepares for Module 8 utilities used in production regressions (CLP, recorders)
+  notes: From MODULE7 Verification & Testing Methods.
+- type: section
+  title: Syllabus topics
+- type: bullets
+  title: 1. DMA Verification (1/4)
+  bullets:
+  - DMA Controller Overview
+  - DMA concepts
+  - DMA controller architecture
+  - DMA transfer types
+  - DMA verification challenges
+  - DMA Testbench Architecture
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 1. DMA Verification (2/4)
+  bullets:
+  - Register interface agent
+  - Memory interface agent
+  - DMA monitor
+  - Scoreboard design
+  - Coverage model
+  - DMA Verification Scenarios
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 1. DMA Verification (3/4)
+  bullets:
+  - Simple transfers
+  - Scatter-gather transfers
+  - Multiple channel transfers
+  - Error scenarios
+  - Performance verification
+  - DMA Test Implementation
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 1. DMA Verification (4/4)
+  bullets:
+  - Test scenarios
+  - Sequence design
+  - Coverage closure
+  - Regression testing
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 2. Protocol Verification (Industry Standards) (1/4)
+  bullets:
+  - UART Verification
+  - UART protocol
+  - UART agent design
+  - UART testbench
+  - UART verification
+  - SPI Verification
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 2. Protocol Verification (Industry Standards) (2/4)
+  bullets:
+  - SPI protocol
+  - SPI agent design
+  - Master-slave coordination
+  - SPI testbench
+  - I2C Verification
+  - I2C protocol
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 2. Protocol Verification (Industry Standards) (3/4)
+  bullets:
+  - I2C agent design
+  - Multi-master scenarios
+  - I2C testbench
+  - AXI Verification
+  - AXI protocol details
+  - AXI agent implementation
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 2. Protocol Verification (Industry Standards) (4/4)
+  bullets:
+  - AXI testbench
+  - AXI compliance
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 3. Best Practices and Patterns (1/4)
+  bullets:
+  - Code Organization
+  - Project structure
+  - File organization
+  - Naming conventions
+  - Documentation standards
+  - Reusability Patterns
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 3. Best Practices and Patterns (2/4)
+  bullets:
+  - Component reuse
+  - Sequence reuse
+  - Environment reuse
+  - VIP (Verification IP) creation
+  - Documentation
+  - Code documentation
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 3. Best Practices and Patterns (3/4)
+  bullets:
+  - Test documentation
+  - User guides
+  - API documentation
+  - Maintenance
+  - Code maintenance
+  - Test maintenance
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 3. Best Practices and Patterns (4/4)
+  bullets:
+  - Version management
+  - Change management
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 4. Advanced Topics (1/4)
+  bullets:
+  - Performance Optimization
+  - Testbench optimization
+  - Simulation speed
+  - Memory optimization
+  - CPU utilization
+  - Coverage Closure
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 4. Advanced Topics (2/4)
+  bullets:
+  - Coverage strategies
+  - Coverage analysis
+  - Coverage improvement
+  - Coverage metrics
+  - Regression Testing
+  - Regression strategies
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 4. Advanced Topics (3/4)
+  bullets:
+  - Test selection
+  - Test execution
+  - Result analysis
+  - Continuous Integration
+  - CI/CD setup
+  - Automated testing
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 4. Advanced Topics (4/4)
+  bullets:
+  - Result reporting
+  - Notification systems
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 5. Verification IP (VIP) Development (1/3)
+  bullets:
+  - VIP Overview
+  - What is VIP?
+  - VIP components
+  - VIP structure
+  - VIP benefits
+  - VIP Development
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 5. Verification IP (VIP) Development (2/3)
+  bullets:
+  - VIP design
+  - VIP implementation
+  - VIP testing
+  - VIP documentation
+  - VIP Integration
+  - VIP integration
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 5. Verification IP (VIP) Development (3/3)
+  bullets:
+  - VIP configuration
+  - VIP usage
+  - VIP maintenance
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 6. System-Level Verification (1/2)
+  bullets:
+  - System Verification
+  - System architecture
+  - System testbench
+  - System scenarios
+  - System verification
+  - SoC Verification
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 6. System-Level Verification (2/2)
+  bullets:
+  - SoC architecture
+  - SoC testbench
+  - SoC scenarios
+  - SoC verification
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 7. Advanced Debugging (1/2)
+  bullets:
+  - Complex Debugging
+  - Multi-component debugging
+  - Transaction flow debugging
+  - Timing debugging
+  - Configuration debugging
+  - Debugging Tools
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 7. Advanced Debugging (2/2)
+  bullets:
+  - Waveform tools
+  - Log analysis tools
+  - Coverage tools
+  - Performance tools
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 8. Test Planning and Strategy (1/2)
+  bullets:
+  - Test Planning
+  - Test strategy
+  - Test scenarios
+  - Test coverage
+  - Test execution plan
+  - Verification Strategy
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 8. Test Planning and Strategy (2/2)
+  bullets:
+  - Verification approach
+  - Verification metrics
+  - Verification closure
+  - Sign-off criteria
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 9. Industry Patterns (1/2)
+  bullets:
+  - Common Patterns
+  - Industry patterns
+  - Pattern libraries
+  - Pattern reuse
+  - Pattern best practices
+  - Design Patterns
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: 9. Industry Patterns (2/2)
+  bullets:
+  - Verification patterns
+  - Architecture patterns
+  - Implementation patterns
+  - Testing patterns
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: '10. Project: Build Your Own VIP (1/3)'
+  bullets:
+  - Project Requirements
+  - Choose protocol
+  - Design VIP
+  - Implement VIP
+  - Test VIP
+  - Document VIP
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: '10. Project: Build Your Own VIP (2/3)'
+  bullets:
+  - VIP Components
+  - Complete agent
+  - Protocol checker
+  - Coverage model
+  - Scoreboard
+  - Register model (if applicable)
+  notes: From MODULE7 Topics Covered.
+- type: bullets
+  title: '10. Project: Build Your Own VIP (3/3)'
+  bullets:
+  - Documentation
+  - Test suite
+  notes: From MODULE7 Topics Covered.
+- type: section
+  title: Hands-on examples
+- type: demo
+  title: Module 7 self-check
+  command: ./scripts/module7.sh --check
+  screenshot: assets/screenshots/module7_check.png
+  expect_stdout_contains: All required checks passed
+  notes: Run from course repository root.
+- type: demo
+  title: 'Demo: DMA Verification'
+  command: .venv/bin/python module7/examples/dma/dma_example.py
+  screenshot: assets/screenshots/ex01_dma.png
+  notes: 'Hands-on: module7/examples/dma/'
+- type: demo
+  title: 'Demo: UART Protocol'
+  command: .venv/bin/python module7/examples/protocols/uart_example.py
+  screenshot: assets/screenshots/ex02_protocols.png
+  notes: 'Hands-on: module7/examples/protocols/'
+- type: demo
+  title: 'Demo: SPI Protocol'
+  command: .venv/bin/python module7/examples/protocols/spi_example.py
+  screenshot: assets/screenshots/ex03_protocols.png
+  notes: 'Hands-on: module7/examples/protocols/'
+- type: demo
+  title: 'Demo: I2C Protocol'
+  command: .venv/bin/python module7/examples/protocols/i2c_example.py
+  screenshot: assets/screenshots/ex04_protocols.png
+  notes: 'Hands-on: module7/examples/protocols/'
+- type: demo
+  title: 'Demo: VIP Development'
+  command: .venv/bin/python module7/examples/vip/vip_example.py
+  screenshot: assets/screenshots/ex05_vip.png
+  notes: 'Hands-on: module7/examples/vip/'
+- type: demo
+  title: 'Demo: Best Practices'
+  command: .venv/bin/python module7/examples/best_practices/best_practices_example.py
+  screenshot: assets/screenshots/ex06_best_practices.png
+  notes: 'Hands-on: module7/examples/best_practices/'
+- type: section
+  title: Practice & assessment
+- type: bullets
+  title: Exercises
+  bullets:
+  - DMA Verification
+  - Protocol VIP
+  - Best Practices
+  - Coverage Closure
+  - Final Project
+- type: bullets
+  title: Assessment checklist
+  bullets:
+  - Can verify complex designs
+  - Understands best practices
+  - Can create reusable VIP
+  - Can optimize performance
+  - Can achieve coverage closure
+  - Can plan verification projects
+- type: bullets
+  title: Summary & next steps
+  bullets:
+  - Apply UVM to real-world verification scenarios
+  - Complete module7/CHECKLIST.md
+  - Run ./scripts/module7.sh --check
+  - 'Next: Next module in course'

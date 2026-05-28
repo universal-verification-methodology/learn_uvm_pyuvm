@@ -1,0 +1,6 @@
+flowchart TD
+  S[Stimulus: directed vectors] --> DUT[(DUT)]
+  DUT --> M[Monitor / read signals]
+  M --> C{Match expected?}
+  C -->|yes| P[PASS]
+  C -->|no| F[FAIL + log]

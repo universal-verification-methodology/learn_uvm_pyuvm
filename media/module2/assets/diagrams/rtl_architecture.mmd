@@ -1,0 +1,11 @@
+flowchart TB
+  subgraph regs["Registers"]
+    SR[simple_register]
+    SH[shift_register]
+  end
+  subgraph other["Reference DUTs"]
+    FIFO[simple_fifo]
+    FSM[simple_fsm]
+  end
+  CLK[clk] --> SR
+  CLK --> SH

@@ -1,0 +1,5 @@
+flowchart TD
+  R[Reset test first] --> W[Directed writes]
+  W --> E[Edge / boundary values]
+  E --> REG[cocotb regression]
+  REG --> OK{All pass?}

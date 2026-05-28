@@ -1,0 +1,536 @@
+title: Module 8 — UVM Miscellaneous Utilities
+course: learn_uvm_pyuvm
+module: 8
+subtitle: Master UVM utility classes and helper functions
+footer: learn_uvm_pyuvm / Module 8
+slides:
+- type: title
+  title: Module 8
+  subtitle: UVM Miscellaneous Utilities
+- type: bullets
+  title: Learning objectives
+  bullets:
+  - Master UVM utility classes and helper functions
+- type: bullets
+  title: Prerequisites
+  bullets:
+  - See module README
+- type: image
+  title: Learning path
+  image: assets/diagrams/learning_path.png
+  caption: Master UVM utility classes and helper functions
+- type: bullets
+  title: Overview
+  bullets:
+  - This module covers the miscellaneous utilities provided by UVM that support verification
+    environments. These utilities include command-line processing, comparators, recorders,
+    object pools, queues, and various helper cla
+- type: section
+  title: Design architecture
+- type: image
+  title: RTL / block architecture
+  image: assets/diagrams/rtl_architecture.png
+  caption: 'Module 8: DUT structure and key interfaces (see common_dut/rtl/).'
+- type: image
+  title: Verification environment architecture
+  image: assets/diagrams/verification_architecture.png
+  caption: 'Module 8: UVM layers, agents, and checkers for this phase.'
+- type: bullets
+  title: 1. Utility layer in the testbench
+  bullets:
+  - No new large DUT focus — utilities plug into existing envs from prior modules
+  - CLP (`uvm_cmdline_processor`) configures tests without recompilation
+  - Comparators, recorders, pools, queues support analysis and debug infrastructure
+  notes: From MODULE8 Design Architecture.
+- type: bullets
+  title: 2. How utilities attach
+  bullets:
+  - Comparators sit on analysis ports beside scoreboards
+  - Recorders log transactions to files for offline review
+  - Pools/queues manage recycled objects and ordered work lists
+  - String/math/random helpers reduce boilerplate in checks and stimulus
+  notes: From MODULE8 Design Architecture.
+- type: bullets
+  title: 3. Integration architecture
+  bullets:
+  - '`module8/examples/integration/` wires multiple utilities in one mini-env'
+  - Tests under `module8/tests/pyuvm_tests/` prove utilities under simulation
+  - 'Pattern: configure via CLP → run sequence → compare → record → report'
+  notes: From MODULE8 Design Architecture.
+- type: section
+  title: Verification & testing methods
+- type: image
+  title: Testing and closure flow
+  image: assets/diagrams/testing_methods.png
+  caption: 'Module 8: how tests, checks, and metrics close verification goals.'
+- type: bullets
+  title: 1. Utility-focused test methods
+  bullets:
+  - 'Comparator tests: equal/less/greater policies on transaction streams'
+  - 'Recorder tests: verify log format and flush on phase boundaries'
+  - 'CLP tests: plusargs override seed, verbosity, and test name'
+  notes: From MODULE8 Verification & Testing Methods.
+- type: bullets
+  title: 2. Efficiency and reuse
+  bullets:
+  - Object pools cut allocation churn in high-transaction regressions
+  - Queues order deferred checks or secondary stimulus
+  - Random/string/math utils keep constraints readable in sequences
+  notes: From MODULE8 Verification & Testing Methods.
+- type: bullets
+  title: 3. Closure
+  bullets:
+  - '`./scripts/module8.sh --check` across all utility examples'
+  - 'Assessment: CLP, comparators, recorders, pools, queues, integration'
+  - 'Capstone: combine utilities with Module 6/7 style envs in your own project'
+  notes: From MODULE8 Verification & Testing Methods.
+- type: section
+  title: Syllabus topics
+- type: bullets
+  title: 1. UVM Command Line Processor (CLP) (1/4)
+  bullets:
+  - Command Line Processor Overview
+  - What is CLP?
+  - Why use CLP?
+  - CLP benefits
+  - CLP vs manual argument parsing
+  - CLP Usage
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 1. UVM Command Line Processor (CLP) (2/4)
+  bullets:
+  - Getting command-line arguments
+  - Argument types (string, int, bit, time)
+  - Default values
+  - Argument validation
+  - CLP Methods
+  - '`get_arg_value()` - Get argument value'
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 1. UVM Command Line Processor (CLP) (3/4)
+  bullets:
+  - '`get_arg_values()` - Get multiple values'
+  - '`get_arg_count()` - Get argument count'
+  - '`has_arg()` - Check if argument exists'
+  - CLP Patterns
+  - Test configuration via command line
+  - Debug control via command line
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 1. UVM Command Line Processor (CLP) (4/4)
+  bullets:
+  - Simulation control via command line
+  - Best practices
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 2. UVM Comparators (1/5)
+  bullets:
+  - Comparator Overview
+  - What are comparators?
+  - Comparator purpose
+  - When to use comparators
+  - Comparator types
+  - Built-in Comparators
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 2. UVM Comparators (2/5)
+  bullets:
+  - '`uvm_in_order_comparator` - In-order comparison'
+  - '`uvm_algorithmic_comparator` - Algorithmic comparison'
+  - Comparator characteristics
+  - Comparator selection
+  - In-Order Comparator
+  - Sequential comparison
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 2. UVM Comparators (3/5)
+  bullets:
+  - Transaction matching
+  - Comparison logic
+  - Error reporting
+  - Algorithmic Comparator
+  - Custom comparison algorithms
+  - Flexible matching
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 2. UVM Comparators (4/5)
+  bullets:
+  - Comparison functions
+  - Use cases
+  - Comparator Implementation
+  - Creating comparators
+  - Connecting comparators
+  - Configuring comparators
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 2. UVM Comparators (5/5)
+  bullets:
+  - Using comparators in scoreboards
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 3. UVM Recorders (1/5)
+  bullets:
+  - Recorder Overview
+  - What are recorders?
+  - Recorder purpose
+  - Transaction recording
+  - Recording benefits
+  - Recorder Types
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 3. UVM Recorders (2/5)
+  bullets:
+  - '`uvm_text_recorder` - Text recording'
+  - '`uvm_tr_database` - Transaction database'
+  - Recording formats
+  - Recording selection
+  - Recorder Usage
+  - Enabling recording
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 3. UVM Recorders (3/5)
+  bullets:
+  - Recording transactions
+  - Recording configuration
+  - Recording analysis
+  - Transaction Recording
+  - Recording sequence items
+  - Recording transactions
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 3. UVM Recorders (4/5)
+  bullets:
+  - Recording timing
+  - Recording relationships
+  - Recorder Implementation
+  - Creating recorders
+  - Connecting recorders
+  - Configuring recorders
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 3. UVM Recorders (5/5)
+  bullets:
+  - Analyzing recordings
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 4. UVM Pools (1/5)
+  bullets:
+  - Object Pool Overview
+  - What are pools?
+  - Pool purpose
+  - Object reuse
+  - Performance benefits
+  - Pool Types
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 4. UVM Pools (2/5)
+  bullets:
+  - '`uvm_pool` - Generic object pool'
+  - Pool characteristics
+  - Pool operations
+  - Pool use cases
+  - Pool Usage
+  - Creating pools
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 4. UVM Pools (3/5)
+  bullets:
+  - Adding objects to pools
+  - Getting objects from pools
+  - Pool management
+  - Pool Implementation
+  - Pool creation
+  - Object allocation
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 4. UVM Pools (4/5)
+  bullets:
+  - Object deallocation
+  - Pool cleanup
+  - Pool Patterns
+  - Transaction pooling
+  - Sequence item pooling
+  - Performance optimization
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 4. UVM Pools (5/5)
+  bullets:
+  - Memory management
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 5. UVM Queues (1/5)
+  bullets:
+  - Queue Overview
+  - What are queues?
+  - Queue purpose
+  - Queue vs list
+  - Queue benefits
+  - Queue Types
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 5. UVM Queues (2/5)
+  bullets:
+  - '`uvm_queue` - Generic queue'
+  - Queue characteristics
+  - Queue operations
+  - Queue use cases
+  - Queue Usage
+  - Creating queues
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 5. UVM Queues (3/5)
+  bullets:
+  - Adding items to queues
+  - Removing items from queues
+  - Queue management
+  - Queue Implementation
+  - Queue creation
+  - Queue operations
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 5. UVM Queues (4/5)
+  bullets:
+  - Queue iteration
+  - Queue cleanup
+  - Queue Patterns
+  - Transaction queues
+  - Scoreboard queues
+  - Buffer queues
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 5. UVM Queues (5/5)
+  bullets:
+  - Queue best practices
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 6. UVM String Utilities (1/3)
+  bullets:
+  - String Utility Overview
+  - String manipulation needs
+  - UVM string utilities
+  - Utility benefits
+  - When to use utilities
+  - String Operations
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 6. UVM String Utilities (2/3)
+  bullets:
+  - String formatting
+  - String conversion
+  - String manipulation
+  - String comparison
+  - String Utility Methods
+  - Common string operations
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 6. UVM String Utilities (3/3)
+  bullets:
+  - Formatting functions
+  - Conversion functions
+  - Utility patterns
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 7. UVM Math Utilities (1/3)
+  bullets:
+  - Math Utility Overview
+  - Mathematical operations
+  - UVM math utilities
+  - Utility benefits
+  - When to use utilities
+  - Math Operations
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 7. UVM Math Utilities (2/3)
+  bullets:
+  - Random number generation
+  - Statistical functions
+  - Mathematical utilities
+  - Math patterns
+  - Math Utility Methods
+  - Common math operations
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 7. UVM Math Utilities (3/3)
+  bullets:
+  - Random functions
+  - Statistical functions
+  - Utility patterns
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 8. UVM Random Utilities (1/3)
+  bullets:
+  - Random Utility Overview
+  - Random number generation
+  - UVM random utilities
+  - Randomization support
+  - Random patterns
+  - Random Operations
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 8. UVM Random Utilities (2/3)
+  bullets:
+  - Random value generation
+  - Constrained random
+  - Random seeds
+  - Random control
+  - Random Utility Methods
+  - Random number generation
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 8. UVM Random Utilities (3/3)
+  bullets:
+  - Seed management
+  - Random state
+  - Utility patterns
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 9. UVM Primitives (1/3)
+  bullets:
+  - Primitive Overview
+  - What are primitives?
+  - Primitive purpose
+  - Primitive types
+  - Primitive use cases
+  - Primitive Types
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 9. UVM Primitives (2/3)
+  bullets:
+  - Common primitives
+  - Primitive operations
+  - Primitive characteristics
+  - Primitive selection
+  - Primitive Usage
+  - Using primitives
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 9. UVM Primitives (3/3)
+  bullets:
+  - Primitive patterns
+  - Primitive best practices
+  - Primitive examples
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 10. UVM Macros (Python Context) (1/2)
+  bullets:
+  - Macro Overview
+  - Macros in SystemVerilog vs Python
+  - Python alternatives
+  - Utility functions
+  - Helper decorators
+  - Python Equivalents
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 10. UVM Macros (Python Context) (2/2)
+  bullets:
+  - Macro alternatives
+  - Utility functions
+  - Decorator patterns
+  - Helper classes
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 11. Utility Integration (1/3)
+  bullets:
+  - Using Utilities in Testbenches
+  - When to use utilities
+  - Utility selection
+  - Utility integration
+  - Utility patterns
+  - Utility Best Practices
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 11. Utility Integration (2/3)
+  bullets:
+  - Utility usage guidelines
+  - Performance considerations
+  - Memory management
+  - Utility organization
+  - Common Utility Patterns
+  - Command-line configuration
+  notes: From MODULE8 Topics Covered.
+- type: bullets
+  title: 11. Utility Integration (3/3)
+  bullets:
+  - Transaction comparison
+  - Transaction recording
+  - Object management
+  notes: From MODULE8 Topics Covered.
+- type: section
+  title: Hands-on examples
+- type: demo
+  title: Module 8 self-check
+  command: ./scripts/module8.sh --check
+  screenshot: assets/screenshots/module8_check.png
+  expect_stdout_contains: All required checks passed
+  notes: Run from course repository root.
+- type: demo
+  title: 'Demo: Command Line Processor'
+  command: .venv/bin/python module8/examples/clp/clp_example.py
+  screenshot: assets/screenshots/ex01_clp.png
+  notes: 'Hands-on: module8/examples/clp/'
+- type: demo
+  title: 'Demo: Comparators'
+  command: .venv/bin/python module8/examples/comparators/comparator_example.py
+  screenshot: assets/screenshots/ex02_comparators.png
+  notes: 'Hands-on: module8/examples/comparators/'
+- type: demo
+  title: 'Demo: Recorders'
+  command: .venv/bin/python module8/examples/recorders/recorder_example.py
+  screenshot: assets/screenshots/ex03_recorders.png
+  notes: 'Hands-on: module8/examples/recorders/'
+- type: demo
+  title: 'Demo: Pools'
+  command: .venv/bin/python module8/examples/pools/pool_example.py
+  screenshot: assets/screenshots/ex04_pools.png
+  notes: 'Hands-on: module8/examples/pools/'
+- type: demo
+  title: 'Demo: Queues'
+  command: .venv/bin/python module8/examples/queues/queue_example.py
+  screenshot: assets/screenshots/ex05_queues.png
+  notes: 'Hands-on: module8/examples/queues/'
+- type: demo
+  title: 'Demo: String Utilities'
+  command: .venv/bin/python module8/examples/string_utils/string_utils_example.py
+  screenshot: assets/screenshots/ex06_string_utils.png
+  notes: 'Hands-on: module8/examples/string_utils/'
+- type: demo
+  title: 'Demo: Math Utilities'
+  command: .venv/bin/python module8/examples/math_utils/math_utils_example.py
+  screenshot: assets/screenshots/ex07_math_utils.png
+  notes: 'Hands-on: module8/examples/math_utils/'
+- type: demo
+  title: 'Demo: Random Utilities'
+  command: .venv/bin/python module8/examples/random_utils/random_utils_example.py
+  screenshot: assets/screenshots/ex08_random_utils.png
+  notes: 'Hands-on: module8/examples/random_utils/'
+- type: demo
+  title: 'Demo: Utility Integration'
+  command: .venv/bin/python module8/examples/integration/integration_example.py
+  screenshot: assets/screenshots/ex09_integration.png
+  notes: 'Hands-on: module8/examples/integration/'
+- type: section
+  title: Practice & assessment
+- type: bullets
+  title: Exercises
+  bullets:
+  - Command Line Processor
+  - Comparator Implementation
+  - Recorder Usage
+  - Pool and Queue Usage
+  - Utility Integration
+- type: bullets
+  title: Assessment checklist
+  bullets:
+  - Can use Command Line Processor
+  - Can implement and use comparators
+  - Can use recorders effectively
+  - Can use pools for object management
+  - Can use queues for data structures
+  - Can use string and math utilities
+- type: bullets
+  title: Summary & next steps
+  bullets:
+  - Master UVM utility classes and helper functions
+  - Complete module8/CHECKLIST.md
+  - Run ./scripts/module8.sh --check
+  - 'Next: Next module in course'

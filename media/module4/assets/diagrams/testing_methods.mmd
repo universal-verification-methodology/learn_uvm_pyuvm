@@ -1,0 +1,7 @@
+flowchart TD
+  ITEM[sequence_item] --> DRV[drive beat]
+  DRV --> DUT[(DUT)]
+  DUT --> MON[monitor item]
+  MON --> SB{scoreboard compare}
+  SB -->|match| PASS
+  SB -->|mismatch| FAIL
