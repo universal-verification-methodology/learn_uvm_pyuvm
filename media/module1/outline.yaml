@@ -23,29 +23,37 @@ slides:
   title: Overview
   bullets:
   - This module establishes the foundation for verification work. You'll learn essential
-    Python concepts used in verification and understand the fundamental principles
-    of hardware verification.
+    Python concepts used in verification and understand...
+- type: section
+  title: How to learn this module
+- type: bullets
+  title: Suggested learning path
+  bullets:
+  - Complete Module 0 (`./scripts/module0.sh --verify-only`) so Verilator, cocotb,
+    and pyuvm are available in `.venv`
+  - Skim `docs/MODULE1.md` and run pure Python examples first — no simulator required
+    for OOP/async foundations
+  - Review `module1/dut/simple_gates/` RTL (AND gate, counter) before opening cocotb
+    tests
+  - 'Understand the testbench mental model: DUT ← driver/stimulus ← test ← checker
+    ← monitor'
+  - Keep venv active; cocotb Makefiles expect `SIM=verilator` and `COCOTB_REDIRECT_OUTPUT=1`
+    defaults from course Makefiles
+  notes: From docs/MODULE1.md — read guides before running demos.
 - type: section
   title: Design architecture
-- type: image
-  title: RTL / block architecture
-  image: assets/diagrams/rtl_architecture.png
-  caption: 'Module 1: DUT structure and key interfaces (see common_dut/rtl/).'
-- type: image
-  title: Verification environment architecture
-  image: assets/diagrams/verification_architecture.png
-  caption: 'Module 1: UVM layers, agents, and checkers for this phase.'
-- type: bullets
+- type: two_column
   title: 1. RTL block architecture
-  bullets:
-  - DUTs in `module1/dut/simple_gates/` (AND gate) and `module1/dut/counters/` (counter
-    with enable/reset)
-  - 'Synchronous blocks: clock, active-low reset, multi-bit data paths'
+  left:
+  - DUTs in `module1/dut/simple_gates/` — `and_gate.v` (combinational) and `counter.v`
+    (enable, active-low reset)
+  - 'Synchronous blocks: clock, active-low reset, multi-bit data paths on the counter'
   - Flat hierarchy — no buses; ideal for first cocotb signal access and pyuvm hook-up
+  right: assets/diagrams/rtl_architecture.png
   notes: From MODULE1 Design Architecture.
-- type: bullets
+- type: two_column
   title: 2. Python verification layer architecture
-  bullets:
+  left:
   - '`module1/examples/` — pure Python (transactions, decorators, async, data structures,
     logging)'
   - '`module1/tests/cocotb_tests/` — coroutine testbenches driving RTL via cocotb
@@ -53,28 +61,75 @@ slides:
   - '`module1/tests/pyuvm_tests/` — minimal UVM-style hierarchy introduction'
   - Transaction classes in `examples/python_basics/transaction.py` model stimulus
     items reused in TB thinking
+  right: assets/diagrams/verification_architecture.png
   notes: From MODULE1 Design Architecture.
 - type: bullets
-  title: 3. Testbench mental model
+  title: 3. Execution pipeline
+  bullets:
+  - 'Build: Verilator compiles `module1/dut/simple_gates/*.v` via cocotb Makefile
+    (`VERILOG_SOURCES`, top module)'
+  - 'Sim: cocotb loads Python test module; coroutines advance time on `RisingEdge(clk)`
+    and combinational reads'
+  - 'Check: assertions in test functions plus cocotb `TestSuccess`/`TestFailure`;
+    pyuvm tests report UVM status'
+  - 'Orchestrator path: `module1.sh --cocotb-tests` wraps `make` with venv and simulator
+    checks'
+  notes: From MODULE1 Design Architecture.
+- type: bullets
+  title: 4. Testbench mental model
   bullets:
   - DUT (RTL) ← driver/stimulus ← test ← checker/scoreboard ← monitor → observations
   - Simulation time advances on clock edges; Python coroutines (`async`/`await`) align
     with cocotb
   - Assertions and logging close the loop between expected and actual behavior
+  - Python examples teach patterns (transactions, async) reused when pyuvm sequences
+    appear in Module 3
   notes: From MODULE1 Design Architecture.
+- type: code
+  title: DUT — AND gate ports
+  language: systemverilog
+  source_file: module1/dut/simple_gates/and_gate.v
+  code: "module and_gate (\n    input  wire a,\n    input  wire b,\n    output reg\
+    \  y\n);\n\n    always @(*) begin\n        y = a & b;\n    end\n\nendmodule"
+  notes: Flat combinational block; cocotb accesses dut.a, dut.b, dut.y.
+- type: code
+  title: cocotb — drive inputs and assert
+  language: text
+  source_file: module1/tests/cocotb_tests/test_and_gate.py
+  code: "@cocotb.test()\nasync def test_and_gate_basic(dut):\n    \"\"\"\n    Basic\
+    \ AND gate test.\n    \n    Tests all input combinations.\n    \"\"\"\n    # Initialize\
+    \ inputs\n    dut.a.value = 0\n    dut.b.value = 0\n    \n    # Wait for initial\
+    \ values to settle\n    await Timer(10, units=\"ns\")\n    \n    # Test case 1:\
+    \ 0 & 0 = 0\n    dut.a.value = 0\n    dut.b.value = 0\n    await Timer(10, units=\"\
+    ns\")\n// ..."
+- type: section
+  title: Key files to study
+- type: bullets
+  title: Open these in the repo
+  bullets:
+  - '`module1/dut/simple_gates/and_gate.v` — 2-input AND; first combinational DUT
+    for cocotb handles'
+  - '`module1/dut/simple_gates/counter.v` — clocked counter with enable/reset for
+    sequential labs'
+  - '`module1/examples/python_basics/transaction.py` — transaction class with `__eq__`/`__hash__`
+    patterns'
+  - '`module1/tests/cocotb_tests/test_and_gate.py` — directed cocotb vectors and edge
+    triggers'
+  - '`module1/tests/pyuvm_tests/test_and_gate_uvm.py` — minimal pyuvm hierarchy on
+    the AND gate'
+  - '`scripts/module1.sh` — routes Python examples and `--cocotb-tests` / `--pyuvm-tests`
+    regressions'
+  notes: Trace while running module1/EXAMPLES.md labs.
 - type: section
   title: Verification & testing methods
-- type: image
-  title: Testing and closure flow
-  image: assets/diagrams/testing_methods.png
-  caption: 'Module 1: how tests, checks, and metrics close verification goals.'
-- type: bullets
+- type: two_column
   title: 1. cocotb testing methods
-  bullets:
+  left:
   - 'Tests in `test_and_gate.py`, `test_counter.py`: reset, directed vectors, edge
     cases'
   - 'Run: `cd module1/tests/cocotb_tests && make SIM=verilator TEST=test_and_gate`'
   - 'Triggers: `RisingEdge(clk)`, `ReadOnly`/`Write` phases for signal stability'
+  right: assets/diagrams/testing_methods.png
   notes: From MODULE1 Verification & Testing Methods.
 - type: bullets
   title: 2. pyuvm and Python unit-style checks
@@ -86,13 +141,64 @@ slides:
   - Error-handling example shows structured logging for debuggable regressions
   notes: From MODULE1 Verification & Testing Methods.
 - type: bullets
-  title: 3. Closure and self-check
+  title: 3. Step-by-step lab execution
   bullets:
-  - '`./scripts/module1.sh --check` runs required examples and tests'
+  - '1. Run Python track: `./scripts/module1.sh` (or individual `--python-basics`,
+    `--async-await`, …)'
+  - '2. cocotb AND gate: `cd module1/tests/cocotb_tests && make SIM=verilator TEST=test_and_gate`'
+  - '3. cocotb counter: `make SIM=verilator TEST=test_counter` — observe reset and
+    enable sequencing'
+  - '4. pyuvm entry: `./scripts/module1.sh --pyuvm-tests` — confirm UVM-style test
+    completes without fatals'
+  - '5. Full regression: `./scripts/module1.sh --all-tests` before MODULE1 assessment
+    sign-off'
+  notes: From MODULE1 Verification & Testing Methods.
+- type: bullets
+  title: 4. Closure and self-check
+  bullets:
+  - '`./scripts/module1.sh --all-tests` runs required examples and simulator-backed
+    tests'
   - Combine directed cocotb tests with transaction equality (`__eq__`, `__hash__`)
     from Python examples
   - 'Assessment: OOP for verification, basic TB structure, cocotb + pyuvm entry points'
   notes: From MODULE1 Verification & Testing Methods.
+- type: code
+  title: Makefile — build and run flow
+  language: text
+  source_file: module1/tests/cocotb_tests/Makefile
+  code: '# Makefile for Module 1 cocotb tests
+
+    # Usage: make SIM=verilator test_and_gate
+
+
+    # Default simulator
+
+    SIM ?= verilator
+
+
+    # Python files
+
+    PYTHON_FILES = test_and_gate.py test_counter.py
+
+
+    # Verilog files
+
+    VERILOG_FILES = ../../dut/simple_gates/and_gate.v ../../dut/simple_gates/counter.v
+
+
+    # Test to run
+
+    TEST ?= test_and_gate
+
+
+    # Cocotb variables
+
+    MODULE = $(TEST)
+
+    TOPLEVEL = $(shell echo $(TEST) | sed ''s/test_//'')
+
+    // ...'
+  notes: SIM=verilator, TEST= selects cocotb module; cocotb-config drives compile.
 - type: section
   title: Syllabus topics
 - type: bullets
@@ -489,12 +595,42 @@ slides:
   - 'Verification Statistics: Track test results and errors for reporting'
   notes: From MODULE1 Topics Covered.
 - type: section
+  title: Command reference highlights
+- type: bullets
+  title: Python examples (no simulator)
+  bullets:
+  - '`./scripts/module1.sh` — runs all five Python example tracks (default)'
+  - '`./scripts/module1.sh --decorators --async-await` — selective example subsets'
+  - '`python3 module1/examples/python_basics/transaction.py` — standalone OOP/transaction
+    drill'
+  notes: Full detail in docs/MODULE1.md command reference.
+- type: bullets
+  title: cocotb RTL tests
+  bullets:
+  - '`./scripts/module1.sh --cocotb-tests` — build and run cocotb regressions via
+    orchestrator'
+  - '`cd module1/tests/cocotb_tests && make SIM=verilator TEST=test_and_gate` — single-test
+    Makefile flow'
+  - '`make SIM=verilator TEST=test_counter` — sequential counter regression with reset/enable
+    checks'
+  notes: Full detail in docs/MODULE1.md command reference.
+- type: bullets
+  title: pyuvm entry tests
+  bullets:
+  - '`./scripts/module1.sh --pyuvm-tests` — compile RTL and run introductory pyuvm
+    test against AND gate'
+  - '`cd module1/tests/pyuvm_tests && make SIM=verilator` — direct Make entry when
+    debugging pyuvm wiring'
+  - '`./scripts/module1.sh --all-tests` — Python examples plus cocotb and pyuvm test
+    suites'
+  notes: Full detail in docs/MODULE1.md command reference.
+- type: section
   title: Hands-on examples
 - type: demo
-  title: Module 1 self-check
-  command: ./scripts/module1.sh --check
+  title: Module 1 orchestrator
+  command: ./scripts/module1.sh --help
   screenshot: assets/screenshots/module1_check.png
-  expect_stdout_contains: All required checks passed
+  expect_stdout_contains: 'Usage:'
   notes: Run from course repository root.
 - type: code
   title: Exercise scaffold
@@ -524,13 +660,104 @@ slides:
   command: .venv/bin/python module1/examples/data_structures/data_structures_example.py
   screenshot: assets/screenshots/ex04_data_structures.png
   notes: 'Hands-on: module1/examples/data_structures/'
+  expect_stdout_contains: Queue
 - type: demo
   title: 'Demo: Error Handling and Logging'
   command: .venv/bin/python module1/examples/error_handling/error_handling_example.py
   screenshot: assets/screenshots/ex05_error_handling.png
   notes: 'Hands-on: module1/examples/error_handling/'
+  expect_stdout_contains: Error
 - type: section
   title: Practice & assessment
+- type: bullets
+  title: What you should know (1/9)
+  bullets:
+  - Write Python classes with inheritance
+  - Use decorators and context managers effectively
+  - Understand and use async/await for simulation
+  - Explain verification fundamentals
+  - Understand testbench architecture
+  - Comprehend simulation flow
+  notes: From MODULE1 Learning Outcomes.
+- type: bullets
+  title: What you should know (2/9)
+  bullets:
+  - Write basic assertions
+  - Use Python testing frameworks
+  - Handle errors and implement logging
+  - Class definition
+  - Instance variables
+  - Methods
+  notes: From MODULE1 Learning Outcomes.
+- type: bullets
+  title: What you should know (3/9)
+  bullets:
+  - Inheritance
+  - Function decorators
+  - Async function definition
+  - Await usage
+  - Testbench structure
+  - Clock generation
+  notes: From MODULE1 Learning Outcomes.
+- type: bullets
+  title: What you should know (4/9)
+  bullets:
+  - Signal driving
+  - Basic checking
+  - 'Test Structure: Using `@cocotb.test()` decorator'
+  - 'Signal Access: Reading and writing DUT signals (`dut.a`, `dut.b`, `dut.y`)'
+  - 'Timing Control: Using `await Timer()` for simulation time'
+  - 'Assertions: Python assertions for checking results'
+  notes: From MODULE1 Learning Outcomes.
+- type: bullets
+  title: What you should know (5/9)
+  bullets:
+  - 'Test Cases: Multiple test functions for different scenarios'
+  - 'Truth Table Testing: Systematic testing of all input combinations'
+  - '`@cocotb.test()`: Decorator marks function as a test'
+  - 'DUT Access: `dut.signal_name.value` to read/write signals'
+  - '`Timer()`: Advances simulation time'
+  - 'Assertions: Python `assert` statements for checking'
+  notes: From MODULE1 Learning Outcomes.
+- type: bullets
+  title: What you should know (6/9)
+  bullets:
+  - 'Test Organization: Multiple test functions in one file'
+  - 'Clock Generation: Creating clock signal with `generate_clock()` coroutine'
+  - 'Reset Sequence: Implementing reset with proper timing'
+  - 'Sequential Logic Testing: Testing clocked (sequential) circuits'
+  - 'Enable Control: Testing enable/disable functionality'
+  - 'Edge Detection: Using `RisingEdge()` trigger'
+  notes: From MODULE1 Learning Outcomes.
+- type: bullets
+  title: What you should know (7/9)
+  bullets:
+  - 'Multiple Test Scenarios: Reset, increment, enable, overflow tests'
+  - 'Clock Generation: Background coroutine for clock signal'
+  - '`cocotb.start_soon()`: Start background coroutines'
+  - '`RisingEdge()`: Wait for clock edge'
+  - 'Reset Timing: Proper reset sequence with timing'
+  - 'Sequential Testing: Testing state machines and counters'
+  notes: From MODULE1 Learning Outcomes.
+- type: bullets
+  title: What you should know (8/9)
+  bullets:
+  - 'UVM Test Structure: `@uvm_test()` decorator'
+  - 'UVM Phases: `build_phase()`, `run_phase()`, `check_phase()`'
+  - 'UVM Components: `uvm_test`, `uvm_env`, `uvm_agent`, `uvm_driver`, `uvm_monitor`'
+  - 'UVM Sequences: `uvm_sequence` and `uvm_sequence_item`'
+  - 'UVM Reporting: Using `self.logger` for messages'
+  - 'Objections: Using `raise_objection()` and `drop_objection()` for test control'
+  notes: From MODULE1 Learning Outcomes.
+- type: bullets
+  title: What you should know (9/9)
+  bullets:
+  - 'UVM Phases: Build, connect, run, check phases'
+  - 'Component Hierarchy: Test → Environment → Agent → Driver/Monitor'
+  - 'Sequences: Generate and send transactions'
+  - 'Objections: Control test execution duration'
+  - 'Factory Pattern: UVM uses factory for component creation'
+  notes: From MODULE1 Learning Outcomes.
 - type: bullets
   title: Exercises
   bullets:
@@ -553,5 +780,5 @@ slides:
   bullets:
   - Understand Python for verification and verification fundamentals
   - Complete module1/CHECKLIST.md
-  - Run ./scripts/module1.sh --check
+  - Review module1/EXAMPLES.md and run each lab
   - 'Next: Next module in course'

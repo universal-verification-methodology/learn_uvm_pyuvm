@@ -23,52 +23,111 @@ slides:
   title: Overview
   bullets:
   - This module applies all learned concepts to real-world verification scenarios.
-    You'll work on complete verification projects, learn industry best practices,
-    and understand how to create production-quality verification en
+    You'll work on complete verification projects, learn...
+- type: section
+  title: How to learn this module
+- type: bullets
+  title: Suggested learning path
+  bullets:
+  - Module 6 multi-agent protocol env is baseline — Module 7 applies it to DMA and
+    UART IP blocks
+  - Review `module7/dut/dma/simple_dma.v` register map and descriptor flow before
+    DMA examples
+  - Study `module7/dut/protocols/uart.v` framing (start bit, data, stop) for serial
+    agent labs
+  - VIP example packages reusable agents — focus on directory layout and naming for
+    reuse
+  - Best-practices example summarizes production-style TB structure before integrated
+    tests
+  notes: From docs/MODULE7.md — read guides before running demos.
 - type: section
   title: Design architecture
-- type: image
-  title: RTL / block architecture
-  image: assets/diagrams/rtl_architecture.png
-  caption: 'Module 7: DUT structure and key interfaces (see common_dut/rtl/).'
-- type: image
-  title: Verification environment architecture
-  image: assets/diagrams/verification_architecture.png
-  caption: 'Module 7: UVM layers, agents, and checkers for this phase.'
-- type: bullets
+- type: two_column
   title: 1. Real-world DUT blocks
-  bullets:
+  left:
   - '`module7/dut/dma/simple_dma.v` — DMA controller with channel descriptors'
   - '`module7/dut/protocols/uart.v` — serial framing for protocol agent labs'
   - Blocks represent IP-style interfaces students will see in SoC verification
+  right: assets/diagrams/rtl_architecture.png
   notes: From MODULE7 Design Architecture.
-- type: bullets
+- type: two_column
   title: 2. Verification IP (VIP) architecture
-  bullets:
+  left:
   - Reusable agents package protocol knowledge (transactions, sequences, checkers)
   - Env composes DMA + UART (or other) agents with shared config and scoreboard fabric
   - Best-practices example shows directory layout, naming, and review-friendly TB
     structure
+  - VIP boundaries separate protocol expertise from scenario tests
+  right: assets/diagrams/verification_architecture.png
   notes: From MODULE7 Design Architecture.
 - type: bullets
-  title: 3. Integration view
+  title: 3. Execution pipeline
+  bullets:
+  - 'Build: Verilator compiles DMA and/or UART RTL; env builds VIP agents and shared
+    infrastructure'
+  - 'Connect: register bus agent + DMA status monitors + UART analysis paths into
+    system scoreboard'
+  - 'Sim: software-visible register writes program DMA; UART sequences inject serial
+    traffic concurrently'
+  - 'Check: DMA transfer completion flags, memory content, UART frame integrity —
+    unified regression report'
+  notes: From MODULE7 Design Architecture.
+- type: bullets
+  title: 4. Integration view
   bullets:
   - Software-visible registers drive DMA; UART provides async serial path
   - Scoreboard and coverage span multiple IPs in one regression
   - Exercises push toward production-style reuse and documentation
+  - Module 8 utilities (CLP, recorders) plug into this env style in capstone work
   notes: From MODULE7 Design Architecture.
+- type: code
+  title: DUT — simple DMA controller
+  language: systemverilog
+  source_file: module7/dut/dma/simple_dma.v
+  code: "/**\n * Module 7: Simple DMA Controller\n * \n * A simple DMA controller\
+    \ for verification.\n * \n * Ports:\n *   clk:        Clock signal\n *   rst_n:\
+    \      Active-low reset\n *   dma_start:  Start DMA transfer\n *   dma_done: \
+    \  DMA transfer complete\n *   dma_src_addr: Source address\n *   dma_dst_addr:\
+    \ Destination address\n *   dma_length:  Transfer length\n *   dma_channel: DMA\
+    \ channel select\n */\n\nmodule simple_dma (\n    input  wire        clk,\n//\
+    \ ..."
+- type: code
+  title: VIP-style agent reuse
+  language: text
+  source_file: module7/examples/vip/vip_example.py
+  code: "\"\"\"\nModule 7 Example: VIP (Verification IP) Development\nDemonstrates\
+    \ creating reusable verification IP.\n\"\"\"\n\nfrom pyuvm import *\n\n# Explicitly\
+    \ import TLM classes that may not be in __all__\n# Try direct imports from known\
+    \ TLM module paths\ntry:\n    from pyuvm.s15_uvm_tlm_1 import uvm_seq_item_pull_port,\
+    \ uvm_analysis_imp\nexcept (ImportError, AttributeError):\n    try:\n        from\
+    \ pyuvm.s15_uvm_tlm import uvm_seq_item_pull_port, uvm_analysis_imp\n    except\
+    \ (ImportError, AttributeError):\n        try:\n            from pyuvm.s16_uvm_tlm_1\
+    \ import uvm_seq_item_pull_port, uvm_analysis_imp\n        except (ImportError,\
+    \ AttributeError):\n// ..."
+- type: section
+  title: Key files to study
+- type: bullets
+  title: Open these in the repo
+  bullets:
+  - '`module7/dut/dma/simple_dma.v` — DMA controller with channel descriptors and
+    status'
+  - '`module7/dut/protocols/uart.v` — UART TX/RX serial interface for protocol agent
+    labs'
+  - '`module7/examples/dma/dma_example.py` — descriptor programming and transfer completion'
+  - '`module7/examples/protocols/uart_example.py` — baud/framing stimulus and loopback
+    checks'
+  - '`module7/examples/vip/vip_example.py` — packaged verification IP agent pattern'
+  - '`scripts/module7.sh` — `--dma`, `--protocols`, `--vip`, `--best-practices`, `--pyuvm-tests`'
+  notes: Trace while running module7/EXAMPLES.md labs.
 - type: section
   title: Verification & testing methods
-- type: image
-  title: Testing and closure flow
-  image: assets/diagrams/testing_methods.png
-  caption: 'Module 7: how tests, checks, and metrics close verification goals.'
-- type: bullets
+- type: two_column
   title: 1. Application-level test methods
-  bullets:
+  left:
   - 'DMA tests: descriptor programming, transfer completion, interrupt/status flags'
   - 'UART tests: baud framing, TX/RX loops, error injection in exercises'
   - VIP tests encapsulate protocol rules so tests focus on scenarios not bit toggling
+  right: assets/diagrams/testing_methods.png
   notes: From MODULE7 Verification & Testing Methods.
 - type: bullets
   title: 2. Regression and sign-off practices
@@ -79,10 +138,22 @@ slides:
   - Waveforms and transaction logs for post-mortem on failures
   notes: From MODULE7 Verification & Testing Methods.
 - type: bullets
-  title: 3. Closure
+  title: 3. Step-by-step lab execution
   bullets:
-  - '`module7.sh --check`; assessment covers VIP reuse, protocols, and integration'
+  - '1. DMA block: `./scripts/module7.sh --dma` — program descriptor, confirm completion'
+  - '2. UART protocol: `./scripts/module7.sh --protocols` — framing and loopback'
+  - '3. VIP packaging: `./scripts/module7.sh --vip` — study reusable agent layout'
+  - '4. Best practices: `./scripts/module7.sh --best-practices` — review TB structure
+    checklist'
+  - '5. Integrated: `./scripts/module7.sh --pyuvm-tests` — multi-IP regression pass'
+  notes: From MODULE7 Verification & Testing Methods.
+- type: bullets
+  title: 4. Closure
+  bullets:
+  - '`./scripts/module7.sh --pyuvm-tests`; assessment covers VIP reuse, protocols,
+    and integration'
   - Prepares for Module 8 utilities used in production regressions (CLP, recorders)
+  - Articulate which checks live in VIP vs scenario test vs scoreboard
   notes: From MODULE7 Verification & Testing Methods.
 - type: section
   title: Syllabus topics
@@ -358,12 +429,37 @@ slides:
   - Test suite
   notes: From MODULE7 Topics Covered.
 - type: section
+  title: Command reference highlights
+- type: bullets
+  title: IP block examples
+  bullets:
+  - '`./scripts/module7.sh --dma` — DMA descriptor and completion drills'
+  - '`./scripts/module7.sh --protocols` — UART (and related protocol) agent examples'
+  - '`./scripts/module7.sh --vip --best-practices` — reusable VIP layout and review-friendly
+    structure'
+  notes: Full detail in docs/MODULE7.md command reference.
+- type: bullets
+  title: Integrated tests
+  bullets:
+  - '`./scripts/module7.sh --pyuvm-tests` — integrated pyuvm regressions under `module7/tests/`'
+  - '`cd module7/tests/pyuvm_tests && make SIM=verilator` — direct Make when debugging
+    env wiring'
+  - '`./scripts/module7.sh` — full example sweep plus tests for module sign-off'
+  notes: Full detail in docs/MODULE7.md command reference.
+- type: bullets
+  title: Layered regression mindset
+  bullets:
+  - 'Smoke: `./scripts/module7.sh --dma` only — fast sanity after tool changes'
+  - 'Nightly: all example flags — catches cross-IP integration regressions'
+  - Use transaction logs and waves for UART timing vs DMA memory content failures
+  notes: Full detail in docs/MODULE7.md command reference.
+- type: section
   title: Hands-on examples
 - type: demo
-  title: Module 7 self-check
-  command: ./scripts/module7.sh --check
+  title: Module 7 orchestrator
+  command: ./scripts/module7.sh --help
   screenshot: assets/screenshots/module7_check.png
-  expect_stdout_contains: All required checks passed
+  expect_stdout_contains: 'Usage:'
   notes: Run from course repository root.
 - type: demo
   title: 'Demo: DMA Verification'
@@ -398,6 +494,34 @@ slides:
 - type: section
   title: Practice & assessment
 - type: bullets
+  title: What you should know (1/3)
+  bullets:
+  - Verify complex designs (DMA, protocols)
+  - Apply industry best practices
+  - Create reusable verification IP
+  - Optimize testbench performance
+  - Achieve coverage closure
+  - Plan and execute verification projects
+  notes: From MODULE7 Learning Outcomes.
+- type: bullets
+  title: What you should know (2/3)
+  bullets:
+  - Debug complex issues
+  - Maintain production testbenches
+  - Apply industry patterns
+  - Create complete verification solutions
+  - Register model
+  - Multiple DMA channels
+  notes: From MODULE7 Learning Outcomes.
+- type: bullets
+  title: What you should know (3/3)
+  bullets:
+  - Scatter-gather support
+  - Performance monitoring
+  - Coverage model
+  - Scoreboard
+  notes: From MODULE7 Learning Outcomes.
+- type: bullets
   title: Exercises
   bullets:
   - DMA Verification
@@ -419,5 +543,5 @@ slides:
   bullets:
   - Apply UVM to real-world verification scenarios
   - Complete module7/CHECKLIST.md
-  - Run ./scripts/module7.sh --check
+  - Review module7/EXAMPLES.md and run each lab
   - 'Next: Next module in course'

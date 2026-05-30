@@ -37,6 +37,26 @@ chmod +x scripts/*.sh
 
 For detailed usage of each script, see the corresponding installation sections below.
 
+<!-- module-slide-supplements:auto:start -->
+
+## Before You Start
+
+1. Clone the repo and read `docs/MODULE0.md` for toolchain expectations (GCC/Clang, Python 3.10+, Git, Make)
+2. Confirm you have build essentials for Verilator (`sudo apt install build-essential` on Debian/Ubuntu) before running install scripts
+3. Decide install modes: Verilator (`submodule`/`system`/`source`), cocotb/pyuvm (`pip` or `submodule`) — defaults work for most learners
+4. Plan for a project-local venv at `.venv`; activate it (`source .venv/bin/activate`) before any Python checks
+5. No RTL or simulation in this module — success means every tool probe passes before Module 1
+
+## Key files to study
+
+- `scripts/module0.sh` — orchestrator for Verilator, cocotb, and pyuvm install plus verification probes
+- `scripts/install_verilator.sh` — builds or links Verilator per `--verilator-mode`
+- `scripts/install_cocotb.sh` — installs cocotb into `.venv` or submodule tree
+- `scripts/install_pyuvm.sh` — installs pyuvm and pins course Python dependencies
+- `docs/MODULE0.md` — assessment checklist mapping environment readiness to course progress
+- `requirements.txt` / `pyproject.toml` — dependency versions consumed by pip install paths
+
+<!-- module-slide-supplements:auto:end -->
 <!-- module-architecture:auto:start -->
 ## Design Architecture
 
@@ -52,33 +72,49 @@ For detailed usage of each script, see the corresponding installation sections b
 - Bottom layer: OS, compiler (GCC/Clang), Make/Ninja, Git
 - Simulator layer: Verilator (default) produces fast cycle-accurate models from SystemVerilog/Verilog
 - Testbench layer: cocotb (coroutine-driven) and pyuvm (UVM 1.2 in Python) share the same venv
-- Artifacts: logs under module runs, optional VCD/FST waveforms from Make targets
+- Artifacts: logs under module runs, optional VCD/FST waveforms from Make targets in later modules
 
-### 3. What is not in this module
+### 3. Execution pipeline
 
-- No DUT or UVM hierarchy yet — focus is reproducible environment setup
+- Install: `module0.sh` → dependency scripts → venv population → version probes (no compile/sim/check loop yet)
+- Build: not applicable — no DUT or Makefile targets in Module 0
+- Sim: not applicable — cocotb/Verilator coupling is validated only via import and `--version` probes
+- Check: `--verify-only` aggregates pass/fail; all three tools must report OK before Module 1 labs
+
+### 4. What is not in this module
+
+- No DUT or UVM hierarchy — focus is reproducible environment setup
 - Later modules attach Python tests to RTL under `moduleN/dut/`
 - Self-check only validates tools; functional verification starts in Module 1
+- Waveforms, scoreboards, and regression Makefiles appear from Module 1 onward
 
 ## Verification & Testing Methods
 
 ### 1. Installation verification strategy
 
 - Run `./scripts/module0.sh` for full install or per-tool flags (`--verilator-mode`, `--cocotb-mode`, `--pyuvm-mode`)
-- `./scripts/module0.sh --check` confirms `verilator`, `cocotb-config`, and importable `pyuvm`
+- `./scripts/module0.sh --verify-only` confirms `verilator`, `cocotb-config`, and importable `pyuvm`
 - Version probes (`verilator --version`, `python -c 'import cocotb'`) catch PATH and venv mistakes early
 
 ### 2. Smoke and regression mindset
 
 - Treat install as the first regression: every tool must pass before Module 1 labs
-- Re-run `--check` after OS updates or submodule pulls
+- Re-run `--verify-only` after OS updates or submodule pulls
 - Document failures in install logs; fix one layer at a time (compiler → Verilator → Python packages)
 
-### 3. Closure for Module 0
+### 3. Step-by-step lab execution
 
-- Pass criteria: all install scripts succeed and `--check` reports required tools present
+- 1. From repo root: `./scripts/module0.sh` (or selective `--skip-*` flags if tools already installed)
+- 2. Activate venv: `source .venv/bin/activate`
+- 3. Verify: `./scripts/module0.sh --verify-only` — expect green checks for Verilator, cocotb, pyuvm
+- 4. Optional manual probes: `verilator --version`, `cocotb-config --version`, `python3 -c 'import pyuvm'`
+- 5. Record pass in MODULE0 assessment checklist; proceed to Module 1 only when all probes succeed
+
+### 4. Closure for Module 0
+
+- Pass criteria: all install scripts succeed and `--verify-only` reports required tools present
 - Optional: run a minimal cocotb compile in Module 1 only after Module 0 passes
-- Assessment checklist in MODULE0 maps environment readiness to course progress
+- Assessment checklist in `docs/MODULE0.md` maps environment readiness to course progress
 
 <!-- module-architecture:auto:end -->
 ## Topics Covered
@@ -428,6 +464,28 @@ For detailed usage of each script, see the corresponding installation sections b
 - [ ] Can create and run simple testbench
 - [ ] Understand basic project structure
 - [ ] Know how to get help when stuck
+
+<!-- module-commands:auto:start -->
+## Command Reference
+
+### Full toolchain install
+
+- `./scripts/module0.sh` — install Verilator, cocotb, and pyuvm with default modes into `.venv`
+- `./scripts/module0.sh --verilator-mode system --cocotb-mode pip --pyuvm-mode pip` — explicit mode selection
+- `./scripts/module0.sh --skip-verilator` — refresh Python packages only when Verilator already present
+
+### Verify without reinstalling
+
+- `./scripts/module0.sh --verify-only` — probe `verilator`, `cocotb-config`, and `import pyuvm` without mutating the system
+- `verilator --version` — confirms simulator on PATH after submodule or system install
+- `python3 -c "import cocotb, pyuvm; print('OK')"` — quick venv sanity check outside the orchestrator
+
+### Manual probes (debug)
+
+- `which verilator && cocotb-config --version` — separate PATH issues from Python import failures
+- `source .venv/bin/activate` — required before manual Python probes if `--no-venv` was not used
+- Re-run `--verify-only` after OS updates, submodule pulls, or venv recreation
+<!-- module-commands:auto:end -->
 
 ## Learning Outcomes
 

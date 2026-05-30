@@ -109,6 +109,8 @@ if [[ $REGENERATE -eq 1 ]]; then
   "$SKILL_SCRIPTS/run_python.sh" "$SKILL_SCRIPTS/generate_outline_from_module.py" "$COURSE_ROOT"
   log "Patching outlines (expect strings, summary bullets)..."
   "$SKILL_SCRIPTS/run_python.sh" "$COURSE_ROOT/scripts/fix_media_outlines.py" --course-root "$COURSE_ROOT"
+  log "Refreshing narration scripts from patched outlines..."
+  "$SKILL_SCRIPTS/run_python.sh" "$SKILL_SCRIPTS/generate_outline_from_module.py" "$COURSE_ROOT" --refresh-scripts-only
 fi
 
 BUILD_ARGS=("$COURSE_ROOT")

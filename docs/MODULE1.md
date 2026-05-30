@@ -68,13 +68,33 @@ make SIM=verilator TEST=test_and_gate
 make SIM=verilator TEST=test_counter
 ```
 
+<!-- module-slide-supplements:auto:start -->
+
+## Before You Start
+
+1. Complete Module 0 (`./scripts/module0.sh --verify-only`) so Verilator, cocotb, and pyuvm are available in `.venv`
+2. Skim `docs/MODULE1.md` and run pure Python examples first — no simulator required for OOP/async foundations
+3. Review `module1/dut/simple_gates/` RTL (AND gate, counter) before opening cocotb tests
+4. Understand the testbench mental model: DUT ← driver/stimulus ← test ← checker ← monitor
+5. Keep venv active; cocotb Makefiles expect `SIM=verilator` and `COCOTB_REDIRECT_OUTPUT=1` defaults from course Makefiles
+
+## Key files to study
+
+- `module1/dut/simple_gates/and_gate.v` — 2-input AND; first combinational DUT for cocotb handles
+- `module1/dut/simple_gates/counter.v` — clocked counter with enable/reset for sequential labs
+- `module1/examples/python_basics/transaction.py` — transaction class with `__eq__`/`__hash__` patterns
+- `module1/tests/cocotb_tests/test_and_gate.py` — directed cocotb vectors and edge triggers
+- `module1/tests/pyuvm_tests/test_and_gate_uvm.py` — minimal pyuvm hierarchy on the AND gate
+- `scripts/module1.sh` — routes Python examples and `--cocotb-tests` / `--pyuvm-tests` regressions
+
+<!-- module-slide-supplements:auto:end -->
 <!-- module-architecture:auto:start -->
 ## Design Architecture
 
 ### 1. RTL block architecture
 
-- DUTs in `module1/dut/simple_gates/` (AND gate) and `module1/dut/counters/` (counter with enable/reset)
-- Synchronous blocks: clock, active-low reset, multi-bit data paths
+- DUTs in `module1/dut/simple_gates/` — `and_gate.v` (combinational) and `counter.v` (enable, active-low reset)
+- Synchronous blocks: clock, active-low reset, multi-bit data paths on the counter
 - Flat hierarchy — no buses; ideal for first cocotb signal access and pyuvm hook-up
 
 ### 2. Python verification layer architecture
@@ -84,11 +104,19 @@ make SIM=verilator TEST=test_counter
 - `module1/tests/pyuvm_tests/` — minimal UVM-style hierarchy introduction
 - Transaction classes in `examples/python_basics/transaction.py` model stimulus items reused in TB thinking
 
-### 3. Testbench mental model
+### 3. Execution pipeline
+
+- Build: Verilator compiles `module1/dut/simple_gates/*.v` via cocotb Makefile (`VERILOG_SOURCES`, top module)
+- Sim: cocotb loads Python test module; coroutines advance time on `RisingEdge(clk)` and combinational reads
+- Check: assertions in test functions plus cocotb `TestSuccess`/`TestFailure`; pyuvm tests report UVM status
+- Orchestrator path: `module1.sh --cocotb-tests` wraps `make` with venv and simulator checks
+
+### 4. Testbench mental model
 
 - DUT (RTL) ← driver/stimulus ← test ← checker/scoreboard ← monitor → observations
 - Simulation time advances on clock edges; Python coroutines (`async`/`await`) align with cocotb
 - Assertions and logging close the loop between expected and actual behavior
+- Python examples teach patterns (transactions, async) reused when pyuvm sequences appear in Module 3
 
 ## Verification & Testing Methods
 
@@ -104,9 +132,17 @@ make SIM=verilator TEST=test_counter
 - Examples run without simulator (`python3 module1/examples/...`) to teach OOP patterns first
 - Error-handling example shows structured logging for debuggable regressions
 
-### 3. Closure and self-check
+### 3. Step-by-step lab execution
 
-- `./scripts/module1.sh --check` runs required examples and tests
+- 1. Run Python track: `./scripts/module1.sh` (or individual `--python-basics`, `--async-await`, …)
+- 2. cocotb AND gate: `cd module1/tests/cocotb_tests && make SIM=verilator TEST=test_and_gate`
+- 3. cocotb counter: `make SIM=verilator TEST=test_counter` — observe reset and enable sequencing
+- 4. pyuvm entry: `./scripts/module1.sh --pyuvm-tests` — confirm UVM-style test completes without fatals
+- 5. Full regression: `./scripts/module1.sh --all-tests` before MODULE1 assessment sign-off
+
+### 4. Closure and self-check
+
+- `./scripts/module1.sh --all-tests` runs required examples and simulator-backed tests
 - Combine directed cocotb tests with transaction equality (`__eq__`, `__hash__`) from Python examples
 - Assessment: OOP for verification, basic TB structure, cocotb + pyuvm entry points
 
@@ -625,6 +661,28 @@ Check 'verification.log' for detailed logs
 - **Log Handlers**: Multiple handlers (file, console) for different outputs
 - **Log Formatting**: Customize log message format with timestamps, levels, etc.
 - **Verification Statistics**: Track test results and errors for reporting
+
+<!-- module-commands:auto:start -->
+## Command Reference
+
+### Python examples (no simulator)
+
+- `./scripts/module1.sh` — runs all five Python example tracks (default)
+- `./scripts/module1.sh --decorators --async-await` — selective example subsets
+- `python3 module1/examples/python_basics/transaction.py` — standalone OOP/transaction drill
+
+### cocotb RTL tests
+
+- `./scripts/module1.sh --cocotb-tests` — build and run cocotb regressions via orchestrator
+- `cd module1/tests/cocotb_tests && make SIM=verilator TEST=test_and_gate` — single-test Makefile flow
+- `make SIM=verilator TEST=test_counter` — sequential counter regression with reset/enable checks
+
+### pyuvm entry tests
+
+- `./scripts/module1.sh --pyuvm-tests` — compile RTL and run introductory pyuvm test against AND gate
+- `cd module1/tests/pyuvm_tests && make SIM=verilator` — direct Make entry when debugging pyuvm wiring
+- `./scripts/module1.sh --all-tests` — Python examples plus cocotb and pyuvm test suites
+<!-- module-commands:auto:end -->
 
 ## Learning Outcomes
 

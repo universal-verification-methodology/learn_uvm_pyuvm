@@ -58,6 +58,26 @@ make SIM=verilator TEST=test_simple_uvm
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-slide-supplements:auto:start -->
+
+## Before You Start
+
+1. Solid cocotb skills from Module 2 — you will reuse trigger timing inside pyuvm drivers later
+2. Read `module3/dut/simple_blocks/adder.v` — combinational operands `a`, `b`, output `sum`
+3. Step through `module3/examples/phases/` and `class_hierarchy/` before integrated `test_simple_uvm.py`
+4. Understand UVM phase order: build → connect → run (with objections) → report
+5. ConfigDB and factory examples are isolated; run them before merging concepts in the pyuvm test
+
+## Key files to study
+
+- `module3/dut/simple_blocks/adder.v` — primary combinational DUT for UVM structure labs
+- `module3/examples/phases/phases_example.py` — phase callbacks and simulation lifetime
+- `module3/examples/configdb/configdb_example.py` — virtual interface and parameter publishing
+- `module3/examples/factory/factory_example.py` — type overrides without hierarchy edits
+- `module3/tests/pyuvm_tests/test_simple_uvm.py` — integrated test → env → agent → adder DUT
+- `scripts/module3.sh` — per-topic flags (`--phases`, `--factory`, …) plus `--pyuvm-tests`
+
+<!-- module-slide-supplements:auto:end -->
 <!-- module-architecture:auto:start -->
 ## Design Architecture
 
@@ -74,10 +94,19 @@ make SIM=verilator TEST=test_simple_uvm
 - ConfigDB publishes virtual interfaces and parameters before `build_phase`
 - Factory + objections control creation and phase lifetime
 
-### 3. Module layout
+### 3. Execution pipeline
+
+- Build: Verilator compiles adder RTL; pyuvm `build_phase` constructs test/env/agent/component tree
+- Connect: TLM ports linked in `connect_phase`; ConfigDB delivers virtual interface handles to driver/monitor
+- Sim/run: sequences start on sequencer; driver applies operands; objections hold run phase until sequences finish
+- Check/report: monitor samples `sum`; UVM report phase summarizes errors; expect UVM TEST PASSED
+
+### 4. Module layout
 
 - `module3/examples/` — isolated API demos (phases, reporting, configdb, factory, objections)
 - `module3/tests/pyuvm_tests/` — integrated `make SIM=verilator TEST=test_simple_uvm` flows
+- Each example directory has its own Makefile for incremental learning
+- Assessment maps each example topic to integrated test behaviors
 
 ## Verification & Testing Methods
 
@@ -93,9 +122,17 @@ make SIM=verilator TEST=test_simple_uvm
 - Factory overrides swap test/agent types without editing hierarchy code
 - ConfigDB sets agent active/passive and interface handles
 
-### 3. Closure
+### 3. Step-by-step lab execution
 
-- `./scripts/module3.sh --check` and per-topic flags (`--phases`, `--factory`, …)
+- 1. API drills: `./scripts/module3.sh --class-hierarchy --phases --configdb`
+- 2. Factory/objections: `./scripts/module3.sh --factory --objections`
+- 3. Integrated test: `./scripts/module3.sh --pyuvm-tests` (or `make TEST=test_simple_uvm`)
+- 4. Confirm simulation log shows phase progression and no UVM_ERROR/FATAL
+- 5. Optional: factory override exercise from examples, re-run integrated test to observe swapped types
+
+### 4. Closure
+
+- `./scripts/module3.sh --pyuvm-tests` and per-topic flags (`--phases`, `--factory`, …)
 - Pass when simulation report shows UVM TEST PASSED and no fatal errors
 - Assessment: class hierarchy, phases, configdb, factory, objections
 
@@ -331,6 +368,28 @@ make SIM=verilator TEST=test_simple_uvm
   - Test inheritance
   - Test libraries
   - Test selection
+
+<!-- module-commands:auto:start -->
+## Command Reference
+
+### Isolated UVM API examples
+
+- `./scripts/module3.sh --phases --reporting` — phase and verbosity drills
+- `./scripts/module3.sh --configdb --factory --objections` — ConfigDB, factory, objection tracks
+- `./scripts/module3.sh --class-hierarchy` — component tree and TLM port basics
+
+### Integrated pyuvm simulation
+
+- `./scripts/module3.sh --pyuvm-tests` — default integrated regression against adder DUT
+- `cd module3/tests/pyuvm_tests && make SIM=verilator TEST=test_simple_uvm` — direct Make debug path
+- `./scripts/module3.sh --skip-examples --pyuvm-tests` — jump to integrated test when API drills are done
+
+### Verbosity and overrides
+
+- Set `PYUVM_VERBOSITY` or plusargs (when supported) to filter UVM report noise during debug
+- Factory overrides in examples swap test/agent types — mirror pattern in integrated test
+- Re-run single example Make target under `module3/examples/<topic>/` for fast iteration
+<!-- module-commands:auto:end -->
 
 ## Learning Outcomes
 

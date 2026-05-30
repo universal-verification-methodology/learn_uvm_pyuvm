@@ -23,52 +23,97 @@ slides:
   title: Overview
   bullets:
   - This module covers the miscellaneous utilities provided by UVM that support verification
-    environments. These utilities include command-line processing, comparators, recorders,
-    object pools, queues, and various helper cla
+    environments. These utilities include...
+- type: section
+  title: How to learn this module
+- type: bullets
+  title: Suggested learning path
+  bullets:
+  - Modules 4–7 env patterns should be fresh — utilities attach to analysis ports
+    and phase hooks you already built
+  - No new large DUT focus; `module8/dut/dma/simple_dma.v` reuses DMA block as a lightweight
+    integration anchor
+  - Run CLP example first — plusargs configure tests without recompilation
+  - Study comparators and recorders on analysis ports before pools/queues efficiency
+    labs
+  - 'Capstone: `integration/` wires multiple utilities; `test_utilities.py` proves
+    them under simulation'
+  notes: From docs/MODULE8.md — read guides before running demos.
 - type: section
   title: Design architecture
-- type: image
-  title: RTL / block architecture
-  image: assets/diagrams/rtl_architecture.png
-  caption: 'Module 8: DUT structure and key interfaces (see common_dut/rtl/).'
-- type: image
-  title: Verification environment architecture
-  image: assets/diagrams/verification_architecture.png
-  caption: 'Module 8: UVM layers, agents, and checkers for this phase.'
-- type: bullets
+- type: two_column
   title: 1. Utility layer in the testbench
-  bullets:
+  left:
   - No new large DUT focus — utilities plug into existing envs from prior modules
   - CLP (`uvm_cmdline_processor`) configures tests without recompilation
   - Comparators, recorders, pools, queues support analysis and debug infrastructure
+  - String/math/random helpers reduce boilerplate in checks and stimulus
+  right: assets/diagrams/rtl_architecture.png
   notes: From MODULE8 Design Architecture.
-- type: bullets
+- type: two_column
   title: 2. How utilities attach
-  bullets:
+  left:
   - Comparators sit on analysis ports beside scoreboards
   - Recorders log transactions to files for offline review
   - Pools/queues manage recycled objects and ordered work lists
-  - String/math/random helpers reduce boilerplate in checks and stimulus
+  - CLP reads plusargs before build/run to select tests and verbosity
+  right: assets/diagrams/verification_architecture.png
   notes: From MODULE8 Design Architecture.
 - type: bullets
-  title: 3. Integration architecture
+  title: 3. Execution pipeline
+  bullets:
+  - 'Build: standard Verilator compile; utilities instantiate during env build like
+    other components'
+  - 'Connect: comparators/recorders tap monitor analysis ports alongside scoreboard'
+  - 'Sim: CLP-selected sequences run; recorders flush on phase boundaries; pools recycle
+    transaction objects'
+  - 'Check: comparators flag ordering/equality violations; logs + UVM report provide
+    offline audit trail'
+  notes: From MODULE8 Design Architecture.
+- type: bullets
+  title: 4. Integration architecture
   bullets:
   - '`module8/examples/integration/` wires multiple utilities in one mini-env'
   - Tests under `module8/tests/pyuvm_tests/` prove utilities under simulation
   - 'Pattern: configure via CLP → run sequence → compare → record → report'
+  - Reuse utilities in Module 6/7 style envs for capstone projects
   notes: From MODULE8 Design Architecture.
+- type: code
+  title: Comparator on analysis port
+  language: text
+  source_file: module8/examples/comparators/comparator_example.py
+  code: "\"\"\"\nModule 8 Example 8.2: UVM Comparators\nDemonstrates using comparators\
+    \ for transaction comparison in scoreboards.\n\"\"\"\n\nfrom pyuvm import *\n\
+    # Explicitly import uvm_analysis_imp - it may not be exported by from pyuvm import\
+    \ *\n# Try multiple possible import paths\n_uvm_analysis_imp = None\ntry:\n  \
+    \  # First try: check if it's in the namespace after from pyuvm import *\n   \
+    \ _uvm_analysis_imp = globals()['uvm_analysis_imp']\nexcept KeyError:\n    # Second\
+    \ try: import from pyuvm module directly\n    import pyuvm\n    if hasattr(pyuvm,\
+    \ 'uvm_analysis_imp'):\n        _uvm_analysis_imp = pyuvm.uvm_analysis_imp\n \
+    \   else:\n// ..."
+- type: section
+  title: Key files to study
+- type: bullets
+  title: Open these in the repo
+  bullets:
+  - '`module8/examples/clp/clp_example.py` — `uvm_cmdline_processor` plusarg parsing'
+  - '`module8/examples/comparators/comparator_example.py` — equal/less/greater compare
+    policies'
+  - '`module8/examples/recorders/recorder_example.py` — transaction logging to files'
+  - '`module8/examples/pools/pool_example.py` and `queues/queue_example.py` — object
+    reuse and ordered work'
+  - '`module8/examples/integration/integration_example.py` — multi-utility mini-env'
+  - '`module8/tests/pyuvm_tests/test_utilities.py` — simulated proof of utility integration'
+  notes: Trace while running module8/EXAMPLES.md labs.
 - type: section
   title: Verification & testing methods
-- type: image
-  title: Testing and closure flow
-  image: assets/diagrams/testing_methods.png
-  caption: 'Module 8: how tests, checks, and metrics close verification goals.'
-- type: bullets
+- type: two_column
   title: 1. Utility-focused test methods
-  bullets:
+  left:
   - 'Comparator tests: equal/less/greater policies on transaction streams'
   - 'Recorder tests: verify log format and flush on phase boundaries'
   - 'CLP tests: plusargs override seed, verbosity, and test name'
+  right: assets/diagrams/testing_methods.png
   notes: From MODULE8 Verification & Testing Methods.
 - type: bullets
   title: 2. Efficiency and reuse
@@ -78,12 +123,32 @@ slides:
   - Random/string/math utils keep constraints readable in sequences
   notes: From MODULE8 Verification & Testing Methods.
 - type: bullets
-  title: 3. Closure
+  title: 3. Step-by-step lab execution
   bullets:
-  - '`./scripts/module8.sh --check` across all utility examples'
+  - '1. CLP: `./scripts/module8.sh --clp` — exercise plusarg overrides'
+  - '2. Compare/record: `./scripts/module8.sh --comparators --recorders`'
+  - '3. Pools/queues: `./scripts/module8.sh --pools --queues`'
+  - '4. Helpers: `./scripts/module8.sh --string-utils --math-utils --random-utils`'
+  - '5. Capstone: `./scripts/module8.sh --integration --pyuvm-tests` — full utility
+    integration pass'
+  notes: From MODULE8 Verification & Testing Methods.
+- type: bullets
+  title: 4. Closure
+  bullets:
+  - '`./scripts/module8.sh --pyuvm-tests` across all utility examples'
   - 'Assessment: CLP, comparators, recorders, pools, queues, integration'
   - 'Capstone: combine utilities with Module 6/7 style envs in your own project'
   notes: From MODULE8 Verification & Testing Methods.
+- type: code
+  title: CLP plusarg configuration
+  language: text
+  source_file: module8/examples/clp/clp_example.py
+  code: "\"\"\"\nModule 8 Example 8.1: Command Line Processor (CLP)\nDemonstrates\
+    \ using UVM Command Line Processor for test configuration.\n\"\"\"\n\nfrom pyuvm\
+    \ import *\nimport sys\nimport cocotb\nfrom cocotb.triggers import Timer\n\n\n\
+    class CLPTransaction(uvm_sequence_item):\n    \"\"\"Transaction for CLP example.\"\
+    \"\"\n    \n    def __init__(self, name=\"CLPTransaction\"):\n        super().__init__(name)\n\
+    \        self.data = 0\n        self.address = 0\n// ..."
 - type: section
   title: Syllabus topics
 - type: bullets
@@ -456,12 +521,39 @@ slides:
   - Object management
   notes: From MODULE8 Topics Covered.
 - type: section
+  title: Command reference highlights
+- type: bullets
+  title: Core utilities
+  bullets:
+  - '`./scripts/module8.sh --clp --comparators --recorders` — configure, compare,
+    and log infrastructure'
+  - '`./scripts/module8.sh --pools --queues` — allocation efficiency and ordered deferred
+    work'
+  - '`./scripts/module8.sh --string-utils --math-utils --random-utils` — helper libraries
+    for checks/stimulus'
+  notes: Full detail in docs/MODULE8.md command reference.
+- type: bullets
+  title: Integration and tests
+  bullets:
+  - '`./scripts/module8.sh --integration` — combined utility mini-env'
+  - '`./scripts/module8.sh --pyuvm-tests` — `test_utilities.py` regression'
+  - '`cd module8/tests/pyuvm_tests && make SIM=verilator TEST=test_utilities`'
+  notes: Full detail in docs/MODULE8.md command reference.
+- type: bullets
+  title: CLP-driven runs
+  bullets:
+  - Pass plusargs through Makefile/`SIM_ARGS` where examples support seed, verbosity,
+    test name overrides
+  - Re-run same binary with different plusargs — demonstrates no-recompile test selection
+  - '`./scripts/module8.sh` — full utility sweep for module completion'
+  notes: Full detail in docs/MODULE8.md command reference.
+- type: section
   title: Hands-on examples
 - type: demo
-  title: Module 8 self-check
-  command: ./scripts/module8.sh --check
+  title: Module 8 orchestrator
+  command: ./scripts/module8.sh --help
   screenshot: assets/screenshots/module8_check.png
-  expect_stdout_contains: All required checks passed
+  expect_stdout_contains: 'Usage:'
   notes: Run from course repository root.
 - type: demo
   title: 'Demo: Command Line Processor'
@@ -511,6 +603,31 @@ slides:
 - type: section
   title: Practice & assessment
 - type: bullets
+  title: What you should know (1/3)
+  bullets:
+  - Use UVM Command Line Processor
+  - Implement and use comparators
+  - Use recorders for transaction recording
+  - Use pools for object management
+  - Use queues for data structures
+  - Use string and math utilities
+  notes: From MODULE8 Learning Outcomes.
+- type: bullets
+  title: What you should know (2/3)
+  bullets:
+  - Use random utilities effectively
+  - Integrate utilities into testbenches
+  - Apply utility best practices
+  - Choose appropriate utilities for tasks
+  - CLP usage
+  - Argument parsing
+  notes: From MODULE8 Learning Outcomes.
+- type: bullets
+  title: What you should know (3/3)
+  bullets:
+  - Configuration via command line
+  notes: From MODULE8 Learning Outcomes.
+- type: bullets
   title: Exercises
   bullets:
   - Command Line Processor
@@ -532,5 +649,5 @@ slides:
   bullets:
   - Master UVM utility classes and helper functions
   - Complete module8/CHECKLIST.md
-  - Run ./scripts/module8.sh --check
+  - Review module8/EXAMPLES.md and run each lab
   - 'Next: Next module in course'

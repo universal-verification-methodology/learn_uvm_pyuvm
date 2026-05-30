@@ -1,5 +1,5 @@
-# Optional demo command / expect overrides for generate_outline_from_module.py
-# Keys under demos: EXAMPLES.md folder name (e.g. python_basics) or asset id (ex01_python_basics)
+# Demo command fixes and architecture code slides for generate_outline_from_module.py
+# Keys: module number → demos | architecture
 
 module0:
   demos:
@@ -9,6 +9,21 @@ module0:
     python_version:
       command: "python3 --version"
       expect: "Python"
+  architecture:
+    two_column: true
+    design_code:
+      title: "Install orchestrator (excerpt)"
+      source_file: scripts/module0.sh
+      start_line: 1
+      end_line: 25
+      notes: "Entry point for Verilator, cocotb, and pyuvm install order."
+    method_code:
+      title: "Verify toolchain probes"
+      language: bash
+      code: |
+        ./scripts/module0.sh --verify-only
+        verilator --version
+        python3 -c "import cocotb, pyuvm; print('OK')"
 
 module1:
   demos:
@@ -18,3 +33,161 @@ module1:
       expect: "decorator"
     async_await:
       expect: "Example completed"
+  architecture:
+    two_column: true
+    rtl_code:
+      title: "DUT — AND gate ports"
+      source_file: module1/dut/simple_gates/and_gate.v
+      start_line: 11
+      end_line: 21
+      notes: "Flat combinational block; cocotb accesses dut.a, dut.b, dut.y."
+    tb_code:
+      title: "cocotb — drive inputs and assert"
+      source_file: module1/tests/cocotb_tests/test_and_gate.py
+      start_line: 18
+      end_line: 55
+    test_code:
+      title: "Makefile — build and run flow"
+      source_file: module1/tests/cocotb_tests/Makefile
+      start_line: 1
+      end_line: 22
+      notes: "SIM=verilator, TEST= selects cocotb module; cocotb-config drives compile."
+
+module2:
+  architecture:
+    two_column: true
+    rtl_code:
+      title: "DUT — simple register"
+      source_file: module2/dut/registers/simple_register.v
+      start_line: 1
+      end_line: 35
+    tb_code:
+      title: "cocotb — reset then write"
+      source_file: module2/tests/cocotb_tests/test_simple_register.py
+      start_line: 1
+      end_line: 45
+    test_code:
+      title: "Regression Makefile"
+      source_file: module2/tests/cocotb_tests/Makefile
+      start_line: 1
+      end_line: 20
+
+module3:
+  architecture:
+    two_column: true
+    rtl_code:
+      title: "DUT — 8-bit adder"
+      source_file: module3/dut/simple_blocks/adder.v
+      start_line: 15
+      end_line: 33
+    env_code:
+      title: "UVM transaction item"
+      source_file: module3/tests/pyuvm_tests/test_simple_uvm.py
+      start_line: 47
+      end_line: 80
+    test_code:
+      title: "Run integrated UVM test"
+      language: bash
+      code: |
+        cd module3/tests/pyuvm_tests
+        make SIM=verilator TEST=test_simple_uvm
+
+module4:
+  architecture:
+    two_column: true
+    rtl_code:
+      title: "Interface — valid/ready handshake"
+      source_file: module4/dut/interfaces/simple_interface.v
+      start_line: 1
+      end_line: 40
+    env_code:
+      title: "Agent-centric env wiring"
+      source_file: module4/tests/pyuvm_tests/test_complete_agent.py
+      start_line: 1
+      end_line: 50
+    test_code:
+      title: "End-to-end agent test"
+      language: bash
+      code: |
+        ./scripts/module4.sh --pyuvm-tests
+        cd module4/tests/pyuvm_tests && make TEST=test_complete_agent
+
+module5:
+  architecture:
+    two_column: true
+    rtl_code:
+      title: "DUT — multi-channel block"
+      source_file: module5/dut/advanced/multi_channel.v
+      start_line: 1
+      end_line: 35
+    env_code:
+      title: "Virtual sequencer pattern"
+      source_file: module5/examples/virtual_sequences/virtual_sequence_example.py
+      start_line: 1
+      end_line: 45
+    test_code:
+      title: "Module 5 orchestrator"
+      language: bash
+      code: |
+        ./scripts/module5.sh --virtual-sequences
+        ./scripts/module5.sh --coverage
+
+module6:
+  architecture:
+    two_column: true
+    rtl_code:
+      title: "DUT — AXI4-Lite slave"
+      source_file: module6/dut/protocols/axi4_lite_slave.v
+      start_line: 1
+      end_line: 45
+    env_code:
+      title: "Multi-agent testbench"
+      source_file: module6/tests/pyuvm_tests/test_complex_testbench.py
+      start_line: 1
+      end_line: 50
+    test_code:
+      title: "Protocol regression"
+      language: bash
+      code: |
+        ./scripts/module6.sh --pyuvm-tests
+        cd module6/tests/pyuvm_tests && make TEST=test_complex_testbench
+
+module7:
+  architecture:
+    two_column: true
+    rtl_code:
+      title: "DUT — simple DMA controller"
+      source_file: module7/dut/dma/simple_dma.v
+      start_line: 1
+      end_line: 40
+    env_code:
+      title: "VIP-style agent reuse"
+      source_file: module7/examples/vip/vip_example.py
+      start_line: 1
+      end_line: 45
+    test_code:
+      title: "Integration regressions"
+      language: bash
+      code: |
+        ./scripts/module7.sh --dma
+        ./scripts/module7.sh --protocol
+
+module8:
+  architecture:
+    two_column: true
+    env_code:
+      title: "Comparator on analysis port"
+      source_file: module8/examples/comparators/comparator_example.py
+      start_line: 1
+      end_line: 45
+    method_code:
+      title: "CLP plusarg configuration"
+      source_file: module8/examples/clp/clp_example.py
+      start_line: 1
+      end_line: 40
+    test_code:
+      title: "Utility integration run"
+      language: bash
+      code: |
+        ./scripts/module8.sh --comparators
+        ./scripts/module8.sh --integration

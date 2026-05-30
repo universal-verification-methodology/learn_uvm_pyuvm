@@ -56,6 +56,26 @@ make SIM=verilator TEST=test_advanced_uvm
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-slide-supplements:auto:start -->
+
+## Before You Start
+
+1. Module 4 agent/scoreboard integration is prerequisite — multi-channel env extends the same TLM patterns
+2. Review `module5/dut/advanced/multi_channel.v` — multiple logical channels needing coordinated stimulus
+3. Study virtual sequencer concept before `virtual_sequences/` examples — one coordinator, many agents
+4. Skim RAL terminology: register map, fields, adapter, predictor — used in `register_model/`
+5. Coverage and callbacks modify observation and driver behavior without deep subclass trees
+
+## Key files to study
+
+- `module5/dut/advanced/multi_channel.v` — multi-stream DUT for virtual sequence coordination
+- `module5/examples/virtual_sequences/virtual_sequence_example.py` — child sequences on multiple sequencers
+- `module5/examples/coverage/coverage_example.py` — functional coverage sampling hooks
+- `module5/examples/register_model/register_model_example.py` — RAL map, adapter, mirror updates
+- `module5/tests/pyuvm_tests/test_advanced_uvm.py` — integrated advanced env regression
+- `scripts/module5.sh` — `--virtual-sequences`, `--coverage`, `--register-model`, …
+
+<!-- module-slide-supplements:auto:end -->
 <!-- module-architecture:auto:start -->
 ## Design Architecture
 
@@ -72,11 +92,19 @@ make SIM=verilator TEST=test_advanced_uvm
 - Callbacks extend driver/monitor without subclass explosion
 - Configuration objects centralize knobs (active/passive, timeouts, enable flags)
 
-### 3. Register model layer
+### 3. Execution pipeline
+
+- Build: multi-channel RTL plus env with multiple agents, virtual sequencer, coverage, register model
+- Connect: per-channel monitor analysis → scoreboard/coverage; RAL adapter linked to bus sequencer
+- Sim: virtual sequence launches child sequences in order; callbacks may alter driver/monitor behavior mid-run
+- Check: scoreboard per channel + coverage goals + register mirror consistency vs DUT state
+
+### 4. Register model layer
 
 - RAL-style maps: registers, fields, access policies (RW, RO, WO)
 - Adapter links bus transactions to register reads/writes in tests
 - Predictor/update paths keep mirror model consistent with DUT
+- Register sequences replace raw bus wiggling for software-visible setup
 
 ## Verification & Testing Methods
 
@@ -92,10 +120,19 @@ make SIM=verilator TEST=test_advanced_uvm
 - Config tests prove ConfigDB + config object overrides change behavior
 - Callback tests inject errors or delays to validate robustness
 
-### 3. Closure
+### 3. Step-by-step lab execution
 
-- `./scripts/module5.sh --check`; register model and callback demos in EXAMPLES.md
+- 1. Virtual sequences: `./scripts/module5.sh --virtual-sequences`
+- 2. Coverage/callbacks: `./scripts/module5.sh --coverage --callbacks`
+- 3. Configuration: `./scripts/module5.sh --configuration`
+- 4. Register model: `./scripts/module5.sh --register-model`
+- 5. Integrated: `./scripts/module5.sh --pyuvm-tests` — all advanced mechanisms in one regression
+
+### 4. Closure
+
+- `./scripts/module5.sh --pyuvm-tests`; register model and callback demos in EXAMPLES.md
 - Assessment: virtual sequences, coverage, callbacks, configuration, register model
+- Demonstrate register read/write through RAL adapter rather than ad-hoc pin toggling
 
 <!-- module-architecture:auto:end -->
 ## Topics Covered
@@ -317,6 +354,28 @@ make SIM=verilator TEST=test_advanced_uvm
   - Coverage analysis
   - Coverage improvement
   - Coverage tools
+
+<!-- module-commands:auto:start -->
+## Command Reference
+
+### Advanced UVM topics
+
+- `./scripts/module5.sh --virtual-sequences --configuration` — coordination and config objects
+- `./scripts/module5.sh --coverage --callbacks` — coverage sampling and callback injection
+- `./scripts/module5.sh --register-model` — RAL map and bus adapter drill
+
+### Integrated regression
+
+- `./scripts/module5.sh --pyuvm-tests` — `test_advanced_uvm` against multi-channel DUT
+- `cd module5/tests/pyuvm_tests && make SIM=verilator TEST=test_advanced_uvm`
+- `./scripts/module5.sh` — all example tracks then tests when doing full module sweep
+
+### Coverage and config debug
+
+- Inspect coverage reports/sample counts from example logs when goals are not met
+- Config object + ConfigDB overrides in `--configuration` — re-run to verify behavior change
+- Callback tests inject delays/errors — use verbosity to see callback invocation order
+<!-- module-commands:auto:end -->
 
 ## Learning Outcomes
 

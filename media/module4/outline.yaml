@@ -23,54 +23,110 @@ slides:
   title: Overview
   bullets:
   - This module covers the core UVM components used to build verification environments.
-    You'll learn how to create agents, drivers, monitors, sequencers, and sequences
-    to build complete verification environments.
+    You'll learn how to create agents, drivers...
+- type: section
+  title: How to learn this module
+- type: bullets
+  title: Suggested learning path
+  bullets:
+  - Module 3 UVM hierarchy and phases must be comfortable — agents bundle components
+    you studied separately
+  - Study `module4/dut/interfaces/simple_interface.v` valid/ready handshake before
+    driver labs
+  - 'Run examples in order: transactions → driver → monitor → sequencer → scoreboard
+    → TLM → agents'
+  - Read `InterfaceTransaction` field definitions and `copy`/`compare` before scoreboard
+    integration
+  - Integrated capstone is `test_complete_agent.py` — do not skip per-component examples
+  notes: From docs/MODULE4.md — read guides before running demos.
 - type: section
   title: Design architecture
-- type: image
-  title: RTL / block architecture
-  image: assets/diagrams/rtl_architecture.png
-  caption: 'Module 4: DUT structure and key interfaces (see common_dut/rtl/).'
-- type: image
-  title: Verification environment architecture
-  image: assets/diagrams/verification_architecture.png
-  caption: 'Module 4: UVM layers, agents, and checkers for this phase.'
-- type: bullets
+- type: two_column
   title: 1. DUT and interface protocol
-  bullets:
+  left:
   - '`module4/dut/interfaces/simple_interface.v` — valid/ready handshake, address/data/result
     buses'
   - Clocked, resettable interface models streaming transactions
   - Agent maps one transaction type to one interface beat
+  right: assets/diagrams/rtl_architecture.png
   notes: From MODULE4 Design Architecture.
-- type: bullets
+- type: two_column
   title: 2. Agent-centric UVM architecture
-  bullets:
+  left:
   - Agent bundles driver, monitor, sequencer; env holds agent + scoreboard
   - TLM analysis ports connect monitor → scoreboard (and optional coverage)
   - '`InterfaceTransaction` defines fields, `copy`/`compare`, and constraints'
   - 'Complete path: sequence → sequencer → driver → DUT → monitor → scoreboard'
+  right: assets/diagrams/verification_architecture.png
   notes: From MODULE4 Design Architecture.
 - type: bullets
-  title: 3. Component responsibilities
+  title: 3. Execution pipeline
+  bullets:
+  - 'Build: Verilator compiles `simple_interface.v`; env builds agent (driver, monitor,
+    sequencer) and scoreboard'
+  - 'Connect: monitor `ap` → scoreboard `exp`/`act` analysis imports; sequencer ↔
+    driver TLM ports'
+  - 'Sim: sequence items drive valid/ready beats; monitor reconstructs transactions
+    on completed handshakes'
+  - 'Check: scoreboard `compare` on monitored vs predicted streams; UVM report summarizes
+    mismatches'
+  notes: From MODULE4 Design Architecture.
+- type: bullets
+  title: 4. Component responsibilities
   bullets:
   - 'Driver: pull items from sequencer, drive pins per protocol'
   - 'Monitor: passive observation, broadcast transactions on analysis port'
   - 'Sequencer: arbitration and sequence execution'
   - 'Scoreboard: expected vs actual from monitor streams'
   notes: From MODULE4 Design Architecture.
+- type: code
+  title: Interface — valid/ready handshake
+  language: systemverilog
+  source_file: module4/dut/interfaces/simple_interface.v
+  code: "/**\n * Module 4: Simple Interface\n * \n * A simple interface for UVM component\
+    \ testing.\n * \n * Ports:\n *   clk:    Clock signal\n *   rst_n:  Active-low\
+    \ reset\n *   valid:  Valid signal\n *   ready:  Ready signal\n *   data:   Data\
+    \ bus\n *   address: Address bus\n */\n\nmodule simple_interface (\n    input\
+    \  wire       clk,\n    input  wire       rst_n,\n    input  wire       valid,\n\
+    // ..."
+- type: code
+  title: Agent-centric env wiring
+  language: text
+  source_file: module4/tests/pyuvm_tests/test_complete_agent.py
+  code: "\"\"\"\nModule 4 Test: Complete Agent Test\nComplete UVM testbench with driver,\
+    \ monitor, sequencer, and scoreboard.\n\"\"\"\n\nimport cocotb\nfrom cocotb.clock\
+    \ import Clock\nfrom cocotb.triggers import Timer, RisingEdge\nfrom pyuvm import\
+    \ *\n# Explicitly import uvm_seq_item_pull_port - it may not be exported by from\
+    \ pyuvm import *\n# Try multiple possible import paths\n_uvm_seq_item_pull_port\
+    \ = None\ntry:\n    # First try: check if it's in the namespace after from pyuvm\
+    \ import *\n    _uvm_seq_item_pull_port = globals()['uvm_seq_item_pull_port']\n\
+    except KeyError:\n    # Second try: import from pyuvm module directly\n    import\
+    \ pyuvm\n// ..."
+- type: section
+  title: Key files to study
+- type: bullets
+  title: Open these in the repo
+  bullets:
+  - '`module4/dut/interfaces/simple_interface.v` — valid/ready streaming interface
+    with addr/data/result'
+  - '`module4/examples/transactions/transaction_example.py` — sequence item fields
+    and compare/copy'
+  - '`module4/examples/drivers/driver_example.py` — sequencer pull loop and pin wiggling'
+  - '`module4/examples/monitors/monitor_example.py` — passive sampling and analysis
+    port broadcast'
+  - '`module4/tests/pyuvm_tests/test_complete_agent.py` — end-to-end agent, env, scoreboard
+    integration'
+  - '`scripts/module4.sh` — `--drivers` … `--agents` example flags and `--pyuvm-tests`'
+  notes: Trace while running module4/EXAMPLES.md labs.
 - type: section
   title: Verification & testing methods
-- type: image
-  title: Testing and closure flow
-  image: assets/diagrams/testing_methods.png
-  caption: 'Module 4: how tests, checks, and metrics close verification goals.'
-- type: bullets
+- type: two_column
   title: 1. Integration testing method
-  bullets:
+  left:
   - '`test_complete_agent.py` — end-to-end agent, env, and test class'
   - 'Run: `./scripts/module4.sh --pyuvm-tests` or `make TEST=test_complete_agent`'
   - Per-component examples (`driver_example.py`, …) isolate behavior before integration
+  right: assets/diagrams/testing_methods.png
   notes: From MODULE4 Verification & Testing Methods.
 - type: bullets
   title: 2. Checking strategy
@@ -80,10 +136,22 @@ slides:
   - Sequences provide repeatable stimulus; random/constrained extensions in exercises
   notes: From MODULE4 Verification & Testing Methods.
 - type: bullets
-  title: 3. Closure
+  title: 3. Step-by-step lab execution
   bullets:
-  - Self-check via `module4.sh --check`; demo screenshots per EXAMPLES.md section
+  - '1. Transactions: `./scripts/module4.sh --transactions`'
+  - '2. Driver/monitor/sequencer: `./scripts/module4.sh --drivers --monitors --sequencers`'
+  - '3. Scoreboard/TLM: `./scripts/module4.sh --scoreboards --tlm`'
+  - '4. Agent assembly: `./scripts/module4.sh --agents`'
+  - '5. Capstone: `./scripts/module4.sh --pyuvm-tests` — confirm scoreboard clean
+    and UVM TEST PASSED'
+  notes: From MODULE4 Verification & Testing Methods.
+- type: bullets
+  title: 4. Closure
+  bullets:
+  - Self-check via `./scripts/module4.sh --pyuvm-tests`; demo screenshots per EXAMPLES.md
+    section
   - 'Assessment: drivers, monitors, sequencers, agents, scoreboards, TLM connections'
+  - You should trace one transaction from sequence item through to scoreboard compare
   notes: From MODULE4 Verification & Testing Methods.
 - type: section
   title: Syllabus topics
@@ -462,12 +530,38 @@ slides:
   - Result checking
   notes: From MODULE4 Topics Covered.
 - type: section
+  title: Command reference highlights
+- type: bullets
+  title: Per-component examples
+  bullets:
+  - '`./scripts/module4.sh --transactions --drivers --monitors` — stimulus and observation
+    building blocks'
+  - '`./scripts/module4.sh --sequencers --scoreboards --tlm` — sequence flow and analysis
+    connections'
+  - '`./scripts/module4.sh --agents` — complete agent wiring before capstone test'
+  notes: Full detail in docs/MODULE4.md command reference.
+- type: bullets
+  title: Integration test
+  bullets:
+  - '`./scripts/module4.sh --pyuvm-tests` — run `test_complete_agent` via orchestrator'
+  - '`cd module4/tests/pyuvm_tests && make SIM=verilator TEST=test_complete_agent`'
+  - '`./scripts/module4.sh --skip-examples --pyuvm-tests` — capstone only when components
+    are understood'
+  notes: Full detail in docs/MODULE4.md command reference.
+- type: bullets
+  title: Debug paths
+  bullets:
+  - Run individual example Make under `module4/examples/<component>/` to isolate failures
+  - Increase UVM verbosity to trace sequence → driver → monitor transaction paths
+  - Verilator waveforms on interface valid/ready when handshake debug is needed
+  notes: Full detail in docs/MODULE4.md command reference.
+- type: section
   title: Hands-on examples
 - type: demo
-  title: Module 4 self-check
-  command: ./scripts/module4.sh --check
+  title: Module 4 orchestrator
+  command: ./scripts/module4.sh --help
   screenshot: assets/screenshots/module4_check.png
-  expect_stdout_contains: All required checks passed
+  expect_stdout_contains: 'Usage:'
   notes: Run from course repository root.
 - type: code
   title: Exercise scaffold
@@ -512,6 +606,31 @@ slides:
 - type: section
   title: Practice & assessment
 - type: bullets
+  title: What you should know (1/3)
+  bullets:
+  - Understand agent architecture
+  - Implement UVM drivers
+  - Implement UVM monitors
+  - Implement sequencers and sequences
+  - Use analysis ports effectively
+  - Implement scoreboards
+  notes: From MODULE4 Learning Outcomes.
+- type: bullets
+  title: What you should know (2/3)
+  bullets:
+  - Design transaction models
+  - Build complete agents
+  - Integrate agents into environments
+  - Execute sequences in tests
+  - Driver class
+  - Transaction reception
+  notes: From MODULE4 Learning Outcomes.
+- type: bullets
+  title: What you should know (3/3)
+  bullets:
+  - Signal driving
+  notes: From MODULE4 Learning Outcomes.
+- type: bullets
   title: Exercises
   bullets:
   - Driver Implementation
@@ -533,5 +652,5 @@ slides:
   bullets:
   - Build complete UVM agents with driver, monitor, and sequencer
   - Complete module4/CHECKLIST.md
-  - Run ./scripts/module4.sh --check
+  - Review module4/EXAMPLES.md and run each lab
   - 'Next: Next module in course'

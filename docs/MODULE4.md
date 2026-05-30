@@ -60,6 +60,26 @@ make SIM=verilator TEST=test_complete_agent
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-slide-supplements:auto:start -->
+
+## Before You Start
+
+1. Module 3 UVM hierarchy and phases must be comfortable — agents bundle components you studied separately
+2. Study `module4/dut/interfaces/simple_interface.v` valid/ready handshake before driver labs
+3. Run examples in order: transactions → driver → monitor → sequencer → scoreboard → TLM → agents
+4. Read `InterfaceTransaction` field definitions and `copy`/`compare` before scoreboard integration
+5. Integrated capstone is `test_complete_agent.py` — do not skip per-component examples
+
+## Key files to study
+
+- `module4/dut/interfaces/simple_interface.v` — valid/ready streaming interface with addr/data/result
+- `module4/examples/transactions/transaction_example.py` — sequence item fields and compare/copy
+- `module4/examples/drivers/driver_example.py` — sequencer pull loop and pin wiggling
+- `module4/examples/monitors/monitor_example.py` — passive sampling and analysis port broadcast
+- `module4/tests/pyuvm_tests/test_complete_agent.py` — end-to-end agent, env, scoreboard integration
+- `scripts/module4.sh` — `--drivers` … `--agents` example flags and `--pyuvm-tests`
+
+<!-- module-slide-supplements:auto:end -->
 <!-- module-architecture:auto:start -->
 ## Design Architecture
 
@@ -76,7 +96,14 @@ make SIM=verilator TEST=test_complete_agent
 - `InterfaceTransaction` defines fields, `copy`/`compare`, and constraints
 - Complete path: sequence → sequencer → driver → DUT → monitor → scoreboard
 
-### 3. Component responsibilities
+### 3. Execution pipeline
+
+- Build: Verilator compiles `simple_interface.v`; env builds agent (driver, monitor, sequencer) and scoreboard
+- Connect: monitor `ap` → scoreboard `exp`/`act` analysis imports; sequencer ↔ driver TLM ports
+- Sim: sequence items drive valid/ready beats; monitor reconstructs transactions on completed handshakes
+- Check: scoreboard `compare` on monitored vs predicted streams; UVM report summarizes mismatches
+
+### 4. Component responsibilities
 
 - Driver: pull items from sequencer, drive pins per protocol
 - Monitor: passive observation, broadcast transactions on analysis port
@@ -97,10 +124,19 @@ make SIM=verilator TEST=test_complete_agent
 - Analysis port fan-out allows multiple checkers without changing monitor
 - Sequences provide repeatable stimulus; random/constrained extensions in exercises
 
-### 3. Closure
+### 3. Step-by-step lab execution
 
-- Self-check via `module4.sh --check`; demo screenshots per EXAMPLES.md section
+- 1. Transactions: `./scripts/module4.sh --transactions`
+- 2. Driver/monitor/sequencer: `./scripts/module4.sh --drivers --monitors --sequencers`
+- 3. Scoreboard/TLM: `./scripts/module4.sh --scoreboards --tlm`
+- 4. Agent assembly: `./scripts/module4.sh --agents`
+- 5. Capstone: `./scripts/module4.sh --pyuvm-tests` — confirm scoreboard clean and UVM TEST PASSED
+
+### 4. Closure
+
+- Self-check via `./scripts/module4.sh --pyuvm-tests`; demo screenshots per EXAMPLES.md section
 - Assessment: drivers, monitors, sequencers, agents, scoreboards, TLM connections
+- You should trace one transaction from sequence item through to scoreboard compare
 
 <!-- module-architecture:auto:end -->
 ## Topics Covered
@@ -374,6 +410,28 @@ make SIM=verilator TEST=test_complete_agent
   - Sequence execution
   - Test coordination
   - Result checking
+
+<!-- module-commands:auto:start -->
+## Command Reference
+
+### Per-component examples
+
+- `./scripts/module4.sh --transactions --drivers --monitors` — stimulus and observation building blocks
+- `./scripts/module4.sh --sequencers --scoreboards --tlm` — sequence flow and analysis connections
+- `./scripts/module4.sh --agents` — complete agent wiring before capstone test
+
+### Integration test
+
+- `./scripts/module4.sh --pyuvm-tests` — run `test_complete_agent` via orchestrator
+- `cd module4/tests/pyuvm_tests && make SIM=verilator TEST=test_complete_agent`
+- `./scripts/module4.sh --skip-examples --pyuvm-tests` — capstone only when components are understood
+
+### Debug paths
+
+- Run individual example Make under `module4/examples/<component>/` to isolate failures
+- Increase UVM verbosity to trace sequence → driver → monitor transaction paths
+- Verilator waveforms on interface valid/ready when handshake debug is needed
+<!-- module-commands:auto:end -->
 
 ## Learning Outcomes
 

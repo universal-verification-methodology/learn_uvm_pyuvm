@@ -16,7 +16,7 @@ assets:
   source: assets/diagrams/rtl_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 7
+  - 9
   license: learn_uvm_pyuvm course materials
 - id: verification_architecture
   type: diagram
@@ -24,7 +24,7 @@ assets:
   source: assets/diagrams/verification_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 8
+  - 10
   license: learn_uvm_pyuvm course materials
 - id: testing_methods
   type: diagram
@@ -32,13 +32,13 @@ assets:
   source: assets/diagrams/testing_methods.mmd
   generator: render_diagrams.sh
   slides:
-  - 13
+  - 17
   license: learn_uvm_pyuvm course materials
 - id: module0_check
   type: screenshot
   file: assets/screenshots/module0_check.png
-  capture_command: ./scripts/module0.sh --check
+  capture_command: ./scripts/module0.sh --help
   cwd: .
   slides:
-  - 59
-  expect_stdout_contains: All required checks passed
+  - 67
+  expect_stdout_contains: verilator

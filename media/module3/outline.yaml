@@ -23,56 +23,113 @@ slides:
   title: Overview
   bullets:
   - This module introduces the Universal Verification Methodology (UVM) and its implementation
-    in pyuvm. You'll learn the fundamental UVM concepts, class hierarchy, phases,
-    and how to structure UVM testbenches.
+    in pyuvm. You'll learn the fundamental UVM...
+- type: section
+  title: How to learn this module
+- type: bullets
+  title: Suggested learning path
+  bullets:
+  - Solid cocotb skills from Module 2 — you will reuse trigger timing inside pyuvm
+    drivers later
+  - Read `module3/dut/simple_blocks/adder.v` — combinational operands `a`, `b`, output
+    `sum`
+  - Step through `module3/examples/phases/` and `class_hierarchy/` before integrated
+    `test_simple_uvm.py`
+  - 'Understand UVM phase order: build → connect → run (with objections) → report'
+  - ConfigDB and factory examples are isolated; run them before merging concepts in
+    the pyuvm test
+  notes: From docs/MODULE3.md — read guides before running demos.
 - type: section
   title: Design architecture
-- type: image
-  title: RTL / block architecture
-  image: assets/diagrams/rtl_architecture.png
-  caption: 'Module 3: DUT structure and key interfaces (see common_dut/rtl/).'
-- type: image
-  title: Verification environment architecture
-  image: assets/diagrams/verification_architecture.png
-  caption: 'Module 3: UVM layers, agents, and checkers for this phase.'
-- type: bullets
+- type: two_column
   title: 1. RTL and interfaces
-  bullets:
+  left:
   - 'Primary DUT: `module3/dut/simple_blocks/adder.v` — combinational operands and
     sum'
   - Clock/reset scaffolding for pyuvm tests that mirror industry TB hooks
   - Flat block; no protocol channels — focus stays on UVM structure, not bus complexity
+  right: assets/diagrams/rtl_architecture.png
   notes: From MODULE3 Design Architecture.
-- type: bullets
+- type: two_column
   title: 2. UVM testbench architecture
-  bullets:
+  left:
   - 'Hierarchy: `uvm_test` → `uvm_env` → `uvm_agent` (driver, monitor, sequencer)
     → DUT'
   - '`uvm_sequence_item` / `uvm_sequence` carry transactions; driver converts items
     to pin wiggles'
   - ConfigDB publishes virtual interfaces and parameters before `build_phase`
   - Factory + objections control creation and phase lifetime
+  right: assets/diagrams/verification_architecture.png
   notes: From MODULE3 Design Architecture.
 - type: bullets
-  title: 3. Module layout
+  title: 3. Execution pipeline
+  bullets:
+  - 'Build: Verilator compiles adder RTL; pyuvm `build_phase` constructs test/env/agent/component
+    tree'
+  - 'Connect: TLM ports linked in `connect_phase`; ConfigDB delivers virtual interface
+    handles to driver/monitor'
+  - 'Sim/run: sequences start on sequencer; driver applies operands; objections hold
+    run phase until sequences finish'
+  - 'Check/report: monitor samples `sum`; UVM report phase summarizes errors; expect
+    UVM TEST PASSED'
+  notes: From MODULE3 Design Architecture.
+- type: bullets
+  title: 4. Module layout
   bullets:
   - '`module3/examples/` — isolated API demos (phases, reporting, configdb, factory,
     objections)'
   - '`module3/tests/pyuvm_tests/` — integrated `make SIM=verilator TEST=test_simple_uvm`
     flows'
+  - Each example directory has its own Makefile for incremental learning
+  - Assessment maps each example topic to integrated test behaviors
   notes: From MODULE3 Design Architecture.
+- type: code
+  title: DUT — 8-bit adder
+  language: systemverilog
+  source_file: module3/dut/simple_blocks/adder.v
+  code: "module adder (\n    input  wire       clk,\n    input  wire       rst_n,\n\
+    \    input  wire [7:0] a,\n    input  wire [7:0] b,\n    output reg  [7:0] sum,\n\
+    \    output reg        carry\n);\n\n    always @(posedge clk or negedge rst_n)\
+    \ begin\n        if (!rst_n) begin\n            sum <= 8'h00;\n            carry\
+    \ <= 1'b0;\n        end else begin\n            {carry, sum} <= a + b;\n     \
+    \   end\n    end\n\n// ..."
+- type: code
+  title: UVM transaction item
+  language: text
+  source_file: module3/tests/pyuvm_tests/test_simple_uvm.py
+  code: "class AdderTransaction(uvm_sequence_item):\n    \"\"\"Transaction for adder\
+    \ test.\"\"\"\n    \n    def __init__(self, name=\"AdderTransaction\"):\n    \
+    \    super().__init__(name)\n        self.a = 0\n        self.b = 0\n        self.expected_sum\
+    \ = 0\n        self.expected_carry = 0\n    \n    def __str__(self):\n       \
+    \ return (f\"a=0x{self.a:02X}, b=0x{self.b:02X}, \"\n                f\"expected_sum=0x{self.expected_sum:02X},\
+    \ \"\n                f\"expected_carry={self.expected_carry}\")\n\n\nclass AdderSequence(uvm_sequence):\n\
+    \    \"\"\"Sequence generating adder test vectors.\"\"\"\n// ..."
+- type: section
+  title: Key files to study
+- type: bullets
+  title: Open these in the repo
+  bullets:
+  - '`module3/dut/simple_blocks/adder.v` — primary combinational DUT for UVM structure
+    labs'
+  - '`module3/examples/phases/phases_example.py` — phase callbacks and simulation
+    lifetime'
+  - '`module3/examples/configdb/configdb_example.py` — virtual interface and parameter
+    publishing'
+  - '`module3/examples/factory/factory_example.py` — type overrides without hierarchy
+    edits'
+  - '`module3/tests/pyuvm_tests/test_simple_uvm.py` — integrated test → env → agent
+    → adder DUT'
+  - '`scripts/module3.sh` — per-topic flags (`--phases`, `--factory`, …) plus `--pyuvm-tests`'
+  notes: Trace while running module3/EXAMPLES.md labs.
 - type: section
   title: Verification & testing methods
-- type: image
-  title: Testing and closure flow
-  image: assets/diagrams/testing_methods.png
-  caption: 'Module 3: how tests, checks, and metrics close verification goals.'
-- type: bullets
+- type: two_column
   title: 1. Phase-based test execution
-  bullets:
+  left:
   - build → connect → end_of_elaboration → start_of_simulation → run → extract → report
   - Objections in run phase prevent premature finish until sequences complete
   - Reporting verbosity filters debug vs error messages
+  right: assets/diagrams/testing_methods.png
   notes: From MODULE3 Verification & Testing Methods.
 - type: bullets
   title: 2. Stimulus and checking
@@ -82,9 +139,19 @@ slides:
   - ConfigDB sets agent active/passive and interface handles
   notes: From MODULE3 Verification & Testing Methods.
 - type: bullets
-  title: 3. Closure
+  title: 3. Step-by-step lab execution
   bullets:
-  - '`./scripts/module3.sh --check` and per-topic flags (`--phases`, `--factory`,
+  - '1. API drills: `./scripts/module3.sh --class-hierarchy --phases --configdb`'
+  - '2. Factory/objections: `./scripts/module3.sh --factory --objections`'
+  - '3. Integrated test: `./scripts/module3.sh --pyuvm-tests` (or `make TEST=test_simple_uvm`)'
+  - 4. Confirm simulation log shows phase progression and no UVM_ERROR/FATAL
+  - '5. Optional: factory override exercise from examples, re-run integrated test
+    to observe swapped types'
+  notes: From MODULE3 Verification & Testing Methods.
+- type: bullets
+  title: 4. Closure
+  bullets:
+  - '`./scripts/module3.sh --pyuvm-tests` and per-topic flags (`--phases`, `--factory`,
     …)'
   - Pass when simulation report shows UVM TEST PASSED and no fatal errors
   - 'Assessment: class hierarchy, phases, configdb, factory, objections'
@@ -412,12 +479,41 @@ slides:
   - Test selection
   notes: From MODULE3 Topics Covered.
 - type: section
+  title: Command reference highlights
+- type: bullets
+  title: Isolated UVM API examples
+  bullets:
+  - '`./scripts/module3.sh --phases --reporting` — phase and verbosity drills'
+  - '`./scripts/module3.sh --configdb --factory --objections` — ConfigDB, factory,
+    objection tracks'
+  - '`./scripts/module3.sh --class-hierarchy` — component tree and TLM port basics'
+  notes: Full detail in docs/MODULE3.md command reference.
+- type: bullets
+  title: Integrated pyuvm simulation
+  bullets:
+  - '`./scripts/module3.sh --pyuvm-tests` — default integrated regression against
+    adder DUT'
+  - '`cd module3/tests/pyuvm_tests && make SIM=verilator TEST=test_simple_uvm` — direct
+    Make debug path'
+  - '`./scripts/module3.sh --skip-examples --pyuvm-tests` — jump to integrated test
+    when API drills are done'
+  notes: Full detail in docs/MODULE3.md command reference.
+- type: bullets
+  title: Verbosity and overrides
+  bullets:
+  - Set `PYUVM_VERBOSITY` or plusargs (when supported) to filter UVM report noise
+    during debug
+  - Factory overrides in examples swap test/agent types — mirror pattern in integrated
+    test
+  - Re-run single example Make target under `module3/examples/<topic>/` for fast iteration
+  notes: Full detail in docs/MODULE3.md command reference.
+- type: section
   title: Hands-on examples
 - type: demo
-  title: Module 3 self-check
-  command: ./scripts/module3.sh --check
+  title: Module 3 orchestrator
+  command: ./scripts/module3.sh --help
   screenshot: assets/screenshots/module3_check.png
-  expect_stdout_contains: All required checks passed
+  expect_stdout_contains: 'Usage:'
   notes: Run from course repository root.
 - type: code
   title: Exercise scaffold
@@ -457,6 +553,31 @@ slides:
 - type: section
   title: Practice & assessment
 - type: bullets
+  title: What you should know (1/3)
+  bullets:
+  - Understand UVM methodology
+  - Explain UVM class hierarchy
+  - Understand and use UVM phases
+  - Use UVM reporting effectively
+  - Use ConfigDB for configuration
+  - Understand factory pattern
+  notes: From MODULE3 Learning Outcomes.
+- type: bullets
+  title: What you should know (2/3)
+  bullets:
+  - Create UVM test classes
+  - Structure UVM environments
+  - Use objection mechanism
+  - Execute UVM tests
+  - Test class definition
+  - Basic phases
+  notes: From MODULE3 Learning Outcomes.
+- type: bullets
+  title: What you should know (3/3)
+  bullets:
+  - Objection mechanism
+  notes: From MODULE3 Learning Outcomes.
+- type: bullets
   title: Exercises
   bullets:
   - Test Class Creation
@@ -478,5 +599,5 @@ slides:
   bullets:
   - Master UVM class hierarchy and phases
   - Complete module3/CHECKLIST.md
-  - Run ./scripts/module3.sh --check
+  - Review module3/EXAMPLES.md and run each lab
   - 'Next: Next module in course'

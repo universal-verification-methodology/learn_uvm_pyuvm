@@ -62,6 +62,26 @@ make SIM=verilator TEST=test_utilities
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-slide-supplements:auto:start -->
+
+## Before You Start
+
+1. Modules 4–7 env patterns should be fresh — utilities attach to analysis ports and phase hooks you already built
+2. No new large DUT focus; `module8/dut/dma/simple_dma.v` reuses DMA block as a lightweight integration anchor
+3. Run CLP example first — plusargs configure tests without recompilation
+4. Study comparators and recorders on analysis ports before pools/queues efficiency labs
+5. Capstone: `integration/` wires multiple utilities; `test_utilities.py` proves them under simulation
+
+## Key files to study
+
+- `module8/examples/clp/clp_example.py` — `uvm_cmdline_processor` plusarg parsing
+- `module8/examples/comparators/comparator_example.py` — equal/less/greater compare policies
+- `module8/examples/recorders/recorder_example.py` — transaction logging to files
+- `module8/examples/pools/pool_example.py` and `queues/queue_example.py` — object reuse and ordered work
+- `module8/examples/integration/integration_example.py` — multi-utility mini-env
+- `module8/tests/pyuvm_tests/test_utilities.py` — simulated proof of utility integration
+
+<!-- module-slide-supplements:auto:end -->
 <!-- module-architecture:auto:start -->
 ## Design Architecture
 
@@ -70,19 +90,28 @@ make SIM=verilator TEST=test_utilities
 - No new large DUT focus — utilities plug into existing envs from prior modules
 - CLP (`uvm_cmdline_processor`) configures tests without recompilation
 - Comparators, recorders, pools, queues support analysis and debug infrastructure
+- String/math/random helpers reduce boilerplate in checks and stimulus
 
 ### 2. How utilities attach
 
 - Comparators sit on analysis ports beside scoreboards
 - Recorders log transactions to files for offline review
 - Pools/queues manage recycled objects and ordered work lists
-- String/math/random helpers reduce boilerplate in checks and stimulus
+- CLP reads plusargs before build/run to select tests and verbosity
 
-### 3. Integration architecture
+### 3. Execution pipeline
+
+- Build: standard Verilator compile; utilities instantiate during env build like other components
+- Connect: comparators/recorders tap monitor analysis ports alongside scoreboard
+- Sim: CLP-selected sequences run; recorders flush on phase boundaries; pools recycle transaction objects
+- Check: comparators flag ordering/equality violations; logs + UVM report provide offline audit trail
+
+### 4. Integration architecture
 
 - `module8/examples/integration/` wires multiple utilities in one mini-env
 - Tests under `module8/tests/pyuvm_tests/` prove utilities under simulation
 - Pattern: configure via CLP → run sequence → compare → record → report
+- Reuse utilities in Module 6/7 style envs for capstone projects
 
 ## Verification & Testing Methods
 
@@ -98,9 +127,17 @@ make SIM=verilator TEST=test_utilities
 - Queues order deferred checks or secondary stimulus
 - Random/string/math utils keep constraints readable in sequences
 
-### 3. Closure
+### 3. Step-by-step lab execution
 
-- `./scripts/module8.sh --check` across all utility examples
+- 1. CLP: `./scripts/module8.sh --clp` — exercise plusarg overrides
+- 2. Compare/record: `./scripts/module8.sh --comparators --recorders`
+- 3. Pools/queues: `./scripts/module8.sh --pools --queues`
+- 4. Helpers: `./scripts/module8.sh --string-utils --math-utils --random-utils`
+- 5. Capstone: `./scripts/module8.sh --integration --pyuvm-tests` — full utility integration pass
+
+### 4. Closure
+
+- `./scripts/module8.sh --pyuvm-tests` across all utility examples
 - Assessment: CLP, comparators, recorders, pools, queues, integration
 - Capstone: combine utilities with Module 6/7 style envs in your own project
 
@@ -374,6 +411,28 @@ make SIM=verilator TEST=test_utilities
   - Transaction comparison
   - Transaction recording
   - Object management
+
+<!-- module-commands:auto:start -->
+## Command Reference
+
+### Core utilities
+
+- `./scripts/module8.sh --clp --comparators --recorders` — configure, compare, and log infrastructure
+- `./scripts/module8.sh --pools --queues` — allocation efficiency and ordered deferred work
+- `./scripts/module8.sh --string-utils --math-utils --random-utils` — helper libraries for checks/stimulus
+
+### Integration and tests
+
+- `./scripts/module8.sh --integration` — combined utility mini-env
+- `./scripts/module8.sh --pyuvm-tests` — `test_utilities.py` regression
+- `cd module8/tests/pyuvm_tests && make SIM=verilator TEST=test_utilities`
+
+### CLP-driven runs
+
+- Pass plusargs through Makefile/`SIM_ARGS` where examples support seed, verbosity, test name overrides
+- Re-run same binary with different plusargs — demonstrates no-recompile test selection
+- `./scripts/module8.sh` — full utility sweep for module completion
+<!-- module-commands:auto:end -->
 
 ## Learning Outcomes
 

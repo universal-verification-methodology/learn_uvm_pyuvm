@@ -124,3 +124,17 @@
 2026-05-28 20:37:08,894 - __main__ - WARNING - This is a WARNING message (potential issues)
 2026-05-28 20:37:08,895 - __main__ - ERROR - This is an ERROR message (errors occurred)
 2026-05-28 20:37:08,896 - __main__ - CRITICAL - This is a CRITICAL message (serious errors)
+2026-05-30 20:19:40,481 - __main__ - INFO - Initialized verification checker: BasicChecker
+2026-05-30 20:19:40,482 - __main__ - DEBUG - BasicChecker: Match at address 0x1000: 0x1234
+2026-05-30 20:19:40,483 - __main__ - ERROR - BasicChecker: Mismatch at address 0x2000: expected 0x5678, got 0x9ABC
+2026-05-30 20:19:40,483 - __main__ - ERROR - Caught chained exception: Verification failed
+2026-05-30 20:19:40,484 - __main__ - ERROR - Original exception: Original error
+2026-05-30 20:19:40,484 - __main__ - INFO - Initialized verification checker: RetryChecker
+2026-05-30 20:19:40,485 - __main__ - WARNING - RetryChecker: Attempt 1 failed: Timeout in flaky_operation after 100ns
+2026-05-30 20:19:40,486 - __main__ - WARNING - RetryChecker: Attempt 2 failed: Timeout in flaky_operation after 100ns
+2026-05-30 20:19:40,486 - __main__ - INFO - RetryChecker: Operation succeeded on attempt 3
+2026-05-30 20:19:40,487 - __main__ - DEBUG - This is a DEBUG message (detailed information)
+2026-05-30 20:19:40,487 - __main__ - INFO - This is an INFO message (general information)
+2026-05-30 20:19:40,488 - __main__ - WARNING - This is a WARNING message (potential issues)
+2026-05-30 20:19:40,489 - __main__ - ERROR - This is an ERROR message (errors occurred)
+2026-05-30 20:19:40,489 - __main__ - CRITICAL - This is a CRITICAL message (serious errors)

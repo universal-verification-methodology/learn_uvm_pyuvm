@@ -16,7 +16,7 @@ assets:
   source: assets/diagrams/rtl_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 7
+  - 9
   license: learn_uvm_pyuvm course materials
 - id: verification_architecture
   type: diagram
@@ -24,7 +24,7 @@ assets:
   source: assets/diagrams/verification_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 8
+  - 10
   license: learn_uvm_pyuvm course materials
 - id: testing_methods
   type: diagram
@@ -32,48 +32,48 @@ assets:
   source: assets/diagrams/testing_methods.mmd
   generator: render_diagrams.sh
   slides:
-  - 13
+  - 18
   license: learn_uvm_pyuvm course materials
 - id: module6_check
   type: screenshot
   file: assets/screenshots/module6_check.png
-  capture_command: ./scripts/module6.sh --check
+  capture_command: ./scripts/module6.sh --help
   cwd: .
   slides:
-  - 45
-  expect_stdout_contains: All required checks passed
+  - 54
+  expect_stdout_contains: 'Usage:'
 - id: ex01_multi_agent
   type: screenshot
   file: assets/screenshots/ex01_multi_agent.png
   capture_command: .venv/bin/python module6/examples/multi_agent/multi_agent_example.py
   cwd: .
   slides:
-  - 47
+  - 56
 - id: ex02_protocol
   type: screenshot
   file: assets/screenshots/ex02_protocol.png
   capture_command: .venv/bin/python module6/examples/protocol/protocol_example.py
   cwd: .
   slides:
-  - 48
+  - 57
 - id: ex03_protocol_checkers
   type: screenshot
   file: assets/screenshots/ex03_protocol_checkers.png
   capture_command: .venv/bin/python module6/examples/protocol_checkers/protocol_checker_example.py
   cwd: .
   slides:
-  - 49
+  - 58
 - id: ex04_scoreboards
   type: screenshot
   file: assets/screenshots/ex04_scoreboards.png
   capture_command: .venv/bin/python module6/examples/scoreboards/multi_channel_scoreboard_example.py
   cwd: .
   slides:
-  - 50
+  - 59
 - id: ex05_architecture
   type: screenshot
   file: assets/screenshots/ex05_architecture.png
   capture_command: .venv/bin/python module6/examples/architecture/architecture_example.py
   cwd: .
   slides:
-  - 51
+  - 60

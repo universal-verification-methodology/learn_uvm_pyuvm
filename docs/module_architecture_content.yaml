@@ -3,6 +3,35 @@
 
 modules:
   0:
+    before_you_start:
+      - "Clone the repo and read `docs/MODULE0.md` for toolchain expectations (GCC/Clang, Python 3.10+, Git, Make)"
+      - "Confirm you have build essentials for Verilator (`sudo apt install build-essential` on Debian/Ubuntu) before running install scripts"
+      - "Decide install modes: Verilator (`submodule`/`system`/`source`), cocotb/pyuvm (`pip` or `submodule`) — defaults work for most learners"
+      - "Plan for a project-local venv at `.venv`; activate it (`source .venv/bin/activate`) before any Python checks"
+      - "No RTL or simulation in this module — success means every tool probe passes before Module 1"
+    key_files:
+      - "`scripts/module0.sh` — orchestrator for Verilator, cocotb, and pyuvm install plus verification probes"
+      - "`scripts/install_verilator.sh` — builds or links Verilator per `--verilator-mode`"
+      - "`scripts/install_cocotb.sh` — installs cocotb into `.venv` or submodule tree"
+      - "`scripts/install_pyuvm.sh` — installs pyuvm and pins course Python dependencies"
+      - "`docs/MODULE0.md` — assessment checklist mapping environment readiness to course progress"
+      - "`requirements.txt` / `pyproject.toml` — dependency versions consumed by pip install paths"
+    commands:
+      - title: Full toolchain install
+        bullets:
+          - "`./scripts/module0.sh` — install Verilator, cocotb, and pyuvm with default modes into `.venv`"
+          - "`./scripts/module0.sh --verilator-mode system --cocotb-mode pip --pyuvm-mode pip` — explicit mode selection"
+          - "`./scripts/module0.sh --skip-verilator` — refresh Python packages only when Verilator already present"
+      - title: Verify without reinstalling
+        bullets:
+          - "`./scripts/module0.sh --verify-only` — probe `verilator`, `cocotb-config`, and `import pyuvm` without mutating the system"
+          - "`verilator --version` — confirms simulator on PATH after submodule or system install"
+          - "`python3 -c \"import cocotb, pyuvm; print('OK')\"` — quick venv sanity check outside the orchestrator"
+      - title: Manual probes (debug)
+        bullets:
+          - "`which verilator && cocotb-config --version` — separate PATH issues from Python import failures"
+          - "`source .venv/bin/activate` — required before manual Python probes if `--no-venv` was not used"
+          - "Re-run `--verify-only` after OS updates, submodule pulls, or venv recreation"
     design:
       - title: Toolchain and repository layout
         bullets:
@@ -15,35 +44,78 @@ modules:
           - "Bottom layer: OS, compiler (GCC/Clang), Make/Ninja, Git"
           - "Simulator layer: Verilator (default) produces fast cycle-accurate models from SystemVerilog/Verilog"
           - "Testbench layer: cocotb (coroutine-driven) and pyuvm (UVM 1.2 in Python) share the same venv"
-          - "Artifacts: logs under module runs, optional VCD/FST waveforms from Make targets"
+          - "Artifacts: logs under module runs, optional VCD/FST waveforms from Make targets in later modules"
+      - title: Execution pipeline
+        bullets:
+          - "Install: `module0.sh` → dependency scripts → venv population → version probes (no compile/sim/check loop yet)"
+          - "Build: not applicable — no DUT or Makefile targets in Module 0"
+          - "Sim: not applicable — cocotb/Verilator coupling is validated only via import and `--version` probes"
+          - "Check: `--verify-only` aggregates pass/fail; all three tools must report OK before Module 1 labs"
       - title: What is not in this module
         bullets:
-          - "No DUT or UVM hierarchy yet — focus is reproducible environment setup"
+          - "No DUT or UVM hierarchy — focus is reproducible environment setup"
           - "Later modules attach Python tests to RTL under `moduleN/dut/`"
           - "Self-check only validates tools; functional verification starts in Module 1"
+          - "Waveforms, scoreboards, and regression Makefiles appear from Module 1 onward"
     testing:
       - title: Installation verification strategy
         bullets:
           - "Run `./scripts/module0.sh` for full install or per-tool flags (`--verilator-mode`, `--cocotb-mode`, `--pyuvm-mode`)"
-          - "`./scripts/module0.sh --check` confirms `verilator`, `cocotb-config`, and importable `pyuvm`"
+          - "`./scripts/module0.sh --verify-only` confirms `verilator`, `cocotb-config`, and importable `pyuvm`"
           - "Version probes (`verilator --version`, `python -c 'import cocotb'`) catch PATH and venv mistakes early"
       - title: Smoke and regression mindset
         bullets:
           - "Treat install as the first regression: every tool must pass before Module 1 labs"
-          - "Re-run `--check` after OS updates or submodule pulls"
+          - "Re-run `--verify-only` after OS updates or submodule pulls"
           - "Document failures in install logs; fix one layer at a time (compiler → Verilator → Python packages)"
+      - title: Step-by-step lab execution
+        bullets:
+          - "1. From repo root: `./scripts/module0.sh` (or selective `--skip-*` flags if tools already installed)"
+          - "2. Activate venv: `source .venv/bin/activate`"
+          - "3. Verify: `./scripts/module0.sh --verify-only` — expect green checks for Verilator, cocotb, pyuvm"
+          - "4. Optional manual probes: `verilator --version`, `cocotb-config --version`, `python3 -c 'import pyuvm'`"
+          - "5. Record pass in MODULE0 assessment checklist; proceed to Module 1 only when all probes succeed"
       - title: Closure for Module 0
         bullets:
-          - "Pass criteria: all install scripts succeed and `--check` reports required tools present"
+          - "Pass criteria: all install scripts succeed and `--verify-only` reports required tools present"
           - "Optional: run a minimal cocotb compile in Module 1 only after Module 0 passes"
-          - "Assessment checklist in MODULE0 maps environment readiness to course progress"
+          - "Assessment checklist in `docs/MODULE0.md` maps environment readiness to course progress"
 
   1:
+    before_you_start:
+      - "Complete Module 0 (`./scripts/module0.sh --verify-only`) so Verilator, cocotb, and pyuvm are available in `.venv`"
+      - "Skim `docs/MODULE1.md` and run pure Python examples first — no simulator required for OOP/async foundations"
+      - "Review `module1/dut/simple_gates/` RTL (AND gate, counter) before opening cocotb tests"
+      - "Understand the testbench mental model: DUT ← driver/stimulus ← test ← checker ← monitor"
+      - "Keep venv active; cocotb Makefiles expect `SIM=verilator` and `COCOTB_REDIRECT_OUTPUT=1` defaults from course Makefiles"
+    key_files:
+      - "`module1/dut/simple_gates/and_gate.v` — 2-input AND; first combinational DUT for cocotb handles"
+      - "`module1/dut/simple_gates/counter.v` — clocked counter with enable/reset for sequential labs"
+      - "`module1/examples/python_basics/transaction.py` — transaction class with `__eq__`/`__hash__` patterns"
+      - "`module1/tests/cocotb_tests/test_and_gate.py` — directed cocotb vectors and edge triggers"
+      - "`module1/tests/pyuvm_tests/test_and_gate_uvm.py` — minimal pyuvm hierarchy on the AND gate"
+      - "`scripts/module1.sh` — routes Python examples and `--cocotb-tests` / `--pyuvm-tests` regressions"
+    commands:
+      - title: Python examples (no simulator)
+        bullets:
+          - "`./scripts/module1.sh` — runs all five Python example tracks (default)"
+          - "`./scripts/module1.sh --decorators --async-await` — selective example subsets"
+          - "`python3 module1/examples/python_basics/transaction.py` — standalone OOP/transaction drill"
+      - title: cocotb RTL tests
+        bullets:
+          - "`./scripts/module1.sh --cocotb-tests` — build and run cocotb regressions via orchestrator"
+          - "`cd module1/tests/cocotb_tests && make SIM=verilator TEST=test_and_gate` — single-test Makefile flow"
+          - "`make SIM=verilator TEST=test_counter` — sequential counter regression with reset/enable checks"
+      - title: pyuvm entry tests
+        bullets:
+          - "`./scripts/module1.sh --pyuvm-tests` — compile RTL and run introductory pyuvm test against AND gate"
+          - "`cd module1/tests/pyuvm_tests && make SIM=verilator` — direct Make entry when debugging pyuvm wiring"
+          - "`./scripts/module1.sh --all-tests` — Python examples plus cocotb and pyuvm test suites"
     design:
       - title: RTL block architecture
         bullets:
-          - "DUTs in `module1/dut/simple_gates/` (AND gate) and `module1/dut/counters/` (counter with enable/reset)"
-          - "Synchronous blocks: clock, active-low reset, multi-bit data paths"
+          - "DUTs in `module1/dut/simple_gates/` — `and_gate.v` (combinational) and `counter.v` (enable, active-low reset)"
+          - "Synchronous blocks: clock, active-low reset, multi-bit data paths on the counter"
           - "Flat hierarchy — no buses; ideal for first cocotb signal access and pyuvm hook-up"
       - title: Python verification layer architecture
         bullets:
@@ -51,11 +123,18 @@ modules:
           - "`module1/tests/cocotb_tests/` — coroutine testbenches driving RTL via cocotb handles"
           - "`module1/tests/pyuvm_tests/` — minimal UVM-style hierarchy introduction"
           - "Transaction classes in `examples/python_basics/transaction.py` model stimulus items reused in TB thinking"
+      - title: Execution pipeline
+        bullets:
+          - "Build: Verilator compiles `module1/dut/simple_gates/*.v` via cocotb Makefile (`VERILOG_SOURCES`, top module)"
+          - "Sim: cocotb loads Python test module; coroutines advance time on `RisingEdge(clk)` and combinational reads"
+          - "Check: assertions in test functions plus cocotb `TestSuccess`/`TestFailure`; pyuvm tests report UVM status"
+          - "Orchestrator path: `module1.sh --cocotb-tests` wraps `make` with venv and simulator checks"
       - title: Testbench mental model
         bullets:
           - "DUT (RTL) ← driver/stimulus ← test ← checker/scoreboard ← monitor → observations"
           - "Simulation time advances on clock edges; Python coroutines (`async`/`await`) align with cocotb"
           - "Assertions and logging close the loop between expected and actual behavior"
+          - "Python examples teach patterns (transactions, async) reused when pyuvm sequences appear in Module 3"
     testing:
       - title: cocotb testing methods
         bullets:
@@ -67,30 +146,74 @@ modules:
           - "`./scripts/module1.sh --pyuvm-tests` — compile/run introductory pyuvm tests against simple DUTs"
           - "Examples run without simulator (`python3 module1/examples/...`) to teach OOP patterns first"
           - "Error-handling example shows structured logging for debuggable regressions"
+      - title: Step-by-step lab execution
+        bullets:
+          - "1. Run Python track: `./scripts/module1.sh` (or individual `--python-basics`, `--async-await`, …)"
+          - "2. cocotb AND gate: `cd module1/tests/cocotb_tests && make SIM=verilator TEST=test_and_gate`"
+          - "3. cocotb counter: `make SIM=verilator TEST=test_counter` — observe reset and enable sequencing"
+          - "4. pyuvm entry: `./scripts/module1.sh --pyuvm-tests` — confirm UVM-style test completes without fatals"
+          - "5. Full regression: `./scripts/module1.sh --all-tests` before MODULE1 assessment sign-off"
       - title: Closure and self-check
         bullets:
-          - "`./scripts/module1.sh --check` runs required examples and tests"
+          - "`./scripts/module1.sh --all-tests` runs required examples and simulator-backed tests"
           - "Combine directed cocotb tests with transaction equality (`__eq__`, `__hash__`) from Python examples"
           - "Assessment: OOP for verification, basic TB structure, cocotb + pyuvm entry points"
 
   2:
+    before_you_start:
+      - "Finish Module 1 cocotb labs so clock/reset coroutine patterns are familiar"
+      - "Read `module2/dut/registers/simple_register.v` and `shift_register.v` port lists before writing stimulus"
+      - "Work through `module2/examples/triggers/` — `RisingEdge`, `FallingEdge`, and `Timer` are core to all Module 2 tests"
+      - "Study `module2/examples/clock_generation/` and `reset_patterns/` — shared fixtures decouple timing from test logic"
+      - "No pyuvm yet; tests are flat `@cocotb.test` functions selected by Makefile `TEST=`"
+    key_files:
+      - "`module2/dut/registers/simple_register.v` — 8-bit register with enable and synchronous reset (primary lab DUT)"
+      - "`module2/dut/registers/shift_register.v` — serial in/out with parallel tap; multi-cycle behavior"
+      - "`module2/examples/triggers/triggers_example.py` — cocotb trigger primitives and concurrency"
+      - "`module2/tests/cocotb_tests/test_simple_register.py` — directed write/read and boundary values"
+      - "`module2/tests/cocotb_tests/test_shift_register.py` — serial shift timing regression"
+      - "`scripts/module2.sh` — routes example makes and `--cocotb-tests` regressions"
+    commands:
+      - title: cocotb examples (tutorial makes)
+        bullets:
+          - "`./scripts/module2.sh --triggers` — run trigger tutorial under `module2/examples/triggers/`"
+          - "`./scripts/module2.sh --clock-generation --reset-patterns` — timing and reset fixture drills"
+          - "`./scripts/module2.sh` — all five example tracks (signal access through common patterns)"
+      - title: DUT regression tests
+        bullets:
+          - "`./scripts/module2.sh --cocotb-tests` — register and shift-register makes via orchestrator"
+          - "`cd module2/tests/cocotb_tests && make SIM=verilator TEST=test_simple_register`"
+          - "`make SIM=verilator TEST=test_shift_register` — serial timing and parallel output checks"
+      - title: Debug and waves
+        bullets:
+          - "`make SIM=verilator TEST=test_simple_register WAVES=1` — enable VCD/FST when Makefile supports it"
+          - "Use `cocotb.log` verbosity and simulator stdout from `results.xml` for pass/fail triage"
+          - "Re-run single `TEST=` target after RTL or stimulus edits — faster than full example sweep"
     design:
       - title: RTL portfolio architecture
         bullets:
           - "`simple_register.v` — 8-bit register, enable, synchronous reset (primary lab DUT)"
           - "`shift_register.v` — serial in/out, parallel tap; exercises multi-cycle behavior"
           - "`simple_fifo.v` — 16×8 FIFO with full/empty flags (reference for extension)"
-          - "`simple_fsm.v` — IDLE/START/WORK/DONE four-state controller"
+          - "`simple_fsm.v` — IDLE/START/WORK/DONE four-state controller (optional study)"
       - title: cocotb testbench architecture
         bullets:
           - "Test module → coroutines (`@cocotb.test`) → DUT signals via `dut.signal` handles"
           - "Clock generators in examples decouple timing from test logic"
           - "No UVM hierarchy; flat Python functions and shared fixtures via Makefile `TEST=` selection"
+          - "Concurrent coroutines use triggers to model parallel clock, reset, and stimulus threads"
+      - title: Execution pipeline
+        bullets:
+          - "Build: Verilator compiles selected DUT under `module2/dut/registers/` per Makefile top module"
+          - "Sim: cocotb schedules coroutines on triggers; reset coroutines establish known state before stimulus"
+          - "Check: Python assertions on `dut.q.value` / shift outputs; cocotb regression aggregates `results.xml`"
+          - "Examples path: `module2.sh --triggers` runs tutorial makes without full DUT regression"
       - title: Example vs test separation
         bullets:
           - "`module2/examples/` — signal access, clocks, triggers, reset patterns (runnable tutorials)"
           - "`module2/tests/cocotb_tests/` — regression tests bound to specific DUTs"
           - "Orchestrator `scripts/module2.sh` routes flags to examples or cocotb makes"
+          - "Reference FIFO/FSM RTL supports self-study; graded labs focus on register and shift register"
     testing:
       - title: Stimulus and observation
         bullets:
@@ -102,13 +225,49 @@ modules:
           - "`make SIM=verilator TEST=test_simple_register` selects cocotb test module"
           - "Regression runner executes multiple tests; pass/fail per `cocotb.regression`"
           - "Boundary tests (`test_register_all_values`) cover 0x00, 0x7F, 0x80, 0xFF"
+      - title: Step-by-step lab execution
+        bullets:
+          - "1. Tutorials: `./scripts/module2.sh --signal-access --triggers --reset-patterns`"
+          - "2. Register lab: `cd module2/tests/cocotb_tests && make SIM=verilator TEST=test_simple_register`"
+          - "3. Shift register lab: `make SIM=verilator TEST=test_shift_register` — verify serial-to-parallel timing"
+          - "4. Full DUT regression: `./scripts/module2.sh --cocotb-tests`"
+          - "5. Debug failures with waves/logging before MODULE2 assessment"
       - title: Debug and closure
         bullets:
           - "Logging via `cocotb.log`; VCD from simulator flags for waveform debug"
-          - "`./scripts/module2.sh --check` validates examples and key cocotb tests"
+          - "`./scripts/module2.sh --cocotb-tests` validates key cocotb tests and example makes"
           - "Assessment: clocks, triggers, reset sequences, structured cocotb tests"
 
   3:
+    before_you_start:
+      - "Solid cocotb skills from Module 2 — you will reuse trigger timing inside pyuvm drivers later"
+      - "Read `module3/dut/simple_blocks/adder.v` — combinational operands `a`, `b`, output `sum`"
+      - "Step through `module3/examples/phases/` and `class_hierarchy/` before integrated `test_simple_uvm.py`"
+      - "Understand UVM phase order: build → connect → run (with objections) → report"
+      - "ConfigDB and factory examples are isolated; run them before merging concepts in the pyuvm test"
+    key_files:
+      - "`module3/dut/simple_blocks/adder.v` — primary combinational DUT for UVM structure labs"
+      - "`module3/examples/phases/phases_example.py` — phase callbacks and simulation lifetime"
+      - "`module3/examples/configdb/configdb_example.py` — virtual interface and parameter publishing"
+      - "`module3/examples/factory/factory_example.py` — type overrides without hierarchy edits"
+      - "`module3/tests/pyuvm_tests/test_simple_uvm.py` — integrated test → env → agent → adder DUT"
+      - "`scripts/module3.sh` — per-topic flags (`--phases`, `--factory`, …) plus `--pyuvm-tests`"
+    commands:
+      - title: Isolated UVM API examples
+        bullets:
+          - "`./scripts/module3.sh --phases --reporting` — phase and verbosity drills"
+          - "`./scripts/module3.sh --configdb --factory --objections` — ConfigDB, factory, objection tracks"
+          - "`./scripts/module3.sh --class-hierarchy` — component tree and TLM port basics"
+      - title: Integrated pyuvm simulation
+        bullets:
+          - "`./scripts/module3.sh --pyuvm-tests` — default integrated regression against adder DUT"
+          - "`cd module3/tests/pyuvm_tests && make SIM=verilator TEST=test_simple_uvm` — direct Make debug path"
+          - "`./scripts/module3.sh --skip-examples --pyuvm-tests` — jump to integrated test when API drills are done"
+      - title: Verbosity and overrides
+        bullets:
+          - "Set `PYUVM_VERBOSITY` or plusargs (when supported) to filter UVM report noise during debug"
+          - "Factory overrides in examples swap test/agent types — mirror pattern in integrated test"
+          - "Re-run single example Make target under `module3/examples/<topic>/` for fast iteration"
     design:
       - title: RTL and interfaces
         bullets:
@@ -121,10 +280,18 @@ modules:
           - "`uvm_sequence_item` / `uvm_sequence` carry transactions; driver converts items to pin wiggles"
           - "ConfigDB publishes virtual interfaces and parameters before `build_phase`"
           - "Factory + objections control creation and phase lifetime"
+      - title: Execution pipeline
+        bullets:
+          - "Build: Verilator compiles adder RTL; pyuvm `build_phase` constructs test/env/agent/component tree"
+          - "Connect: TLM ports linked in `connect_phase`; ConfigDB delivers virtual interface handles to driver/monitor"
+          - "Sim/run: sequences start on sequencer; driver applies operands; objections hold run phase until sequences finish"
+          - "Check/report: monitor samples `sum`; UVM report phase summarizes errors; expect UVM TEST PASSED"
       - title: Module layout
         bullets:
           - "`module3/examples/` — isolated API demos (phases, reporting, configdb, factory, objections)"
           - "`module3/tests/pyuvm_tests/` — integrated `make SIM=verilator TEST=test_simple_uvm` flows"
+          - "Each example directory has its own Makefile for incremental learning"
+          - "Assessment maps each example topic to integrated test behaviors"
     testing:
       - title: Phase-based test execution
         bullets:
@@ -136,13 +303,49 @@ modules:
           - "Directed sequences on adder operands; monitor samples outputs for scoreboard hooks"
           - "Factory overrides swap test/agent types without editing hierarchy code"
           - "ConfigDB sets agent active/passive and interface handles"
+      - title: Step-by-step lab execution
+        bullets:
+          - "1. API drills: `./scripts/module3.sh --class-hierarchy --phases --configdb`"
+          - "2. Factory/objections: `./scripts/module3.sh --factory --objections`"
+          - "3. Integrated test: `./scripts/module3.sh --pyuvm-tests` (or `make TEST=test_simple_uvm`)"
+          - "4. Confirm simulation log shows phase progression and no UVM_ERROR/FATAL"
+          - "5. Optional: factory override exercise from examples, re-run integrated test to observe swapped types"
       - title: Closure
         bullets:
-          - "`./scripts/module3.sh --check` and per-topic flags (`--phases`, `--factory`, …)"
+          - "`./scripts/module3.sh --pyuvm-tests` and per-topic flags (`--phases`, `--factory`, …)"
           - "Pass when simulation report shows UVM TEST PASSED and no fatal errors"
           - "Assessment: class hierarchy, phases, configdb, factory, objections"
 
   4:
+    before_you_start:
+      - "Module 3 UVM hierarchy and phases must be comfortable — agents bundle components you studied separately"
+      - "Study `module4/dut/interfaces/simple_interface.v` valid/ready handshake before driver labs"
+      - "Run examples in order: transactions → driver → monitor → sequencer → scoreboard → TLM → agents"
+      - "Read `InterfaceTransaction` field definitions and `copy`/`compare` before scoreboard integration"
+      - "Integrated capstone is `test_complete_agent.py` — do not skip per-component examples"
+    key_files:
+      - "`module4/dut/interfaces/simple_interface.v` — valid/ready streaming interface with addr/data/result"
+      - "`module4/examples/transactions/transaction_example.py` — sequence item fields and compare/copy"
+      - "`module4/examples/drivers/driver_example.py` — sequencer pull loop and pin wiggling"
+      - "`module4/examples/monitors/monitor_example.py` — passive sampling and analysis port broadcast"
+      - "`module4/tests/pyuvm_tests/test_complete_agent.py` — end-to-end agent, env, scoreboard integration"
+      - "`scripts/module4.sh` — `--drivers` … `--agents` example flags and `--pyuvm-tests`"
+    commands:
+      - title: Per-component examples
+        bullets:
+          - "`./scripts/module4.sh --transactions --drivers --monitors` — stimulus and observation building blocks"
+          - "`./scripts/module4.sh --sequencers --scoreboards --tlm` — sequence flow and analysis connections"
+          - "`./scripts/module4.sh --agents` — complete agent wiring before capstone test"
+      - title: Integration test
+        bullets:
+          - "`./scripts/module4.sh --pyuvm-tests` — run `test_complete_agent` via orchestrator"
+          - "`cd module4/tests/pyuvm_tests && make SIM=verilator TEST=test_complete_agent`"
+          - "`./scripts/module4.sh --skip-examples --pyuvm-tests` — capstone only when components are understood"
+      - title: Debug paths
+        bullets:
+          - "Run individual example Make under `module4/examples/<component>/` to isolate failures"
+          - "Increase UVM verbosity to trace sequence → driver → monitor transaction paths"
+          - "Verilator waveforms on interface valid/ready when handshake debug is needed"
     design:
       - title: DUT and interface protocol
         bullets:
@@ -155,6 +358,12 @@ modules:
           - "TLM analysis ports connect monitor → scoreboard (and optional coverage)"
           - "`InterfaceTransaction` defines fields, `copy`/`compare`, and constraints"
           - "Complete path: sequence → sequencer → driver → DUT → monitor → scoreboard"
+      - title: Execution pipeline
+        bullets:
+          - "Build: Verilator compiles `simple_interface.v`; env builds agent (driver, monitor, sequencer) and scoreboard"
+          - "Connect: monitor `ap` → scoreboard `exp`/`act` analysis imports; sequencer ↔ driver TLM ports"
+          - "Sim: sequence items drive valid/ready beats; monitor reconstructs transactions on completed handshakes"
+          - "Check: scoreboard `compare` on monitored vs predicted streams; UVM report summarizes mismatches"
       - title: Component responsibilities
         bullets:
           - "Driver: pull items from sequencer, drive pins per protocol"
@@ -172,12 +381,49 @@ modules:
           - "Scoreboard compares monitored results to predicted model or golden vectors"
           - "Analysis port fan-out allows multiple checkers without changing monitor"
           - "Sequences provide repeatable stimulus; random/constrained extensions in exercises"
+      - title: Step-by-step lab execution
+        bullets:
+          - "1. Transactions: `./scripts/module4.sh --transactions`"
+          - "2. Driver/monitor/sequencer: `./scripts/module4.sh --drivers --monitors --sequencers`"
+          - "3. Scoreboard/TLM: `./scripts/module4.sh --scoreboards --tlm`"
+          - "4. Agent assembly: `./scripts/module4.sh --agents`"
+          - "5. Capstone: `./scripts/module4.sh --pyuvm-tests` — confirm scoreboard clean and UVM TEST PASSED"
       - title: Closure
         bullets:
-          - "Self-check via `module4.sh --check`; demo screenshots per EXAMPLES.md section"
+          - "Self-check via `./scripts/module4.sh --pyuvm-tests`; demo screenshots per EXAMPLES.md section"
           - "Assessment: drivers, monitors, sequencers, agents, scoreboards, TLM connections"
+          - "You should trace one transaction from sequence item through to scoreboard compare"
 
   5:
+    before_you_start:
+      - "Module 4 agent/scoreboard integration is prerequisite — multi-channel env extends the same TLM patterns"
+      - "Review `module5/dut/advanced/multi_channel.v` — multiple logical channels needing coordinated stimulus"
+      - "Study virtual sequencer concept before `virtual_sequences/` examples — one coordinator, many agents"
+      - "Skim RAL terminology: register map, fields, adapter, predictor — used in `register_model/`"
+      - "Coverage and callbacks modify observation and driver behavior without deep subclass trees"
+    key_files:
+      - "`module5/dut/advanced/multi_channel.v` — multi-stream DUT for virtual sequence coordination"
+      - "`module5/examples/virtual_sequences/virtual_sequence_example.py` — child sequences on multiple sequencers"
+      - "`module5/examples/coverage/coverage_example.py` — functional coverage sampling hooks"
+      - "`module5/examples/register_model/register_model_example.py` — RAL map, adapter, mirror updates"
+      - "`module5/tests/pyuvm_tests/test_advanced_uvm.py` — integrated advanced env regression"
+      - "`scripts/module5.sh` — `--virtual-sequences`, `--coverage`, `--register-model`, …"
+    commands:
+      - title: Advanced UVM topics
+        bullets:
+          - "`./scripts/module5.sh --virtual-sequences --configuration` — coordination and config objects"
+          - "`./scripts/module5.sh --coverage --callbacks` — coverage sampling and callback injection"
+          - "`./scripts/module5.sh --register-model` — RAL map and bus adapter drill"
+      - title: Integrated regression
+        bullets:
+          - "`./scripts/module5.sh --pyuvm-tests` — `test_advanced_uvm` against multi-channel DUT"
+          - "`cd module5/tests/pyuvm_tests && make SIM=verilator TEST=test_advanced_uvm`"
+          - "`./scripts/module5.sh` — all example tracks then tests when doing full module sweep"
+      - title: Coverage and config debug
+        bullets:
+          - "Inspect coverage reports/sample counts from example logs when goals are not met"
+          - "Config object + ConfigDB overrides in `--configuration` — re-run to verify behavior change"
+          - "Callback tests inject delays/errors — use verbosity to see callback invocation order"
     design:
       - title: Advanced DUT architecture
         bullets:
@@ -190,11 +436,18 @@ modules:
           - "Coverage collectors sample transaction fields and cross coverage"
           - "Callbacks extend driver/monitor without subclass explosion"
           - "Configuration objects centralize knobs (active/passive, timeouts, enable flags)"
+      - title: Execution pipeline
+        bullets:
+          - "Build: multi-channel RTL plus env with multiple agents, virtual sequencer, coverage, register model"
+          - "Connect: per-channel monitor analysis → scoreboard/coverage; RAL adapter linked to bus sequencer"
+          - "Sim: virtual sequence launches child sequences in order; callbacks may alter driver/monitor behavior mid-run"
+          - "Check: scoreboard per channel + coverage goals + register mirror consistency vs DUT state"
       - title: Register model layer
         bullets:
           - "RAL-style maps: registers, fields, access policies (RW, RO, WO)"
           - "Adapter links bus transactions to register reads/writes in tests"
           - "Predictor/update paths keep mirror model consistent with DUT"
+          - "Register sequences replace raw bus wiggling for software-visible setup"
     testing:
       - title: Coverage-driven verification
         bullets:
@@ -206,12 +459,49 @@ modules:
           - "Virtual sequences start child sequences on multiple sequencers in order"
           - "Config tests prove ConfigDB + config object overrides change behavior"
           - "Callback tests inject errors or delays to validate robustness"
+      - title: Step-by-step lab execution
+        bullets:
+          - "1. Virtual sequences: `./scripts/module5.sh --virtual-sequences`"
+          - "2. Coverage/callbacks: `./scripts/module5.sh --coverage --callbacks`"
+          - "3. Configuration: `./scripts/module5.sh --configuration`"
+          - "4. Register model: `./scripts/module5.sh --register-model`"
+          - "5. Integrated: `./scripts/module5.sh --pyuvm-tests` — all advanced mechanisms in one regression"
       - title: Closure
         bullets:
-          - "`./scripts/module5.sh --check`; register model and callback demos in EXAMPLES.md"
+          - "`./scripts/module5.sh --pyuvm-tests`; register model and callback demos in EXAMPLES.md"
           - "Assessment: virtual sequences, coverage, callbacks, configuration, register model"
+          - "Demonstrate register read/write through RAL adapter rather than ad-hoc pin toggling"
 
   6:
+    before_you_start:
+      - "Module 5 multi-agent and virtual sequence patterns carry forward — AXI adds real protocol timing"
+      - "Read `module6/dut/protocols/axi4_lite_slave.v` AW/W/B/AR/R channel interfaces before stimulus"
+      - "Run `--multi-agent` and `--protocol` examples before `--protocol-checkers` and scoreboard labs"
+      - "Understand initiator vs slave roles: DUT is slave; TB agents play masters/memory/peripheral"
+      - "Architecture example documents env packaging — study before `test_complex_testbench.py`"
+    key_files:
+      - "`module6/dut/protocols/axi4_lite_slave.v` — five-channel AXI4-Lite slave with memory port"
+      - "`module6/examples/protocol/protocol_example.py` — directed AXI4-Lite transactions"
+      - "`module6/examples/multi_agent/multi_agent_example.py` — multiple agents under one env"
+      - "`module6/examples/protocol_checkers/protocol_checker_example.py` — handshake rule assertions"
+      - "`module6/tests/pyuvm_tests/test_complex_testbench.py` — system-level multi-agent regression"
+      - "`scripts/module6.sh` — routes protocol, checker, scoreboard, and architecture example flags"
+    commands:
+      - title: Protocol and agent examples
+        bullets:
+          - "`./scripts/module6.sh --multi-agent --protocol` — agent fabric and directed AXI traffic"
+          - "`./scripts/module6.sh --protocol-checkers` — independent protocol rule validation"
+          - "`./scripts/module6.sh --scoreboards --architecture` — layered checking and env packaging"
+      - title: Complex testbench regression
+        bullets:
+          - "`./scripts/module6.sh --pyuvm-tests` — `test_complex_testbench` full env"
+          - "`cd module6/tests/pyuvm_tests && make SIM=verilator TEST=test_complex_testbench`"
+          - "`./scripts/module6.sh --skip-examples --pyuvm-tests` — system test when components are validated"
+      - title: Debug concurrent traffic
+        bullets:
+          - "Transaction logs plus UVM verbosity — trace AW/W ordering vs W data beats"
+          - "Protocol checker failures often precede scoreboard mismatches — fix checker errors first"
+          - "Waveforms on `awvalid/awready`, `wvalid/wready` for handshake stalls"
     design:
       - title: Protocol DUT architecture
         bullets:
@@ -224,11 +514,18 @@ modules:
           - "Protocol checkers validate handshake rules independent of scoreboard"
           - "Layered scoreboards: per-agent checks + system-level consistency"
           - "Architecture example documents reusable env patterns and package boundaries"
+      - title: Execution pipeline
+        bullets:
+          - "Build: Verilator compiles AXI slave RTL; env instantiates master/memory/peripheral agents and checkers"
+          - "Connect: each agent monitor feeds protocol checker and scoreboard analysis ports"
+          - "Sim: virtual sequences configure agents then launch concurrent read/write traffic to slave"
+          - "Check: protocol checker asserts channel rules; scoreboard correlates addr/data/response across ports"
       - title: Data flow
         bullets:
           - "Virtual sequences coordinate cross-agent scenarios (config then traffic)"
           - "Monitors on each interface feed checkers and coverage"
           - "Reference models optional for memory content golden checks"
+          - "System scoreboard ties master observations to slave memory updates"
     testing:
       - title: Protocol verification methods
         bullets:
@@ -240,12 +537,49 @@ modules:
           - "Scoreboard correlates transactions across ports (address, data, response)"
           - "Architecture tests validate env wiring before long regressions"
           - "Debug: transaction logs, UVM verbosity, Verilator waveforms"
+      - title: Step-by-step lab execution
+        bullets:
+          - "1. Multi-agent wiring: `./scripts/module6.sh --multi-agent`"
+          - "2. Directed protocol: `./scripts/module6.sh --protocol`"
+          - "3. Protocol checkers: `./scripts/module6.sh --protocol-checkers`"
+          - "4. Scoreboards/architecture: `./scripts/module6.sh --scoreboards --architecture`"
+          - "5. System regression: `./scripts/module6.sh --pyuvm-tests` — full complex testbench pass"
       - title: Closure
         bullets:
-          - "`./scripts/module6.sh --check`; exercises extend multi-agent and protocol checkers"
+          - "`./scripts/module6.sh --pyuvm-tests`; exercises extend multi-agent and protocol checkers"
           - "Assessment: multi-agent envs, protocol verification, complex scoreboards, architecture patterns"
+          - "Explain how checker failures differ from scoreboard data mismatches"
 
   7:
+    before_you_start:
+      - "Module 6 multi-agent protocol env is baseline — Module 7 applies it to DMA and UART IP blocks"
+      - "Review `module7/dut/dma/simple_dma.v` register map and descriptor flow before DMA examples"
+      - "Study `module7/dut/protocols/uart.v` framing (start bit, data, stop) for serial agent labs"
+      - "VIP example packages reusable agents — focus on directory layout and naming for reuse"
+      - "Best-practices example summarizes production-style TB structure before integrated tests"
+    key_files:
+      - "`module7/dut/dma/simple_dma.v` — DMA controller with channel descriptors and status"
+      - "`module7/dut/protocols/uart.v` — UART TX/RX serial interface for protocol agent labs"
+      - "`module7/examples/dma/dma_example.py` — descriptor programming and transfer completion"
+      - "`module7/examples/protocols/uart_example.py` — baud/framing stimulus and loopback checks"
+      - "`module7/examples/vip/vip_example.py` — packaged verification IP agent pattern"
+      - "`scripts/module7.sh` — `--dma`, `--protocols`, `--vip`, `--best-practices`, `--pyuvm-tests`"
+    commands:
+      - title: IP block examples
+        bullets:
+          - "`./scripts/module7.sh --dma` — DMA descriptor and completion drills"
+          - "`./scripts/module7.sh --protocols` — UART (and related protocol) agent examples"
+          - "`./scripts/module7.sh --vip --best-practices` — reusable VIP layout and review-friendly structure"
+      - title: Integrated tests
+        bullets:
+          - "`./scripts/module7.sh --pyuvm-tests` — integrated pyuvm regressions under `module7/tests/`"
+          - "`cd module7/tests/pyuvm_tests && make SIM=verilator` — direct Make when debugging env wiring"
+          - "`./scripts/module7.sh` — full example sweep plus tests for module sign-off"
+      - title: Layered regression mindset
+        bullets:
+          - "Smoke: `./scripts/module7.sh --dma` only — fast sanity after tool changes"
+          - "Nightly: all example flags — catches cross-IP integration regressions"
+          - "Use transaction logs and waves for UART timing vs DMA memory content failures"
     design:
       - title: Real-world DUT blocks
         bullets:
@@ -257,11 +591,19 @@ modules:
           - "Reusable agents package protocol knowledge (transactions, sequences, checkers)"
           - "Env composes DMA + UART (or other) agents with shared config and scoreboard fabric"
           - "Best-practices example shows directory layout, naming, and review-friendly TB structure"
+          - "VIP boundaries separate protocol expertise from scenario tests"
+      - title: Execution pipeline
+        bullets:
+          - "Build: Verilator compiles DMA and/or UART RTL; env builds VIP agents and shared infrastructure"
+          - "Connect: register bus agent + DMA status monitors + UART analysis paths into system scoreboard"
+          - "Sim: software-visible register writes program DMA; UART sequences inject serial traffic concurrently"
+          - "Check: DMA transfer completion flags, memory content, UART frame integrity — unified regression report"
       - title: Integration view
         bullets:
           - "Software-visible registers drive DMA; UART provides async serial path"
           - "Scoreboard and coverage span multiple IPs in one regression"
           - "Exercises push toward production-style reuse and documentation"
+          - "Module 8 utilities (CLP, recorders) plug into this env style in capstone work"
     testing:
       - title: Application-level test methods
         bullets:
@@ -273,29 +615,74 @@ modules:
           - "`./scripts/module7.sh` runs DMA, protocol, VIP, and best-practices demos"
           - "Layered regressions: smoke (short), nightly (full EXAMPLES), release (with coverage goals)"
           - "Waveforms and transaction logs for post-mortem on failures"
+      - title: Step-by-step lab execution
+        bullets:
+          - "1. DMA block: `./scripts/module7.sh --dma` — program descriptor, confirm completion"
+          - "2. UART protocol: `./scripts/module7.sh --protocols` — framing and loopback"
+          - "3. VIP packaging: `./scripts/module7.sh --vip` — study reusable agent layout"
+          - "4. Best practices: `./scripts/module7.sh --best-practices` — review TB structure checklist"
+          - "5. Integrated: `./scripts/module7.sh --pyuvm-tests` — multi-IP regression pass"
       - title: Closure
         bullets:
-          - "`module7.sh --check`; assessment covers VIP reuse, protocols, and integration"
+          - "`./scripts/module7.sh --pyuvm-tests`; assessment covers VIP reuse, protocols, and integration"
           - "Prepares for Module 8 utilities used in production regressions (CLP, recorders)"
+          - "Articulate which checks live in VIP vs scenario test vs scoreboard"
 
   8:
+    before_you_start:
+      - "Modules 4–7 env patterns should be fresh — utilities attach to analysis ports and phase hooks you already built"
+      - "No new large DUT focus; `module8/dut/dma/simple_dma.v` reuses DMA block as a lightweight integration anchor"
+      - "Run CLP example first — plusargs configure tests without recompilation"
+      - "Study comparators and recorders on analysis ports before pools/queues efficiency labs"
+      - "Capstone: `integration/` wires multiple utilities; `test_utilities.py` proves them under simulation"
+    key_files:
+      - "`module8/examples/clp/clp_example.py` — `uvm_cmdline_processor` plusarg parsing"
+      - "`module8/examples/comparators/comparator_example.py` — equal/less/greater compare policies"
+      - "`module8/examples/recorders/recorder_example.py` — transaction logging to files"
+      - "`module8/examples/pools/pool_example.py` and `queues/queue_example.py` — object reuse and ordered work"
+      - "`module8/examples/integration/integration_example.py` — multi-utility mini-env"
+      - "`module8/tests/pyuvm_tests/test_utilities.py` — simulated proof of utility integration"
+    commands:
+      - title: Core utilities
+        bullets:
+          - "`./scripts/module8.sh --clp --comparators --recorders` — configure, compare, and log infrastructure"
+          - "`./scripts/module8.sh --pools --queues` — allocation efficiency and ordered deferred work"
+          - "`./scripts/module8.sh --string-utils --math-utils --random-utils` — helper libraries for checks/stimulus"
+      - title: Integration and tests
+        bullets:
+          - "`./scripts/module8.sh --integration` — combined utility mini-env"
+          - "`./scripts/module8.sh --pyuvm-tests` — `test_utilities.py` regression"
+          - "`cd module8/tests/pyuvm_tests && make SIM=verilator TEST=test_utilities`"
+      - title: CLP-driven runs
+        bullets:
+          - "Pass plusargs through Makefile/`SIM_ARGS` where examples support seed, verbosity, test name overrides"
+          - "Re-run same binary with different plusargs — demonstrates no-recompile test selection"
+          - "`./scripts/module8.sh` — full utility sweep for module completion"
     design:
       - title: Utility layer in the testbench
         bullets:
           - "No new large DUT focus — utilities plug into existing envs from prior modules"
           - "CLP (`uvm_cmdline_processor`) configures tests without recompilation"
           - "Comparators, recorders, pools, queues support analysis and debug infrastructure"
+          - "String/math/random helpers reduce boilerplate in checks and stimulus"
       - title: How utilities attach
         bullets:
           - "Comparators sit on analysis ports beside scoreboards"
           - "Recorders log transactions to files for offline review"
           - "Pools/queues manage recycled objects and ordered work lists"
-          - "String/math/random helpers reduce boilerplate in checks and stimulus"
+          - "CLP reads plusargs before build/run to select tests and verbosity"
+      - title: Execution pipeline
+        bullets:
+          - "Build: standard Verilator compile; utilities instantiate during env build like other components"
+          - "Connect: comparators/recorders tap monitor analysis ports alongside scoreboard"
+          - "Sim: CLP-selected sequences run; recorders flush on phase boundaries; pools recycle transaction objects"
+          - "Check: comparators flag ordering/equality violations; logs + UVM report provide offline audit trail"
       - title: Integration architecture
         bullets:
           - "`module8/examples/integration/` wires multiple utilities in one mini-env"
           - "Tests under `module8/tests/pyuvm_tests/` prove utilities under simulation"
           - "Pattern: configure via CLP → run sequence → compare → record → report"
+          - "Reuse utilities in Module 6/7 style envs for capstone projects"
     testing:
       - title: Utility-focused test methods
         bullets:
@@ -307,8 +694,15 @@ modules:
           - "Object pools cut allocation churn in high-transaction regressions"
           - "Queues order deferred checks or secondary stimulus"
           - "Random/string/math utils keep constraints readable in sequences"
+      - title: Step-by-step lab execution
+        bullets:
+          - "1. CLP: `./scripts/module8.sh --clp` — exercise plusarg overrides"
+          - "2. Compare/record: `./scripts/module8.sh --comparators --recorders`"
+          - "3. Pools/queues: `./scripts/module8.sh --pools --queues`"
+          - "4. Helpers: `./scripts/module8.sh --string-utils --math-utils --random-utils`"
+          - "5. Capstone: `./scripts/module8.sh --integration --pyuvm-tests` — full utility integration pass"
       - title: Closure
         bullets:
-          - "`./scripts/module8.sh --check` across all utility examples"
+          - "`./scripts/module8.sh --pyuvm-tests` across all utility examples"
           - "Assessment: CLP, comparators, recorders, pools, queues, integration"
           - "Capstone: combine utilities with Module 6/7 style envs in your own project"

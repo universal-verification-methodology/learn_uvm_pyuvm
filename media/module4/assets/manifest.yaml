@@ -16,7 +16,7 @@ assets:
   source: assets/diagrams/rtl_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 7
+  - 9
   license: learn_uvm_pyuvm course materials
 - id: verification_architecture
   type: diagram
@@ -24,7 +24,7 @@ assets:
   source: assets/diagrams/verification_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 8
+  - 10
   license: learn_uvm_pyuvm course materials
 - id: testing_methods
   type: diagram
@@ -32,62 +32,62 @@ assets:
   source: assets/diagrams/testing_methods.mmd
   generator: render_diagrams.sh
   slides:
-  - 13
+  - 18
   license: learn_uvm_pyuvm course materials
 - id: module4_check
   type: screenshot
   file: assets/screenshots/module4_check.png
-  capture_command: ./scripts/module4.sh --check
+  capture_command: ./scripts/module4.sh --help
   cwd: .
   slides:
-  - 60
-  expect_stdout_contains: All required checks passed
+  - 69
+  expect_stdout_contains: 'Usage:'
 - id: ex01_drivers
   type: screenshot
   file: assets/screenshots/ex01_drivers.png
   capture_command: .venv/bin/python module4/examples/drivers/driver_example.py
   cwd: .
   slides:
-  - 62
+  - 71
 - id: ex02_monitors
   type: screenshot
   file: assets/screenshots/ex02_monitors.png
   capture_command: .venv/bin/python module4/examples/monitors/monitor_example.py
   cwd: .
   slides:
-  - 63
+  - 72
 - id: ex03_sequencers
   type: screenshot
   file: assets/screenshots/ex03_sequencers.png
   capture_command: .venv/bin/python module4/examples/sequencers/sequencer_example.py
   cwd: .
   slides:
-  - 64
+  - 73
 - id: ex04_agents
   type: screenshot
   file: assets/screenshots/ex04_agents.png
   capture_command: .venv/bin/python module4/examples/agents/agent_example.py
   cwd: .
   slides:
-  - 65
+  - 74
 - id: ex05_scoreboards
   type: screenshot
   file: assets/screenshots/ex05_scoreboards.png
   capture_command: .venv/bin/python module4/examples/scoreboards/scoreboard_example.py
   cwd: .
   slides:
-  - 66
+  - 75
 - id: ex06_tlm
   type: screenshot
   file: assets/screenshots/ex06_tlm.png
   capture_command: .venv/bin/python module4/examples/tlm/tlm_example.py
   cwd: .
   slides:
-  - 67
+  - 76
 - id: ex07_transactions
   type: screenshot
   file: assets/screenshots/ex07_transactions.png
   capture_command: .venv/bin/python module4/examples/transactions/transaction_example.py
   cwd: .
   slides:
-  - 68
+  - 77

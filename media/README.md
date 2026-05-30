@@ -39,7 +39,7 @@ Each `docs/MODULEN.md` includes auto-maintained sections (before **Topics Covere
 - **Design Architecture** — DUT hierarchy, testbench/UVM structure, repo layout
 - **Verification & Testing Methods** — stimulus, checking, regression, closure
 
-Source of truth for those bullets: `docs/module_architecture_content.yaml`. Apply and refresh slides:
+Source of truth for slide supplements: `docs/module_architecture_content.yaml` (also injects **Before You Start**, **Key files to study**, and **Command Reference** into each `docs/MODULEN.md`). Architecture code slides: `media/outline_overrides.yaml`. Apply and refresh slides:
 
 ```bash
 python3 scripts/apply_module_architecture_content.py

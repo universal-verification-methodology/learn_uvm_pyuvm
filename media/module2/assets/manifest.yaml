@@ -16,7 +16,7 @@ assets:
   source: assets/diagrams/rtl_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 7
+  - 9
   license: learn_uvm_pyuvm course materials
 - id: verification_architecture
   type: diagram
@@ -24,7 +24,7 @@ assets:
   source: assets/diagrams/verification_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 8
+  - 10
   license: learn_uvm_pyuvm course materials
 - id: testing_methods
   type: diagram
@@ -32,48 +32,53 @@ assets:
   source: assets/diagrams/testing_methods.mmd
   generator: render_diagrams.sh
   slides:
-  - 13
+  - 18
   license: learn_uvm_pyuvm course materials
 - id: module2_check
   type: screenshot
   file: assets/screenshots/module2_check.png
-  capture_command: ./scripts/module2.sh --check
+  capture_command: ./scripts/module2.sh --help
   cwd: .
   slides:
-  - 53
-  expect_stdout_contains: All required checks passed
+  - 63
+  expect_stdout_contains: 'Usage:'
 - id: ex01_signal_access
   type: screenshot
   file: assets/screenshots/ex01_signal_access.png
   capture_command: .venv/bin/python module2/examples/signal_access/signal_access_example.py
   cwd: .
   slides:
-  - 55
+  - 65
+  expect_stdout_contains: Example
 - id: ex02_clock_generation
   type: screenshot
   file: assets/screenshots/ex02_clock_generation.png
   capture_command: .venv/bin/python module2/examples/clock_generation/clock_generation_example.py
   cwd: .
   slides:
-  - 56
+  - 66
+  expect_stdout_contains: Example
 - id: ex03_triggers
   type: screenshot
   file: assets/screenshots/ex03_triggers.png
   capture_command: .venv/bin/python module2/examples/triggers/triggers_example.py
   cwd: .
   slides:
-  - 57
+  - 67
+  expect_stdout_contains: Example
 - id: ex04_reset_patterns
   type: screenshot
   file: assets/screenshots/ex04_reset_patterns.png
   capture_command: .venv/bin/python module2/examples/reset_patterns/reset_patterns_example.py
   cwd: .
   slides:
-  - 58
+  - 68
+  expect_stdout_contains: Example
 - id: ex05_common_patterns
   type: screenshot
   file: assets/screenshots/ex05_common_patterns.png
   capture_command: .venv/bin/python module2/examples/common_patterns/common_patterns_example.py
   cwd: .
   slides:
-  - 59
+  - 69
+  expect_stdout_contains: Example

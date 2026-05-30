@@ -23,53 +23,110 @@ slides:
   title: Overview
   bullets:
   - This module covers advanced UVM concepts including virtual sequences, coverage
-    models, complex configuration, callbacks, and advanced register model usage. These
-    concepts are essential for building sophisticated verifica
+    models, complex configuration, callbacks, and advanced...
+- type: section
+  title: How to learn this module
+- type: bullets
+  title: Suggested learning path
+  bullets:
+  - Module 4 agent/scoreboard integration is prerequisite — multi-channel env extends
+    the same TLM patterns
+  - Review `module5/dut/advanced/multi_channel.v` — multiple logical channels needing
+    coordinated stimulus
+  - Study virtual sequencer concept before `virtual_sequences/` examples — one coordinator,
+    many agents
+  - 'Skim RAL terminology: register map, fields, adapter, predictor — used in `register_model/`'
+  - Coverage and callbacks modify observation and driver behavior without deep subclass
+    trees
+  notes: From docs/MODULE5.md — read guides before running demos.
 - type: section
   title: Design architecture
-- type: image
-  title: RTL / block architecture
-  image: assets/diagrams/rtl_architecture.png
-  caption: 'Module 5: DUT structure and key interfaces (see common_dut/rtl/).'
-- type: image
-  title: Verification environment architecture
-  image: assets/diagrams/verification_architecture.png
-  caption: 'Module 5: UVM layers, agents, and checkers for this phase.'
-- type: bullets
+- type: two_column
   title: 1. Advanced DUT architecture
-  bullets:
+  left:
   - '`module5/dut/advanced/multi_channel.v` — multiple logical channels for coordination
     labs'
   - Designed for virtual sequences and multi-stream scoreboarding
   - Register abstraction layer examples align with memory-mapped control/status
+  right: assets/diagrams/rtl_architecture.png
   notes: From MODULE5 Design Architecture.
-- type: bullets
+- type: two_column
   title: 2. Advanced UVM environment architecture
-  bullets:
+  left:
   - Virtual sequencers coordinate multiple agents on different channels
   - Coverage collectors sample transaction fields and cross coverage
   - Callbacks extend driver/monitor without subclass explosion
   - Configuration objects centralize knobs (active/passive, timeouts, enable flags)
+  right: assets/diagrams/verification_architecture.png
   notes: From MODULE5 Design Architecture.
 - type: bullets
-  title: 3. Register model layer
+  title: 3. Execution pipeline
+  bullets:
+  - 'Build: multi-channel RTL plus env with multiple agents, virtual sequencer, coverage,
+    register model'
+  - 'Connect: per-channel monitor analysis → scoreboard/coverage; RAL adapter linked
+    to bus sequencer'
+  - 'Sim: virtual sequence launches child sequences in order; callbacks may alter
+    driver/monitor behavior mid-run'
+  - 'Check: scoreboard per channel + coverage goals + register mirror consistency
+    vs DUT state'
+  notes: From MODULE5 Design Architecture.
+- type: bullets
+  title: 4. Register model layer
   bullets:
   - 'RAL-style maps: registers, fields, access policies (RW, RO, WO)'
   - Adapter links bus transactions to register reads/writes in tests
   - Predictor/update paths keep mirror model consistent with DUT
+  - Register sequences replace raw bus wiggling for software-visible setup
   notes: From MODULE5 Design Architecture.
+- type: code
+  title: DUT — multi-channel block
+  language: systemverilog
+  source_file: module5/dut/advanced/multi_channel.v
+  code: "/**\n * Module 5: Multi-Channel Interface\n * \n * A multi-channel interface\
+    \ for advanced UVM testing.\n * \n * Ports:\n *   clk:        Clock signal\n *\
+    \   rst_n:      Active-low reset\n *   master_valid: Master channel valid\n *\
+    \   master_ready: Master channel ready\n *   master_data:  Master channel data\n\
+    \ *   slave_valid:  Slave channel valid\n *   slave_ready:  Slave channel ready\n\
+    \ *   slave_data:   Slave channel data\n */\n\nmodule multi_channel (\n    input\
+    \  wire       clk,\n// ..."
+- type: code
+  title: Virtual sequencer pattern
+  language: text
+  source_file: module5/examples/virtual_sequences/virtual_sequence_example.py
+  code: "\"\"\"\nModule 5 Example 5.1: Virtual Sequences\nDemonstrates virtual sequencer\
+    \ and virtual sequence coordination.\n\"\"\"\n\nfrom pyuvm import *\nimport cocotb\n\
+    from cocotb.triggers import Timer\n\n# Try to import uvm_seq_item_pull_port explicitly\
+    \ if not available from pyuvm import *\ntry:\n    # Check if already available\n\
+    \    _ = uvm_seq_item_pull_port\nexcept NameError:\n    # Try importing from TLM\
+    \ modules\n    try:\n        from pyuvm.s15_uvm_tlm_1 import uvm_seq_item_pull_port\n\
+    \    except (ImportError, AttributeError):\n// ..."
+- type: section
+  title: Key files to study
+- type: bullets
+  title: Open these in the repo
+  bullets:
+  - '`module5/dut/advanced/multi_channel.v` — multi-stream DUT for virtual sequence
+    coordination'
+  - '`module5/examples/virtual_sequences/virtual_sequence_example.py` — child sequences
+    on multiple sequencers'
+  - '`module5/examples/coverage/coverage_example.py` — functional coverage sampling
+    hooks'
+  - '`module5/examples/register_model/register_model_example.py` — RAL map, adapter,
+    mirror updates'
+  - '`module5/tests/pyuvm_tests/test_advanced_uvm.py` — integrated advanced env regression'
+  - '`scripts/module5.sh` — `--virtual-sequences`, `--coverage`, `--register-model`,
+    …'
+  notes: Trace while running module5/EXAMPLES.md labs.
 - type: section
   title: Verification & testing methods
-- type: image
-  title: Testing and closure flow
-  image: assets/diagrams/testing_methods.png
-  caption: 'Module 5: how tests, checks, and metrics close verification goals.'
-- type: bullets
+- type: two_column
   title: 1. Coverage-driven verification
-  bullets:
+  left:
   - Functional coverage on transaction types, channel IDs, and corner field values
   - Coverage goals gate regression sign-off in advanced flows
   - Examples under `module5/examples/coverage/` show sampling hooks
+  right: assets/diagrams/testing_methods.png
   notes: From MODULE5 Verification & Testing Methods.
 - type: bullets
   title: 2. Virtual sequences and configuration tests
@@ -79,10 +136,21 @@ slides:
   - Callback tests inject errors or delays to validate robustness
   notes: From MODULE5 Verification & Testing Methods.
 - type: bullets
-  title: 3. Closure
+  title: 3. Step-by-step lab execution
   bullets:
-  - '`./scripts/module5.sh --check`; register model and callback demos in EXAMPLES.md'
+  - '1. Virtual sequences: `./scripts/module5.sh --virtual-sequences`'
+  - '2. Coverage/callbacks: `./scripts/module5.sh --coverage --callbacks`'
+  - '3. Configuration: `./scripts/module5.sh --configuration`'
+  - '4. Register model: `./scripts/module5.sh --register-model`'
+  - '5. Integrated: `./scripts/module5.sh --pyuvm-tests` — all advanced mechanisms
+    in one regression'
+  notes: From MODULE5 Verification & Testing Methods.
+- type: bullets
+  title: 4. Closure
+  bullets:
+  - '`./scripts/module5.sh --pyuvm-tests`; register model and callback demos in EXAMPLES.md'
   - 'Assessment: virtual sequences, coverage, callbacks, configuration, register model'
+  - Demonstrate register read/write through RAL adapter rather than ad-hoc pin toggling
   notes: From MODULE5 Verification & Testing Methods.
 - type: section
   title: Syllabus topics
@@ -384,12 +452,41 @@ slides:
   - Coverage tools
   notes: From MODULE5 Topics Covered.
 - type: section
+  title: Command reference highlights
+- type: bullets
+  title: Advanced UVM topics
+  bullets:
+  - '`./scripts/module5.sh --virtual-sequences --configuration` — coordination and
+    config objects'
+  - '`./scripts/module5.sh --coverage --callbacks` — coverage sampling and callback
+    injection'
+  - '`./scripts/module5.sh --register-model` — RAL map and bus adapter drill'
+  notes: Full detail in docs/MODULE5.md command reference.
+- type: bullets
+  title: Integrated regression
+  bullets:
+  - '`./scripts/module5.sh --pyuvm-tests` — `test_advanced_uvm` against multi-channel
+    DUT'
+  - '`cd module5/tests/pyuvm_tests && make SIM=verilator TEST=test_advanced_uvm`'
+  - '`./scripts/module5.sh` — all example tracks then tests when doing full module
+    sweep'
+  notes: Full detail in docs/MODULE5.md command reference.
+- type: bullets
+  title: Coverage and config debug
+  bullets:
+  - Inspect coverage reports/sample counts from example logs when goals are not met
+  - Config object + ConfigDB overrides in `--configuration` — re-run to verify behavior
+    change
+  - Callback tests inject delays/errors — use verbosity to see callback invocation
+    order
+  notes: Full detail in docs/MODULE5.md command reference.
+- type: section
   title: Hands-on examples
 - type: demo
-  title: Module 5 self-check
-  command: ./scripts/module5.sh --check
+  title: Module 5 orchestrator
+  command: ./scripts/module5.sh --help
   screenshot: assets/screenshots/module5_check.png
-  expect_stdout_contains: All required checks passed
+  expect_stdout_contains: 'Usage:'
   notes: Run from course repository root.
 - type: code
   title: Exercise scaffold
@@ -424,6 +521,31 @@ slides:
 - type: section
   title: Practice & assessment
 - type: bullets
+  title: What you should know (1/3)
+  bullets:
+  - Create and use virtual sequences
+  - Implement coverage models
+  - Design complex configuration objects
+  - Use UVM callbacks effectively
+  - Use advanced register model features
+  - Coordinate multiple sequencers
+  notes: From MODULE5 Learning Outcomes.
+- type: bullets
+  title: What you should know (2/3)
+  bullets:
+  - Analyze and close coverage
+  - Optimize testbench performance
+  - Debug advanced testbenches
+  - Apply advanced patterns
+  - Virtual sequencer
+  - Virtual sequence
+  notes: From MODULE5 Learning Outcomes.
+- type: bullets
+  title: What you should know (3/3)
+  bullets:
+  - Multiple sequencer coordination
+  notes: From MODULE5 Learning Outcomes.
+- type: bullets
   title: Exercises
   bullets:
   - Virtual Sequences
@@ -445,5 +567,5 @@ slides:
   bullets:
   - Master sequences, coverage, configuration, and virtual sequences
   - Complete module5/CHECKLIST.md
-  - Run ./scripts/module5.sh --check
+  - Review module5/EXAMPLES.md and run each lab
   - 'Next: Next module in course'

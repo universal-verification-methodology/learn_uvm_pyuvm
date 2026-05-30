@@ -61,6 +61,26 @@ cd module2/examples/signal_access
 # Create a Makefile or run with cocotb directly
 ```
 
+<!-- module-slide-supplements:auto:start -->
+
+## Before You Start
+
+1. Finish Module 1 cocotb labs so clock/reset coroutine patterns are familiar
+2. Read `module2/dut/registers/simple_register.v` and `shift_register.v` port lists before writing stimulus
+3. Work through `module2/examples/triggers/` — `RisingEdge`, `FallingEdge`, and `Timer` are core to all Module 2 tests
+4. Study `module2/examples/clock_generation/` and `reset_patterns/` — shared fixtures decouple timing from test logic
+5. No pyuvm yet; tests are flat `@cocotb.test` functions selected by Makefile `TEST=`
+
+## Key files to study
+
+- `module2/dut/registers/simple_register.v` — 8-bit register with enable and synchronous reset (primary lab DUT)
+- `module2/dut/registers/shift_register.v` — serial in/out with parallel tap; multi-cycle behavior
+- `module2/examples/triggers/triggers_example.py` — cocotb trigger primitives and concurrency
+- `module2/tests/cocotb_tests/test_simple_register.py` — directed write/read and boundary values
+- `module2/tests/cocotb_tests/test_shift_register.py` — serial shift timing regression
+- `scripts/module2.sh` — routes example makes and `--cocotb-tests` regressions
+
+<!-- module-slide-supplements:auto:end -->
 <!-- module-architecture:auto:start -->
 ## Design Architecture
 
@@ -69,19 +89,28 @@ cd module2/examples/signal_access
 - `simple_register.v` — 8-bit register, enable, synchronous reset (primary lab DUT)
 - `shift_register.v` — serial in/out, parallel tap; exercises multi-cycle behavior
 - `simple_fifo.v` — 16×8 FIFO with full/empty flags (reference for extension)
-- `simple_fsm.v` — IDLE/START/WORK/DONE four-state controller
+- `simple_fsm.v` — IDLE/START/WORK/DONE four-state controller (optional study)
 
 ### 2. cocotb testbench architecture
 
 - Test module → coroutines (`@cocotb.test`) → DUT signals via `dut.signal` handles
 - Clock generators in examples decouple timing from test logic
 - No UVM hierarchy; flat Python functions and shared fixtures via Makefile `TEST=` selection
+- Concurrent coroutines use triggers to model parallel clock, reset, and stimulus threads
 
-### 3. Example vs test separation
+### 3. Execution pipeline
+
+- Build: Verilator compiles selected DUT under `module2/dut/registers/` per Makefile top module
+- Sim: cocotb schedules coroutines on triggers; reset coroutines establish known state before stimulus
+- Check: Python assertions on `dut.q.value` / shift outputs; cocotb regression aggregates `results.xml`
+- Examples path: `module2.sh --triggers` runs tutorial makes without full DUT regression
+
+### 4. Example vs test separation
 
 - `module2/examples/` — signal access, clocks, triggers, reset patterns (runnable tutorials)
 - `module2/tests/cocotb_tests/` — regression tests bound to specific DUTs
 - Orchestrator `scripts/module2.sh` routes flags to examples or cocotb makes
+- Reference FIFO/FSM RTL supports self-study; graded labs focus on register and shift register
 
 ## Verification & Testing Methods
 
@@ -97,10 +126,18 @@ cd module2/examples/signal_access
 - Regression runner executes multiple tests; pass/fail per `cocotb.regression`
 - Boundary tests (`test_register_all_values`) cover 0x00, 0x7F, 0x80, 0xFF
 
-### 3. Debug and closure
+### 3. Step-by-step lab execution
+
+- 1. Tutorials: `./scripts/module2.sh --signal-access --triggers --reset-patterns`
+- 2. Register lab: `cd module2/tests/cocotb_tests && make SIM=verilator TEST=test_simple_register`
+- 3. Shift register lab: `make SIM=verilator TEST=test_shift_register` — verify serial-to-parallel timing
+- 4. Full DUT regression: `./scripts/module2.sh --cocotb-tests`
+- 5. Debug failures with waves/logging before MODULE2 assessment
+
+### 4. Debug and closure
 
 - Logging via `cocotb.log`; VCD from simulator flags for waveform debug
-- `./scripts/module2.sh --check` validates examples and key cocotb tests
+- `./scripts/module2.sh --cocotb-tests` validates key cocotb tests and example makes
 - Assessment: clocks, triggers, reset sequences, structured cocotb tests
 
 <!-- module-architecture:auto:end -->
@@ -328,6 +365,28 @@ cd module2/examples/signal_access
   - Test naming conventions
   - Test grouping
   - Test execution
+
+<!-- module-commands:auto:start -->
+## Command Reference
+
+### cocotb examples (tutorial makes)
+
+- `./scripts/module2.sh --triggers` — run trigger tutorial under `module2/examples/triggers/`
+- `./scripts/module2.sh --clock-generation --reset-patterns` — timing and reset fixture drills
+- `./scripts/module2.sh` — all five example tracks (signal access through common patterns)
+
+### DUT regression tests
+
+- `./scripts/module2.sh --cocotb-tests` — register and shift-register makes via orchestrator
+- `cd module2/tests/cocotb_tests && make SIM=verilator TEST=test_simple_register`
+- `make SIM=verilator TEST=test_shift_register` — serial timing and parallel output checks
+
+### Debug and waves
+
+- `make SIM=verilator TEST=test_simple_register WAVES=1` — enable VCD/FST when Makefile supports it
+- Use `cocotb.log` verbosity and simulator stdout from `results.xml` for pass/fail triage
+- Re-run single `TEST=` target after RTL or stimulus edits — faster than full example sweep
+<!-- module-commands:auto:end -->
 
 ## Learning Outcomes
 

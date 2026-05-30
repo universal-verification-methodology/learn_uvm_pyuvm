@@ -16,7 +16,7 @@ assets:
   source: assets/diagrams/rtl_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 7
+  - 9
   license: learn_uvm_pyuvm course materials
 - id: verification_architecture
   type: diagram
@@ -24,7 +24,7 @@ assets:
   source: assets/diagrams/verification_architecture.mmd
   generator: render_diagrams.sh
   slides:
-  - 8
+  - 10
   license: learn_uvm_pyuvm course materials
 - id: testing_methods
   type: diagram
@@ -32,23 +32,23 @@ assets:
   source: assets/diagrams/testing_methods.mmd
   generator: render_diagrams.sh
   slides:
-  - 13
+  - 18
   license: learn_uvm_pyuvm course materials
 - id: module1_check
   type: screenshot
   file: assets/screenshots/module1_check.png
-  capture_command: ./scripts/module1.sh --check
+  capture_command: ./scripts/module1.sh --help
   cwd: .
   slides:
-  - 61
-  expect_stdout_contains: All required checks passed
+  - 71
+  expect_stdout_contains: 'Usage:'
 - id: ex01_python_basics
   type: screenshot
   file: assets/screenshots/ex01_python_basics.png
   capture_command: .venv/bin/python module1/examples/python_basics/transaction.py
   cwd: .
   slides:
-  - 63
+  - 73
   expect_stdout_contains: Transaction
 - id: ex02_decorators
   type: screenshot
@@ -56,7 +56,7 @@ assets:
   capture_command: .venv/bin/python module1/examples/decorators/decorators_example.py
   cwd: .
   slides:
-  - 64
+  - 74
   expect_stdout_contains: decorator
 - id: ex03_async_await
   type: screenshot
@@ -64,7 +64,7 @@ assets:
   capture_command: .venv/bin/python module1/examples/async_await/async_example.py
   cwd: .
   slides:
-  - 65
+  - 75
   expect_stdout_contains: Example completed
 - id: ex04_data_structures
   type: screenshot
@@ -72,11 +72,13 @@ assets:
   capture_command: .venv/bin/python module1/examples/data_structures/data_structures_example.py
   cwd: .
   slides:
-  - 66
+  - 76
+  expect_stdout_contains: Queue
 - id: ex05_error_handling
   type: screenshot
   file: assets/screenshots/ex05_error_handling.png
   capture_command: .venv/bin/python module1/examples/error_handling/error_handling_example.py
   cwd: .
   slides:
-  - 67
+  - 77
+  expect_stdout_contains: Error

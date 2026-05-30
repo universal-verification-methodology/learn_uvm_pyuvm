@@ -57,6 +57,26 @@ make SIM=verilator TEST=test_real_world
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-slide-supplements:auto:start -->
+
+## Before You Start
+
+1. Module 6 multi-agent protocol env is baseline — Module 7 applies it to DMA and UART IP blocks
+2. Review `module7/dut/dma/simple_dma.v` register map and descriptor flow before DMA examples
+3. Study `module7/dut/protocols/uart.v` framing (start bit, data, stop) for serial agent labs
+4. VIP example packages reusable agents — focus on directory layout and naming for reuse
+5. Best-practices example summarizes production-style TB structure before integrated tests
+
+## Key files to study
+
+- `module7/dut/dma/simple_dma.v` — DMA controller with channel descriptors and status
+- `module7/dut/protocols/uart.v` — UART TX/RX serial interface for protocol agent labs
+- `module7/examples/dma/dma_example.py` — descriptor programming and transfer completion
+- `module7/examples/protocols/uart_example.py` — baud/framing stimulus and loopback checks
+- `module7/examples/vip/vip_example.py` — packaged verification IP agent pattern
+- `scripts/module7.sh` — `--dma`, `--protocols`, `--vip`, `--best-practices`, `--pyuvm-tests`
+
+<!-- module-slide-supplements:auto:end -->
 <!-- module-architecture:auto:start -->
 ## Design Architecture
 
@@ -71,12 +91,21 @@ make SIM=verilator TEST=test_real_world
 - Reusable agents package protocol knowledge (transactions, sequences, checkers)
 - Env composes DMA + UART (or other) agents with shared config and scoreboard fabric
 - Best-practices example shows directory layout, naming, and review-friendly TB structure
+- VIP boundaries separate protocol expertise from scenario tests
 
-### 3. Integration view
+### 3. Execution pipeline
+
+- Build: Verilator compiles DMA and/or UART RTL; env builds VIP agents and shared infrastructure
+- Connect: register bus agent + DMA status monitors + UART analysis paths into system scoreboard
+- Sim: software-visible register writes program DMA; UART sequences inject serial traffic concurrently
+- Check: DMA transfer completion flags, memory content, UART frame integrity — unified regression report
+
+### 4. Integration view
 
 - Software-visible registers drive DMA; UART provides async serial path
 - Scoreboard and coverage span multiple IPs in one regression
 - Exercises push toward production-style reuse and documentation
+- Module 8 utilities (CLP, recorders) plug into this env style in capstone work
 
 ## Verification & Testing Methods
 
@@ -92,10 +121,19 @@ make SIM=verilator TEST=test_real_world
 - Layered regressions: smoke (short), nightly (full EXAMPLES), release (with coverage goals)
 - Waveforms and transaction logs for post-mortem on failures
 
-### 3. Closure
+### 3. Step-by-step lab execution
 
-- `module7.sh --check`; assessment covers VIP reuse, protocols, and integration
+- 1. DMA block: `./scripts/module7.sh --dma` — program descriptor, confirm completion
+- 2. UART protocol: `./scripts/module7.sh --protocols` — framing and loopback
+- 3. VIP packaging: `./scripts/module7.sh --vip` — study reusable agent layout
+- 4. Best practices: `./scripts/module7.sh --best-practices` — review TB structure checklist
+- 5. Integrated: `./scripts/module7.sh --pyuvm-tests` — multi-IP regression pass
+
+### 4. Closure
+
+- `./scripts/module7.sh --pyuvm-tests`; assessment covers VIP reuse, protocols, and integration
 - Prepares for Module 8 utilities used in production regressions (CLP, recorders)
+- Articulate which checks live in VIP vs scenario test vs scoreboard
 
 <!-- module-architecture:auto:end -->
 ## Topics Covered
@@ -299,6 +337,28 @@ make SIM=verilator TEST=test_real_world
   - Register model (if applicable)
   - Documentation
   - Test suite
+
+<!-- module-commands:auto:start -->
+## Command Reference
+
+### IP block examples
+
+- `./scripts/module7.sh --dma` — DMA descriptor and completion drills
+- `./scripts/module7.sh --protocols` — UART (and related protocol) agent examples
+- `./scripts/module7.sh --vip --best-practices` — reusable VIP layout and review-friendly structure
+
+### Integrated tests
+
+- `./scripts/module7.sh --pyuvm-tests` — integrated pyuvm regressions under `module7/tests/`
+- `cd module7/tests/pyuvm_tests && make SIM=verilator` — direct Make when debugging env wiring
+- `./scripts/module7.sh` — full example sweep plus tests for module sign-off
+
+### Layered regression mindset
+
+- Smoke: `./scripts/module7.sh --dma` only — fast sanity after tool changes
+- Nightly: all example flags — catches cross-IP integration regressions
+- Use transaction logs and waves for UART timing vs DMA memory content failures
+<!-- module-commands:auto:end -->
 
 ## Learning Outcomes
 

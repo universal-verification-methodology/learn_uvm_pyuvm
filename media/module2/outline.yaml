@@ -23,55 +23,110 @@ slides:
   title: Overview
   bullets:
   - This module provides comprehensive coverage of cocotb, the coroutine-based testbench
-    framework that enables Python testbenches for hardware designs. You'll learn how
-    to interact with simulators, drive signals, sample val
+    framework that enables Python testbenches for...
+- type: section
+  title: How to learn this module
+- type: bullets
+  title: Suggested learning path
+  bullets:
+  - Finish Module 1 cocotb labs so clock/reset coroutine patterns are familiar
+  - Read `module2/dut/registers/simple_register.v` and `shift_register.v` port lists
+    before writing stimulus
+  - Work through `module2/examples/triggers/` — `RisingEdge`, `FallingEdge`, and `Timer`
+    are core to all Module 2 tests
+  - Study `module2/examples/clock_generation/` and `reset_patterns/` — shared fixtures
+    decouple timing from test logic
+  - No pyuvm yet; tests are flat `@cocotb.test` functions selected by Makefile `TEST=`
+  notes: From docs/MODULE2.md — read guides before running demos.
 - type: section
   title: Design architecture
-- type: image
-  title: RTL / block architecture
-  image: assets/diagrams/rtl_architecture.png
-  caption: 'Module 2: DUT structure and key interfaces (see common_dut/rtl/).'
-- type: image
-  title: Verification environment architecture
-  image: assets/diagrams/verification_architecture.png
-  caption: 'Module 2: UVM layers, agents, and checkers for this phase.'
-- type: bullets
+- type: two_column
   title: 1. RTL portfolio architecture
-  bullets:
+  left:
   - '`simple_register.v` — 8-bit register, enable, synchronous reset (primary lab
     DUT)'
   - '`shift_register.v` — serial in/out, parallel tap; exercises multi-cycle behavior'
   - '`simple_fifo.v` — 16×8 FIFO with full/empty flags (reference for extension)'
-  - '`simple_fsm.v` — IDLE/START/WORK/DONE four-state controller'
+  - '`simple_fsm.v` — IDLE/START/WORK/DONE four-state controller (optional study)'
+  right: assets/diagrams/rtl_architecture.png
   notes: From MODULE2 Design Architecture.
-- type: bullets
+- type: two_column
   title: 2. cocotb testbench architecture
-  bullets:
+  left:
   - Test module → coroutines (`@cocotb.test`) → DUT signals via `dut.signal` handles
   - Clock generators in examples decouple timing from test logic
   - No UVM hierarchy; flat Python functions and shared fixtures via Makefile `TEST=`
     selection
+  - Concurrent coroutines use triggers to model parallel clock, reset, and stimulus
+    threads
+  right: assets/diagrams/verification_architecture.png
   notes: From MODULE2 Design Architecture.
 - type: bullets
-  title: 3. Example vs test separation
+  title: 3. Execution pipeline
+  bullets:
+  - 'Build: Verilator compiles selected DUT under `module2/dut/registers/` per Makefile
+    top module'
+  - 'Sim: cocotb schedules coroutines on triggers; reset coroutines establish known
+    state before stimulus'
+  - 'Check: Python assertions on `dut.q.value` / shift outputs; cocotb regression
+    aggregates `results.xml`'
+  - 'Examples path: `module2.sh --triggers` runs tutorial makes without full DUT regression'
+  notes: From MODULE2 Design Architecture.
+- type: bullets
+  title: 4. Example vs test separation
   bullets:
   - '`module2/examples/` — signal access, clocks, triggers, reset patterns (runnable
     tutorials)'
   - '`module2/tests/cocotb_tests/` — regression tests bound to specific DUTs'
   - Orchestrator `scripts/module2.sh` routes flags to examples or cocotb makes
+  - Reference FIFO/FSM RTL supports self-study; graded labs focus on register and
+    shift register
   notes: From MODULE2 Design Architecture.
+- type: code
+  title: DUT — simple register
+  language: systemverilog
+  source_file: module2/dut/registers/simple_register.v
+  code: "/**\n * Module 2: Simple Register\n * \n * A basic register with clock, reset,\
+    \ and enable.\n * \n * Ports:\n *   clk:    Clock signal\n *   rst_n:  Active-low\
+    \ reset\n *   enable: Register enable\n *   d:      Data input\n *   q:      Data\
+    \ output\n */\n\nmodule simple_register (\n    input  wire       clk,\n    input\
+    \  wire       rst_n,\n    input  wire       enable,\n    input  wire [7:0] d,\n\
+    // ..."
+- type: code
+  title: cocotb — reset then write
+  language: text
+  source_file: module2/tests/cocotb_tests/test_simple_register.py
+  code: "\"\"\"\nModule 2 Test: Simple Register\nComprehensive testbench for simple_register\
+    \ module.\n\"\"\"\n\nimport cocotb\nfrom cocotb.clock import Clock\nfrom cocotb.triggers\
+    \ import Timer, RisingEdge, FallingEdge\nfrom cocotb.binary import BinaryValue\n\
+    \n\nasync def reset_dut(dut, duration_ns=50, propagation_delay_ns=10):\n    \"\
+    \"\"\n    Reset the DUT.\n    \n    Args:\n        dut: Device under test\n  \
+    \      duration_ns: Reset duration in nanoseconds\n// ..."
+- type: section
+  title: Key files to study
+- type: bullets
+  title: Open these in the repo
+  bullets:
+  - '`module2/dut/registers/simple_register.v` — 8-bit register with enable and synchronous
+    reset (primary lab DUT)'
+  - '`module2/dut/registers/shift_register.v` — serial in/out with parallel tap; multi-cycle
+    behavior'
+  - '`module2/examples/triggers/triggers_example.py` — cocotb trigger primitives and
+    concurrency'
+  - '`module2/tests/cocotb_tests/test_simple_register.py` — directed write/read and
+    boundary values'
+  - '`module2/tests/cocotb_tests/test_shift_register.py` — serial shift timing regression'
+  - '`scripts/module2.sh` — routes example makes and `--cocotb-tests` regressions'
+  notes: Trace while running module2/EXAMPLES.md labs.
 - type: section
   title: Verification & testing methods
-- type: image
-  title: Testing and closure flow
-  image: assets/diagrams/testing_methods.png
-  caption: 'Module 2: how tests, checks, and metrics close verification goals.'
-- type: bullets
+- type: two_column
   title: 1. Stimulus and observation
-  bullets:
+  left:
   - Directed writes/reads on register ports; shift tests exercise serial timing
   - '`RisingEdge`/`FallingEdge`/`Timer` triggers structure concurrent activity'
   - Reset tests run first in regression order to establish known state
+  right: assets/diagrams/testing_methods.png
   notes: From MODULE2 Verification & Testing Methods.
 - type: bullets
   title: 2. Regression and Makefile flow
@@ -81,12 +136,59 @@ slides:
   - Boundary tests (`test_register_all_values`) cover 0x00, 0x7F, 0x80, 0xFF
   notes: From MODULE2 Verification & Testing Methods.
 - type: bullets
-  title: 3. Debug and closure
+  title: 3. Step-by-step lab execution
+  bullets:
+  - '1. Tutorials: `./scripts/module2.sh --signal-access --triggers --reset-patterns`'
+  - '2. Register lab: `cd module2/tests/cocotb_tests && make SIM=verilator TEST=test_simple_register`'
+  - '3. Shift register lab: `make SIM=verilator TEST=test_shift_register` — verify
+    serial-to-parallel timing'
+  - '4. Full DUT regression: `./scripts/module2.sh --cocotb-tests`'
+  - 5. Debug failures with waves/logging before MODULE2 assessment
+  notes: From MODULE2 Verification & Testing Methods.
+- type: bullets
+  title: 4. Debug and closure
   bullets:
   - Logging via `cocotb.log`; VCD from simulator flags for waveform debug
-  - '`./scripts/module2.sh --check` validates examples and key cocotb tests'
+  - '`./scripts/module2.sh --cocotb-tests` validates key cocotb tests and example
+    makes'
   - 'Assessment: clocks, triggers, reset sequences, structured cocotb tests'
   notes: From MODULE2 Verification & Testing Methods.
+- type: code
+  title: Regression Makefile
+  language: text
+  source_file: module2/tests/cocotb_tests/Makefile
+  code: '# Makefile for Module 2 cocotb tests
+
+    # Usage: make SIM=verilator test_simple_register
+
+
+    # Default simulator
+
+    SIM ?= verilator
+
+
+    # Python files
+
+    PYTHON_FILES = test_simple_register.py test_shift_register.py
+
+
+    # Verilog files
+
+    VERILOG_FILES = ../../dut/registers/simple_register.v ../../dut/registers/shift_register.v
+
+
+    # Test to run
+
+    TEST ?= test_simple_register
+
+
+    # Cocotb variables
+
+    MODULE = $(TEST)
+
+    TOPLEVEL = $(shell echo $(TEST) | sed ''s/test_//'')
+
+    // ...'
 - type: section
   title: Syllabus topics
 - type: bullets
@@ -392,12 +494,42 @@ slides:
   - Test execution
   notes: From MODULE2 Topics Covered.
 - type: section
+  title: Command reference highlights
+- type: bullets
+  title: cocotb examples (tutorial makes)
+  bullets:
+  - '`./scripts/module2.sh --triggers` — run trigger tutorial under `module2/examples/triggers/`'
+  - '`./scripts/module2.sh --clock-generation --reset-patterns` — timing and reset
+    fixture drills'
+  - '`./scripts/module2.sh` — all five example tracks (signal access through common
+    patterns)'
+  notes: Full detail in docs/MODULE2.md command reference.
+- type: bullets
+  title: DUT regression tests
+  bullets:
+  - '`./scripts/module2.sh --cocotb-tests` — register and shift-register makes via
+    orchestrator'
+  - '`cd module2/tests/cocotb_tests && make SIM=verilator TEST=test_simple_register`'
+  - '`make SIM=verilator TEST=test_shift_register` — serial timing and parallel output
+    checks'
+  notes: Full detail in docs/MODULE2.md command reference.
+- type: bullets
+  title: Debug and waves
+  bullets:
+  - '`make SIM=verilator TEST=test_simple_register WAVES=1` — enable VCD/FST when
+    Makefile supports it'
+  - Use `cocotb.log` verbosity and simulator stdout from `results.xml` for pass/fail
+    triage
+  - Re-run single `TEST=` target after RTL or stimulus edits — faster than full example
+    sweep
+  notes: Full detail in docs/MODULE2.md command reference.
+- type: section
   title: Hands-on examples
 - type: demo
-  title: Module 2 self-check
-  command: ./scripts/module2.sh --check
+  title: Module 2 orchestrator
+  command: ./scripts/module2.sh --help
   screenshot: assets/screenshots/module2_check.png
-  expect_stdout_contains: All required checks passed
+  expect_stdout_contains: 'Usage:'
   notes: Run from course repository root.
 - type: code
   title: Exercise scaffold
@@ -409,28 +541,58 @@ slides:
   command: .venv/bin/python module2/examples/signal_access/signal_access_example.py
   screenshot: assets/screenshots/ex01_signal_access.png
   notes: 'Hands-on: module2/examples/signal_access/'
+  expect_stdout_contains: Example
 - type: demo
   title: 'Demo: Clock Generation'
   command: .venv/bin/python module2/examples/clock_generation/clock_generation_example.py
   screenshot: assets/screenshots/ex02_clock_generation.png
   notes: 'Hands-on: module2/examples/clock_generation/'
+  expect_stdout_contains: Example
 - type: demo
   title: 'Demo: Triggers'
   command: .venv/bin/python module2/examples/triggers/triggers_example.py
   screenshot: assets/screenshots/ex03_triggers.png
   notes: 'Hands-on: module2/examples/triggers/'
+  expect_stdout_contains: Example
 - type: demo
   title: 'Demo: Reset Patterns'
   command: .venv/bin/python module2/examples/reset_patterns/reset_patterns_example.py
   screenshot: assets/screenshots/ex04_reset_patterns.png
   notes: 'Hands-on: module2/examples/reset_patterns/'
+  expect_stdout_contains: Example
 - type: demo
   title: 'Demo: Common Verification Patterns'
   command: .venv/bin/python module2/examples/common_patterns/common_patterns_example.py
   screenshot: assets/screenshots/ex05_common_patterns.png
   notes: 'Hands-on: module2/examples/common_patterns/'
+  expect_stdout_contains: Example
 - type: section
   title: Practice & assessment
+- type: bullets
+  title: What you should know (1/3)
+  bullets:
+  - Understand cocotb architecture
+  - Integrate with simulators
+  - Generate and manage clocks
+  - Access and drive signals
+  - Use triggers effectively
+  - Structure tests properly
+  notes: From MODULE2 Learning Outcomes.
+- type: bullets
+  title: What you should know (2/3)
+  bullets:
+  - Implement reset sequences
+  - Use common verification patterns
+  - Debug cocotb testbenches
+  - Optimize testbench performance
+  - Signal handles
+  - Value reading
+  notes: From MODULE2 Learning Outcomes.
+- type: bullets
+  title: What you should know (3/3)
+  bullets:
+  - Signal types
+  notes: From MODULE2 Learning Outcomes.
 - type: bullets
   title: Exercises
   bullets:
@@ -453,5 +615,5 @@ slides:
   bullets:
   - Master cocotb for hardware verification
   - Complete module2/CHECKLIST.md
-  - Run ./scripts/module2.sh --check
+  - Review module2/EXAMPLES.md and run each lab
   - 'Next: Next module in course'

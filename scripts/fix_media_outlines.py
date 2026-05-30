@@ -54,7 +54,7 @@ def _rebuild_manifest(
     course: str,
     slides: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    """Rebuild manifest.yaml assets from outline demo/image slides."""
+    """Rebuild manifest.yaml assets from outline demo/image/two_column slides."""
     lp_slide = 4
     for i, slide in enumerate(slides, start=1):
         if slide.get("type") == "image" and "learning_path" in str(slide.get("image", "")):
@@ -72,6 +72,34 @@ def _rebuild_manifest(
             "license": f"{course} course materials",
         },
     ]
+    seen_diagrams: set[str] = {"learning_path"}
+
+    for i, slide in enumerate(slides, start=1):
+        img = ""
+        if slide.get("type") == "image":
+            img = str(slide.get("image", ""))
+        elif slide.get("type") == "two_column":
+            img = str(slide.get("right", ""))
+        if not img.startswith("assets/diagrams/") or not img.endswith(".png"):
+            continue
+        asset_id = Path(img).stem
+        if asset_id in seen_diagrams:
+            for entry in assets:
+                if entry.get("id") == asset_id:
+                    entry.setdefault("slides", []).append(i)
+            continue
+        seen_diagrams.add(asset_id)
+        assets.append(
+            {
+                "id": asset_id,
+                "type": "diagram",
+                "file": img,
+                "source": f"assets/diagrams/{asset_id}.mmd",
+                "generator": "render_diagrams.sh",
+                "slides": [i],
+                "license": f"{course} course materials",
+            },
+        )
 
     for i, slide in enumerate(slides, start=1):
         if slide.get("type") != "demo":
@@ -111,6 +139,20 @@ def _use_venv_python(command: str, course_root: Path) -> str:
     return command
 
 
+MAX_BULLET_CHARS = 140
+
+
+def _truncate_bullet(text: str, limit: int = MAX_BULLET_CHARS) -> str:
+    s = str(text).strip()
+    if len(s) <= limit:
+        return s
+    cut = limit - 3
+    chunk = s[:cut]
+    if " " in chunk:
+        chunk = chunk.rsplit(" ", 1)[0]
+    return chunk.rstrip(".,;:") + "..."
+
+
 def patch_outline(path: Path, course_root: Path) -> bool:
     data: dict[str, Any] = yaml.safe_load(path.read_text(encoding="utf-8"))
     slides: list[dict[str, Any]] = data.get("slides", [])
@@ -120,6 +162,12 @@ def patch_outline(path: Path, course_root: Path) -> bool:
     course = str(data.get("course", "learn_uvm_pyuvm"))
 
     for slide in slides:
+        if slide.get("type") == "bullets" and slide.get("title") == "Overview":
+            bullets = slide.get("bullets", [])
+            new_bullets = [_truncate_bullet(b) for b in bullets]
+            if new_bullets != bullets:
+                slide["bullets"] = new_bullets
+                changed = True
         if slide.get("type") == "demo" and "self-check" in str(slide.get("title", "")).lower():
             cmd, expect = SELF_CHECK_REPLACEMENT
             slide["command"] = cmd.format(mod=mod)

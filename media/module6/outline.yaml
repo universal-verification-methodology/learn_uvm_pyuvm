@@ -23,53 +23,109 @@ slides:
   title: Overview
   bullets:
   - This module focuses on building complex verification environments with multiple
-    agents, protocol verification, advanced testbench architecture, and debugging
-    techniques. You'll learn industry patterns and best practices.
+    agents, protocol verification, advanced testbench...
+- type: section
+  title: How to learn this module
+- type: bullets
+  title: Suggested learning path
+  bullets:
+  - Module 5 multi-agent and virtual sequence patterns carry forward — AXI adds real
+    protocol timing
+  - Read `module6/dut/protocols/axi4_lite_slave.v` AW/W/B/AR/R channel interfaces
+    before stimulus
+  - Run `--multi-agent` and `--protocol` examples before `--protocol-checkers` and
+    scoreboard labs
+  - 'Understand initiator vs slave roles: DUT is slave; TB agents play masters/memory/peripheral'
+  - Architecture example documents env packaging — study before `test_complex_testbench.py`
+  notes: From docs/MODULE6.md — read guides before running demos.
 - type: section
   title: Design architecture
-- type: image
-  title: RTL / block architecture
-  image: assets/diagrams/rtl_architecture.png
-  caption: 'Module 6: DUT structure and key interfaces (see common_dut/rtl/).'
-- type: image
-  title: Verification environment architecture
-  image: assets/diagrams/verification_architecture.png
-  caption: 'Module 6: UVM layers, agents, and checkers for this phase.'
-- type: bullets
+- type: two_column
   title: 1. Protocol DUT architecture
-  bullets:
+  left:
   - '`module6/dut/protocols/axi4_lite_slave.v` — five-channel AXI4-Lite slave + memory
     interface'
   - Separate address/write/read response channels exercise real protocol timing
   - Multi-agent TB can attach initiator agents while DUT acts as slave
+  right: assets/diagrams/rtl_architecture.png
   notes: From MODULE6 Design Architecture.
-- type: bullets
+- type: two_column
   title: 2. Complex testbench architecture
-  bullets:
+  left:
   - Multiple agents (e.g., master, memory, low-speed peripheral) under one `uvm_env`
   - Protocol checkers validate handshake rules independent of scoreboard
   - 'Layered scoreboards: per-agent checks + system-level consistency'
   - Architecture example documents reusable env patterns and package boundaries
+  right: assets/diagrams/verification_architecture.png
   notes: From MODULE6 Design Architecture.
 - type: bullets
-  title: 3. Data flow
+  title: 3. Execution pipeline
+  bullets:
+  - 'Build: Verilator compiles AXI slave RTL; env instantiates master/memory/peripheral
+    agents and checkers'
+  - 'Connect: each agent monitor feeds protocol checker and scoreboard analysis ports'
+  - 'Sim: virtual sequences configure agents then launch concurrent read/write traffic
+    to slave'
+  - 'Check: protocol checker asserts channel rules; scoreboard correlates addr/data/response
+    across ports'
+  notes: From MODULE6 Design Architecture.
+- type: bullets
+  title: 4. Data flow
   bullets:
   - Virtual sequences coordinate cross-agent scenarios (config then traffic)
   - Monitors on each interface feed checkers and coverage
   - Reference models optional for memory content golden checks
+  - System scoreboard ties master observations to slave memory updates
   notes: From MODULE6 Design Architecture.
+- type: code
+  title: DUT — AXI4-Lite slave
+  language: systemverilog
+  source_file: module6/dut/protocols/axi4_lite_slave.v
+  code: "/**\n * Module 6: AXI4-Lite Slave\n * \n * A simplified AXI4-Lite slave for\
+    \ protocol verification.\n * \n * Ports:\n *   ACLK:     Clock signal\n *   ARESETn:\
+    \  Active-low reset\n *   \n *   Write Address Channel:\n *   AWVALID:  Write\
+    \ address valid\n *   AWREADY:  Write address ready\n *   AWADDR:   Write address\n\
+    \ *   AWPROT:   Write protection type\n *   \n *   Write Data Channel:\n *   WVALID:\
+    \   Write data valid\n *   WREADY:   Write data ready\n// ..."
+- type: code
+  title: Multi-agent testbench
+  language: text
+  source_file: module6/tests/pyuvm_tests/test_complex_testbench.py
+  code: "\"\"\"\nModule 6 Test: Complex Testbench Test\nComplete testbench demonstrating\
+    \ complex multi-agent environment.\n\"\"\"\n\nimport cocotb\nfrom cocotb.clock\
+    \ import Clock\nfrom cocotb.triggers import Timer, RisingEdge\nfrom pyuvm import\
+    \ *\n# Explicitly import uvm_seq_item_pull_port - it may not be exported by from\
+    \ pyuvm import *\n# Try multiple possible import paths\n_uvm_seq_item_pull_port\
+    \ = None\ntry:\n    # First try: check if it's in the namespace after from pyuvm\
+    \ import *\n    _uvm_seq_item_pull_port = globals()['uvm_seq_item_pull_port']\n\
+    except KeyError:\n    # Second try: import from pyuvm module directly\n    import\
+    \ pyuvm\n// ..."
+- type: section
+  title: Key files to study
+- type: bullets
+  title: Open these in the repo
+  bullets:
+  - '`module6/dut/protocols/axi4_lite_slave.v` — five-channel AXI4-Lite slave with
+    memory port'
+  - '`module6/examples/protocol/protocol_example.py` — directed AXI4-Lite transactions'
+  - '`module6/examples/multi_agent/multi_agent_example.py` — multiple agents under
+    one env'
+  - '`module6/examples/protocol_checkers/protocol_checker_example.py` — handshake
+    rule assertions'
+  - '`module6/tests/pyuvm_tests/test_complex_testbench.py` — system-level multi-agent
+    regression'
+  - '`scripts/module6.sh` — routes protocol, checker, scoreboard, and architecture
+    example flags'
+  notes: Trace while running module6/EXAMPLES.md labs.
 - type: section
   title: Verification & testing methods
-- type: image
-  title: Testing and closure flow
-  image: assets/diagrams/testing_methods.png
-  caption: 'Module 6: how tests, checks, and metrics close verification goals.'
-- type: bullets
+- type: two_column
   title: 1. Protocol verification methods
-  bullets:
+  left:
   - Protocol checker asserts AW/W/B/AR/R channel rules and ordering
   - Directed AXI transactions in `protocol_example.py` and `test_complex_testbench`
   - Multi-agent tests verify concurrent masters do not violate slave assumptions
+  right: assets/diagrams/testing_methods.png
   notes: From MODULE6 Verification & Testing Methods.
 - type: bullets
   title: 2. System-level checking
@@ -79,11 +135,23 @@ slides:
   - 'Debug: transaction logs, UVM verbosity, Verilator waveforms'
   notes: From MODULE6 Verification & Testing Methods.
 - type: bullets
-  title: 3. Closure
+  title: 3. Step-by-step lab execution
   bullets:
-  - '`./scripts/module6.sh --check`; exercises extend multi-agent and protocol checkers'
+  - '1. Multi-agent wiring: `./scripts/module6.sh --multi-agent`'
+  - '2. Directed protocol: `./scripts/module6.sh --protocol`'
+  - '3. Protocol checkers: `./scripts/module6.sh --protocol-checkers`'
+  - '4. Scoreboards/architecture: `./scripts/module6.sh --scoreboards --architecture`'
+  - '5. System regression: `./scripts/module6.sh --pyuvm-tests` — full complex testbench
+    pass'
+  notes: From MODULE6 Verification & Testing Methods.
+- type: bullets
+  title: 4. Closure
+  bullets:
+  - '`./scripts/module6.sh --pyuvm-tests`; exercises extend multi-agent and protocol
+    checkers'
   - 'Assessment: multi-agent envs, protocol verification, complex scoreboards, architecture
     patterns'
+  - Explain how checker failures differ from scoreboard data mismatches
   notes: From MODULE6 Verification & Testing Methods.
 - type: section
   title: Syllabus topics
@@ -322,12 +390,39 @@ slides:
   - Release management
   notes: From MODULE6 Topics Covered.
 - type: section
+  title: Command reference highlights
+- type: bullets
+  title: Protocol and agent examples
+  bullets:
+  - '`./scripts/module6.sh --multi-agent --protocol` — agent fabric and directed AXI
+    traffic'
+  - '`./scripts/module6.sh --protocol-checkers` — independent protocol rule validation'
+  - '`./scripts/module6.sh --scoreboards --architecture` — layered checking and env
+    packaging'
+  notes: Full detail in docs/MODULE6.md command reference.
+- type: bullets
+  title: Complex testbench regression
+  bullets:
+  - '`./scripts/module6.sh --pyuvm-tests` — `test_complex_testbench` full env'
+  - '`cd module6/tests/pyuvm_tests && make SIM=verilator TEST=test_complex_testbench`'
+  - '`./scripts/module6.sh --skip-examples --pyuvm-tests` — system test when components
+    are validated'
+  notes: Full detail in docs/MODULE6.md command reference.
+- type: bullets
+  title: Debug concurrent traffic
+  bullets:
+  - Transaction logs plus UVM verbosity — trace AW/W ordering vs W data beats
+  - Protocol checker failures often precede scoreboard mismatches — fix checker errors
+    first
+  - Waveforms on `awvalid/awready`, `wvalid/wready` for handshake stalls
+  notes: Full detail in docs/MODULE6.md command reference.
+- type: section
   title: Hands-on examples
 - type: demo
-  title: Module 6 self-check
-  command: ./scripts/module6.sh --check
+  title: Module 6 orchestrator
+  command: ./scripts/module6.sh --help
   screenshot: assets/screenshots/module6_check.png
-  expect_stdout_contains: All required checks passed
+  expect_stdout_contains: 'Usage:'
   notes: Run from course repository root.
 - type: code
   title: Exercise scaffold
@@ -362,6 +457,31 @@ slides:
 - type: section
   title: Practice & assessment
 - type: bullets
+  title: What you should know (1/3)
+  bullets:
+  - Design multi-agent environments
+  - Implement protocol verification
+  - Apply testbench architecture patterns
+  - Debug complex testbenches
+  - Analyze simulation results
+  - Coordinate multiple channels
+  notes: From MODULE6 Learning Outcomes.
+- type: bullets
+  title: What you should know (2/3)
+  bullets:
+  - Monitor performance
+  - Integrate components
+  - Maintain testbenches
+  - Apply industry best practices
+  - Multiple agents
+  - Agent coordination
+  notes: From MODULE6 Learning Outcomes.
+- type: bullets
+  title: What you should know (3/3)
+  bullets:
+  - Environment structure
+  notes: From MODULE6 Learning Outcomes.
+- type: bullets
   title: Exercises
   bullets:
   - Multi-Agent Environment
@@ -383,5 +503,5 @@ slides:
   bullets:
   - Build complex multi-agent testbenches with protocol verification
   - Complete module6/CHECKLIST.md
-  - Run ./scripts/module6.sh --check
+  - Review module6/EXAMPLES.md and run each lab
   - 'Next: Next module in course'

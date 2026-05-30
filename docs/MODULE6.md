@@ -56,6 +56,26 @@ make SIM=verilator TEST=test_complex_testbench
 # They can be imported and used in your testbenches
 ```
 
+<!-- module-slide-supplements:auto:start -->
+
+## Before You Start
+
+1. Module 5 multi-agent and virtual sequence patterns carry forward — AXI adds real protocol timing
+2. Read `module6/dut/protocols/axi4_lite_slave.v` AW/W/B/AR/R channel interfaces before stimulus
+3. Run `--multi-agent` and `--protocol` examples before `--protocol-checkers` and scoreboard labs
+4. Understand initiator vs slave roles: DUT is slave; TB agents play masters/memory/peripheral
+5. Architecture example documents env packaging — study before `test_complex_testbench.py`
+
+## Key files to study
+
+- `module6/dut/protocols/axi4_lite_slave.v` — five-channel AXI4-Lite slave with memory port
+- `module6/examples/protocol/protocol_example.py` — directed AXI4-Lite transactions
+- `module6/examples/multi_agent/multi_agent_example.py` — multiple agents under one env
+- `module6/examples/protocol_checkers/protocol_checker_example.py` — handshake rule assertions
+- `module6/tests/pyuvm_tests/test_complex_testbench.py` — system-level multi-agent regression
+- `scripts/module6.sh` — routes protocol, checker, scoreboard, and architecture example flags
+
+<!-- module-slide-supplements:auto:end -->
 <!-- module-architecture:auto:start -->
 ## Design Architecture
 
@@ -72,11 +92,19 @@ make SIM=verilator TEST=test_complex_testbench
 - Layered scoreboards: per-agent checks + system-level consistency
 - Architecture example documents reusable env patterns and package boundaries
 
-### 3. Data flow
+### 3. Execution pipeline
+
+- Build: Verilator compiles AXI slave RTL; env instantiates master/memory/peripheral agents and checkers
+- Connect: each agent monitor feeds protocol checker and scoreboard analysis ports
+- Sim: virtual sequences configure agents then launch concurrent read/write traffic to slave
+- Check: protocol checker asserts channel rules; scoreboard correlates addr/data/response across ports
+
+### 4. Data flow
 
 - Virtual sequences coordinate cross-agent scenarios (config then traffic)
 - Monitors on each interface feed checkers and coverage
 - Reference models optional for memory content golden checks
+- System scoreboard ties master observations to slave memory updates
 
 ## Verification & Testing Methods
 
@@ -92,10 +120,19 @@ make SIM=verilator TEST=test_complex_testbench
 - Architecture tests validate env wiring before long regressions
 - Debug: transaction logs, UVM verbosity, Verilator waveforms
 
-### 3. Closure
+### 3. Step-by-step lab execution
 
-- `./scripts/module6.sh --check`; exercises extend multi-agent and protocol checkers
+- 1. Multi-agent wiring: `./scripts/module6.sh --multi-agent`
+- 2. Directed protocol: `./scripts/module6.sh --protocol`
+- 3. Protocol checkers: `./scripts/module6.sh --protocol-checkers`
+- 4. Scoreboards/architecture: `./scripts/module6.sh --scoreboards --architecture`
+- 5. System regression: `./scripts/module6.sh --pyuvm-tests` — full complex testbench pass
+
+### 4. Closure
+
+- `./scripts/module6.sh --pyuvm-tests`; exercises extend multi-agent and protocol checkers
 - Assessment: multi-agent envs, protocol verification, complex scoreboards, architecture patterns
+- Explain how checker failures differ from scoreboard data mismatches
 
 <!-- module-architecture:auto:end -->
 ## Topics Covered
@@ -275,6 +312,28 @@ make SIM=verilator TEST=test_complex_testbench
   - Branching strategies
   - Code review
   - Release management
+
+<!-- module-commands:auto:start -->
+## Command Reference
+
+### Protocol and agent examples
+
+- `./scripts/module6.sh --multi-agent --protocol` — agent fabric and directed AXI traffic
+- `./scripts/module6.sh --protocol-checkers` — independent protocol rule validation
+- `./scripts/module6.sh --scoreboards --architecture` — layered checking and env packaging
+
+### Complex testbench regression
+
+- `./scripts/module6.sh --pyuvm-tests` — `test_complex_testbench` full env
+- `cd module6/tests/pyuvm_tests && make SIM=verilator TEST=test_complex_testbench`
+- `./scripts/module6.sh --skip-examples --pyuvm-tests` — system test when components are validated
+
+### Debug concurrent traffic
+
+- Transaction logs plus UVM verbosity — trace AW/W ordering vs W data beats
+- Protocol checker failures often precede scoreboard mismatches — fix checker errors first
+- Waveforms on `awvalid/awready`, `wvalid/wready` for handshake stalls
+<!-- module-commands:auto:end -->
 
 ## Learning Outcomes
 
